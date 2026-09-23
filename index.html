@@ -1,250 +1,169 @@
+```html
 <!DOCTYPE html>
-
 <html lang="ja">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport"
-   content="width=device-width,
-            initial-scale=1.0,
-            maximum-scale=1.0,
-            user-scalable=no">
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<title>Character Relation Map</title>
+<title>キャラクター関係マップ</title>
 
 <style>
-
-/* =========================================================
-   基本
-========================================================= */
-
 * {
     box-sizing: border-box;
 }
 
 html,
 body {
-
     width: 100%;
     height: 100%;
-
     margin: 0;
-
     overflow: hidden;
-
-    background: #0b0e14;
-
-    color: white;
-
+    background: #050812;
+    color: #fff;
     font-family:
-        "Segoe UI",
-        "Hiragino Kaku Gothic ProN",
         "Yu Gothic",
+        "Meiryo",
+        system-ui,
         sans-serif;
-
 }
 
 body {
-
-    touch-action: none;
-
     user-select: none;
-
 }
 
-
-/* =========================================================
-   ビューポート
-========================================================= */
+/* =========================
+   画面
+========================= */
 
 #viewport {
-
     position: fixed;
-
     inset: 0;
-
     overflow: hidden;
-
     background:
-
-        radial-gradient(
-            circle at center,
-            rgba(50,70,100,0.13),
-            transparent 55%
-        ),
-
-        #0b0e14;
-
+        radial-gradient(circle at center, #10182b 0%, #050812 65%);
+    cursor: grab;
 }
 
+#viewport.dragging {
+    cursor: grabbing;
+}
 
-/* =========================================================
+/* =========================
    マップ
-========================================================= */
+========================= */
 
 #map {
-
     position: absolute;
-
-    left: 0;
-    top: 0;
 
     width: 3000px;
     height: 3000px;
+
+    left: 0;
+    top: 0;
 
     transform-origin: 0 0;
 
-    background-color: #141821;
+    background-color: #0a1020;
 
     background-image:
-
-        radial-gradient(
-            circle,
-            rgba(255,255,255,0.12) 1px,
-            transparent 1px
-        );
+        radial-gradient(circle, rgba(80, 150, 255, 0.25) 1px, transparent 1px);
 
     background-size: 40px 40px;
 
-    box-shadow:
-
-        inset 0 0 150px rgba(0,0,0,0.8);
-
-    cursor: grab;
-
+    border: 1px solid rgba(100, 180, 255, 0.2);
 }
 
-#map.dragging-map {
-
-    cursor: grabbing;
-
-}
-
-
-/* =========================================================
-   SVG関係レイヤー
-========================================================= */
+/* =========================
+   SVG
+========================= */
 
 #relations {
-
     position: absolute;
+    inset: 0;
 
-    left: 0;
-    top: 0;
-
-    width: 3000px;
-    height: 3000px;
+    width: 100%;
+    height: 100%;
 
     overflow: visible;
 
     z-index: 10;
 
+    pointer-events: none;
 }
 
-
-/* =========================================================
-   関係線
-========================================================= */
+.relation-group {
+    pointer-events: auto;
+}
 
 .relation-line {
+    fill: none;
 
-    stroke-width: 4;
+    stroke-width: 6;
 
-    stroke-linecap: round;
-
-    pointer-events: none;
+    opacity: 0.9;
 
     filter:
-        drop-shadow(
-            0 0 5px currentColor
-        );
-
+        drop-shadow(0 0 4px currentColor)
+        drop-shadow(0 0 8px currentColor);
 }
 
+.relation-arrow {
+    stroke: none;
 
-/* =========================================================
-   関係中央マーカー
-========================================================= */
+    filter:
+        drop-shadow(0 0 4px currentColor);
+}
 
-.relation-marker {
-
-    stroke: white;
-
+.relation-point {
+    stroke: #fff;
     stroke-width: 2;
 
-    pointer-events: none;
-
     filter:
-        drop-shadow(
-            0 0 5px currentColor
-        );
-
+        drop-shadow(0 0 5px currentColor);
 }
 
-
-/* =========================================================
+/* =========================
    関係名
-========================================================= */
+========================= */
 
 .relation-label {
-
-    cursor: grab;
+    cursor: move;
 
     pointer-events: all;
-
 }
 
-.relation-label.dragging {
-
-    cursor: grabbing;
-
-}
-
-.relation-label rect {
-
-    fill:
-        rgba(10,14,22,0.96);
+.relation-label-bg {
+    fill: rgba(5, 10, 20, 0.92);
 
     stroke-width: 2;
 
-    rx: 6;
-    ry: 6;
+    rx: 7;
+    ry: 7;
 
+    filter:
+        drop-shadow(0 0 5px rgba(0, 0, 0, 0.8));
 }
 
-.relation-label text {
-
-    fill: white;
-
-    font-size: 14px;
-
+.relation-label-text {
+    font-size: 20px;
     font-weight: bold;
 
     text-anchor: middle;
-
     dominant-baseline: middle;
 
     pointer-events: none;
 
+    paint-order: stroke;
+    stroke: #050812;
+    stroke-width: 4;
 }
 
-.relation.hidden {
-
-    opacity: 0;
-
-    pointer-events: none;
-
-}
-
-
-/* =========================================================
+/* =========================
    キャラクターノード
-========================================================= */
+========================= */
 
 .node {
-
     position: absolute;
 
     width: 150px;
@@ -256,12 +175,26 @@ body {
     border-radius: 50%;
 
     display: flex;
-
     flex-direction: column;
 
     align-items: center;
-
     justify-content: center;
+
+    text-align: center;
+
+    border: 4px solid #00eaff;
+
+    background:
+        radial-gradient(
+            circle at 35% 30%,
+            #243a63,
+            #10182d 65%,
+            #070b16
+        );
+
+    box-shadow:
+        0 0 10px rgba(0, 234, 255, 0.5),
+        inset 0 0 25px rgba(0, 234, 255, 0.12);
 
     z-index: 20;
 
@@ -269,229 +202,181 @@ body {
 
     touch-action: none;
 
-    border:
-        3px solid #00eaff;
-
-    background:
-
-        radial-gradient(
-            circle at 30% 20%,
-            rgba(255,255,255,0.38),
-            transparent 20%
-        ),
-
-        radial-gradient(
-            circle at center,
-            #304154,
-            #121b28 60%,
-            #080b10
-        );
-
-    box-shadow:
-
-        0 0 12px rgba(0,234,255,0.9),
-
-        0 0 30px rgba(0,234,255,0.3),
-
-        inset 0 0 25px rgba(0,234,255,0.15);
-
     transition:
-
         box-shadow 0.15s,
-
         border-color 0.15s;
-
 }
 
 .node:hover {
-
     box-shadow:
-
-        0 0 18px rgba(0,234,255,1),
-
-        0 0 45px rgba(0,234,255,0.5),
-
-        inset 0 0 30px rgba(0,234,255,0.25);
-
+        0 0 15px rgba(0, 234, 255, 0.8),
+        0 0 30px rgba(0, 234, 255, 0.35),
+        inset 0 0 25px rgba(0, 234, 255, 0.15);
 }
 
 .node.dragging {
-
     cursor: grabbing;
 
-    transform: scale(1.05);
+    border-color: #fff;
 
     box-shadow:
-
-        0 0 25px rgba(255,255,255,0.9),
-
-        0 0 55px rgba(0,234,255,0.8);
-
-}
-
-
-/* =========================================================
-   キャラクター名
-========================================================= */
-
-.node-name {
-
-    max-width: 115px;
-
-    text-align: center;
-
-    font-size: 17px;
-
-    font-weight: bold;
-
-    line-height: 1.3;
-
-    pointer-events: none;
-
-    text-shadow:
-
-        0 0 5px black,
-
-        0 0 10px rgba(0,234,255,0.7);
-
-}
-
-
-/* =========================================================
-   OPEN / CLOSE
-========================================================= */
-
-.status {
-
-    margin-top: 8px;
-
-    padding: 3px 10px;
-
-    min-width: 58px;
-
-    border-radius: 20px;
-
-    text-align: center;
-
-    font-size: 11px;
-
-    font-weight: bold;
-
-    letter-spacing: 1px;
-
-    pointer-events: none;
-
-}
-
-.node.open {
-
-    border-color: #00eaff;
-
-}
-
-.node.open .status {
-
-    color: #061014;
-
-    background: #00eaff;
-
-    box-shadow:
-        0 0 10px rgba(0,234,255,0.9);
-
+        0 0 20px rgba(255, 255, 255, 0.8),
+        0 0 40px rgba(0, 234, 255, 0.5);
 }
 
 .node.close {
+    border-color: #667080;
 
-    border-color: #ff416c;
-
-    box-shadow:
-
-        0 0 12px rgba(255,65,108,0.9),
-
-        0 0 30px rgba(255,65,108,0.35),
-
-        inset 0 0 25px rgba(255,65,108,0.15);
-
-}
-
-.node.close .status {
-
-    color: white;
-
-    background: #ff416c;
+    opacity: 0.65;
 
     box-shadow:
-        0 0 10px rgba(255,65,108,0.8);
-
+        0 0 8px rgba(120, 130, 150, 0.25),
+        inset 0 0 20px rgba(120, 130, 150, 0.1);
 }
 
+.node-name {
+    max-width: 125px;
 
-/* =========================================================
-   上部UI
-========================================================= */
+    font-size: 21px;
+    font-weight: bold;
 
-#ui {
-
-    position: fixed;
-
-    top: 15px;
-    left: 15px;
-
-    z-index: 100;
-
-    padding: 12px 16px;
-
-    border:
-        1px solid
-        rgba(0,234,255,0.35);
-
-    border-radius: 10px;
-
-    background:
-        rgba(8,12,20,0.88);
-
-    backdrop-filter: blur(8px);
+    line-height: 1.2;
 
     pointer-events: none;
 
+    overflow-wrap: anywhere;
 }
 
-#ui-title {
+.node-status {
+    margin-top: 8px;
 
-    color: #00eaff;
+    padding: 3px 12px;
 
-    font-size: 14px;
+    border-radius: 20px;
 
+    font-size: 12px;
     font-weight: bold;
 
     letter-spacing: 1px;
 
+    color: #001116;
+
+    background: #00eaff;
 }
 
-#ui-help {
-
-    margin-top: 5px;
-
-    color: #aab4c5;
-
-    font-size: 11px;
-
-    line-height: 1.6;
-
+.node.close .node-status {
+    background: #777f8c;
+    color: #10131a;
 }
 
+/* =========================
+   操作説明
+========================= */
 
-/* =========================================================
-   関係追加モード表示
-========================================================= */
-
-#relationMode {
-
+#help {
     position: fixed;
 
-    left: 50%;
+    left: 15px;
+    bottom: 15px;
 
-    bottom: 25px;
+    z-index: 100;
+
+    padding: 10px 14px;
+
+    border: 1px solid rgba(100, 200, 255, 0.3);
+
+    border-radius: 8px;
+
+    background: rgba(3, 7, 15, 0.82);
+
+    color: #a9c9dc;
+
+    font-size: 12px;
+
+    pointer-events: none;
+}
+
+/* =========================
+   コンテキストメニュー
+========================= */
+
+#contextMenu {
+    position: fixed;
+
+    min-width: 210px;
+
+    padding: 6px;
+
+    z-index: 1000;
+
+    display: none;
+
+    border: 1px solid rgba(0, 234, 255, 0.45);
+
+    border-radius: 8px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(17, 29, 52, 0.98),
+            rgba(5, 10, 20, 0.98)
+        );
+
+    box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.6),
+        0 0 15px rgba(0, 234, 255, 0.15);
+
+    backdrop-filter: blur(8px);
+}
+
+.menu-title {
+    padding: 7px 10px;
+
+    color: #76dfff;
+
+    font-size: 12px;
+    font-weight: bold;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.menu-item {
+    padding: 10px 12px;
+
+    border-radius: 5px;
+
+    color: #e7f8ff;
+
+    font-size: 14px;
+
+    cursor: pointer;
+}
+
+.menu-item:hover {
+    background: rgba(0, 234, 255, 0.15);
+}
+
+.menu-item.danger {
+    color: #ff849c;
+}
+
+.menu-separator {
+    height: 1px;
+
+    margin: 5px 0;
+
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* =========================
+   モード表示
+========================= */
+
+#modeIndicator {
+    position: fixed;
+
+    top: 15px;
+    left: 50%;
 
     transform: translateX(-50%);
 
@@ -499,303 +384,125 @@ body {
 
     display: none;
 
-    padding: 10px 20px;
+    padding: 9px 18px;
 
-    border:
-        1px solid #00eaff;
+    border-radius: 20px;
 
-    border-radius: 30px;
+    border: 1px solid #00eaff;
 
-    background:
-        rgba(5,15,25,0.94);
+    background: rgba(0, 15, 25, 0.92);
 
     color: #00eaff;
 
     font-size: 13px;
 
     box-shadow:
-
-        0 0 20px rgba(0,234,255,0.35);
-
+        0 0 15px rgba(0, 234, 255, 0.3);
 }
 
-#relationMode button {
+#modeIndicator button {
+    margin-left: 12px;
 
-    margin-left: 15px;
+    border: none;
 
-    padding: 5px 12px;
+    border-radius: 4px;
 
-    border: 1px solid #526174;
+    padding: 4px 9px;
 
-    border-radius: 15px;
+    background: #00eaff;
 
-    background: #18202d;
-
-    color: white;
+    color: #001116;
 
     cursor: pointer;
 
-}
-
-
-/* =========================================================
-   コンテキストメニュー
-========================================================= */
-
-#contextMenu {
-
-    position: fixed;
-
-    min-width: 230px;
-
-    z-index: 1000;
-
-    display: none;
-
-    padding: 6px;
-
-    border:
-        1px solid
-        rgba(0,234,255,0.45);
-
-    border-radius: 10px;
-
-    background:
-        rgba(12,16,25,0.97);
-
-    box-shadow:
-
-        0 10px 40px rgba(0,0,0,0.65),
-
-        0 0 20px rgba(0,234,255,0.12);
-
-    backdrop-filter: blur(12px);
-
-}
-
-.menu-title {
-
-    padding: 9px 12px;
-
-    color: #00eaff;
-
-    font-size: 12px;
-
     font-weight: bold;
-
-    border-bottom:
-        1px solid
-        rgba(255,255,255,0.08);
-
 }
-
-.menu-section {
-
-    padding: 5px 0;
-
-}
-
-.menu-section-title {
-
-    padding: 5px 12px;
-
-    color: #6f7c91;
-
-    font-size: 10px;
-
-    font-weight: bold;
-
-    letter-spacing: 1px;
-
-}
-
-.menu-item {
-
-    padding: 9px 12px;
-
-    border-radius: 6px;
-
-    color: #e9edf5;
-
-    font-size: 13px;
-
-    cursor: pointer;
-
-}
-
-.menu-item:hover {
-
-    background:
-        rgba(0,234,255,0.13);
-
-    color: #00eaff;
-
-}
-
-.menu-item.delete:hover {
-
-    background:
-        rgba(255,65,108,0.15);
-
-    color: #ff587d;
-
-}
-
-
-/* =========================================================
-   スマホ
-========================================================= */
-
-@media (max-width: 600px) {
-
-    #ui {
-
-        top: 8px;
-        left: 8px;
-
-        padding: 8px 10px;
-
-    }
-
-    #ui-title {
-
-        font-size: 11px;
-
-    }
-
-    #ui-help {
-
-        font-size: 9px;
-
-    }
-
-    .node {
-
-        width: 130px;
-        height: 130px;
-
-        margin-left: -65px;
-        margin-top: -65px;
-
-    }
-
-    .node-name {
-
-        font-size: 14px;
-
-    }
-
-}
-
 </style>
-
 </head>
 
 <body>
 
-<!-- =======================================================
-     マップ
-======================================================== -->
-
 <div id="viewport">
 
-```
-<div id="map">
+    <div id="map">
 
-    <svg
-        id="relations"
-        viewBox="0 0 3000 3000"
-        preserveAspectRatio="none">
-    </svg>
+        <svg id="relations"
+             viewBox="0 0 3000 3000"
+             preserveAspectRatio="none">
 
-</div>
-```
+            <defs>
 
-</div>
+                <!-- 矢印 -->
+                <marker
+                    id="arrow"
+                    viewBox="0 0 20 20"
+                    refX="18"
+                    refY="10"
+                    markerWidth="12"
+                    markerHeight="12"
+                    orient="auto">
 
-<!-- =======================================================
-     UI
-======================================================== -->
+                    <path
+                        d="M 0 0 L 20 10 L 0 20 z"
+                        class="relation-arrow">
+                    </path>
 
-<div id="ui">
+                </marker>
 
-```
-<div id="ui-title">
-    CHARACTER RELATION MAP
-</div>
+            </defs>
 
-<div id="ui-help">
+            <g id="relationLayer"></g>
 
-    背景ドラッグ：マップ移動<br>
+        </svg>
 
-    ノードドラッグ：キャラクター移動<br>
-
-    関係名ドラッグ：関係名移動<br>
-
-    クリック：OPEN / CLOSE<br>
-
-    ホイール：拡大・縮小<br>
-
-    右クリック：操作メニュー
+    </div>
 
 </div>
-```
-
-</div>
-
-<!-- =======================================================
-     関係追加モード
-======================================================== -->
-
-<div id="relationMode">
-
-```
-関係追加モード：
-接続先のキャラクターをクリックしてください。
-
-<button onclick="cancelRelationMode()">
-    キャンセル
-</button>
-```
-
-</div>
-
-<!-- =======================================================
-     コンテキストメニュー
-======================================================== -->
 
 <div id="contextMenu"></div>
 
-<!-- =======================================================
-     ファイル入力
-======================================================== -->
+<div id="modeIndicator">
+    関係追加モード：接続先のキャラをクリックしてください
+    <button onclick="cancelRelationMode()">キャンセル</button>
+</div>
+
+<div id="help">
+    背景ドラッグ：移動　｜
+    ホイール：拡大縮小　｜
+    キャラドラッグ：移動　｜
+    左クリック：OPEN/CLOSE　｜
+    右クリック：メニュー
+</div>
 
 <input
- type="file"
- id="fileInput"
- accept=".json,application/json"
- style="display:none">
+    id="importFile"
+    type="file"
+    accept=".json,application/json"
+    style="display:none">
 
 <script>
 
-/* =========================================================
+/* ============================================================
    基本設定
-========================================================= */
+============================================================ */
 
 const MAP_WIDTH = 3000;
-
 const MAP_HEIGHT = 3000;
 
 const NODE_RADIUS = 75;
 
 const MIN_ZOOM = 0.35;
-
 const MAX_ZOOM = 2.5;
 
+let zoom = 1;
 
-/* =========================================================
-   初期キャラクター
-========================================================= */
+let mapX = 0;
+let mapY = 0;
+
+
+/* ============================================================
+   キャラクターデータ
+============================================================ */
 
 let characterData = [
 
@@ -834,9 +541,13 @@ let characterData = [
 ];
 
 
-/* =========================================================
-   初期関係
-========================================================= */
+/* ============================================================
+   関係データ
+
+   from → to
+
+   「fromがtoに何を思っているか」
+============================================================ */
 
 let relationData = [
 
@@ -844,446 +555,385 @@ let relationData = [
         id: "r1",
 
         from: "hero",
-
         to: "rival",
 
-        name: "ライバル",
+        name: "憧れ",
 
         color: "#ff4d8d",
 
-        labelOffsetX: 0,
-
-        labelOffsetY: 0
+        /*
+         * 関係点の位置
+         *
+         * labelOffsetX / Y が
+         * 関係名＋関係点＋線をまとめて移動する量
+         */
+        offsetX: 0,
+        offsetY: 0
     },
 
     {
         id: "r2",
 
         from: "hero",
-
         to: "childhood",
 
-        name: "幼馴染",
+        name: "信頼",
 
         color: "#00eaff",
 
-        labelOffsetX: 0,
-
-        labelOffsetY: 0
+        offsetX: 0,
+        offsetY: 0
     },
 
     {
         id: "r3",
 
         from: "rival",
-
         to: "boss",
 
-        name: "敵対",
+        name: "敵意",
 
         color: "#ff416c",
 
-        labelOffsetX: 0,
-
-        labelOffsetY: 0
+        offsetX: 0,
+        offsetY: 0
     },
 
     {
         id: "r4",
 
         from: "hero",
-
         to: "boss",
 
-        name: "因縁",
+        name: "警戒",
 
         color: "#ffc857",
 
-        labelOffsetX: 0,
-
-        labelOffsetY: 0
+        offsetX: 0,
+        offsetY: 0
     }
 
 ];
 
 
-/* =========================================================
+/* ============================================================
    DOM
-========================================================= */
+============================================================ */
 
 const viewport =
-    document.getElementById(
-        "viewport"
-    );
+    document.getElementById("viewport");
 
 const map =
-    document.getElementById(
-        "map"
-    );
+    document.getElementById("map");
 
-const svg =
-    document.getElementById(
-        "relations"
-    );
+const relationLayer =
+    document.getElementById("relationLayer");
 
 const contextMenu =
-    document.getElementById(
-        "contextMenu"
-    );
+    document.getElementById("contextMenu");
 
-const relationMode =
-    document.getElementById(
-        "relationMode"
-    );
+const importFile =
+    document.getElementById("importFile");
 
-const fileInput =
-    document.getElementById(
-        "fileInput"
-    );
+const modeIndicator =
+    document.getElementById("modeIndicator");
 
 
-/* =========================================================
-   状態
-========================================================= */
-
-const nodes = {};
-
-const relationElements = {};
-
-let mapX = 0;
-
-let mapY = 0;
-
-let zoom = 1;
-
-
-/*
- * 関係追加モード
- */
-
-let relationModeActive = false;
-
-let relationStartId = null;
-
-
-/* =========================================================
+/* ============================================================
    ID生成
-========================================================= */
+============================================================ */
 
 function createId(prefix) {
 
-    return (
-        prefix +
+    return prefix +
         "_" +
         Date.now().toString(36) +
         "_" +
         Math.random()
             .toString(36)
-            .substring(2, 7)
+            .substring(2, 7);
+
+}
+
+
+/* ============================================================
+   HTMLエスケープ
+============================================================ */
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+/* ============================================================
+   キャラ検索
+============================================================ */
+
+function getCharacter(id) {
+
+    return characterData.find(
+        c => c.id === id
     );
 
 }
 
 
-/* =========================================================
-   キャラクターノード作成
-========================================================= */
+/* ============================================================
+   Transform
+============================================================ */
 
-function createNode(data) {
+function applyTransform() {
 
-    const element =
-        document.createElement(
-            "div"
-        );
-
-    element.className =
-        "node " +
-        (
-            data.status === "OPEN"
-                ? "open"
-                : "close"
-        );
-
-    element.dataset.id =
-        data.id;
-
-    element.style.left =
-        data.x + "px";
-
-    element.style.top =
-        data.y + "px";
-
-
-    const name =
-        document.createElement(
-            "div"
-        );
-
-    name.className =
-        "node-name";
-
-    name.textContent =
-        data.name;
-
-
-    const status =
-        document.createElement(
-            "div"
-        );
-
-    status.className =
-        "status";
-
-    status.textContent =
-        data.status;
-
-
-    element.appendChild(name);
-
-    element.appendChild(status);
-
-    map.appendChild(element);
-
-
-    const info = {
-
-        data: data,
-
-        element: element,
-
-        x: data.x,
-
-        y: data.y,
-
-        dragging: false,
-
-        moved: false,
-
-        startX: 0,
-
-        startY: 0,
-
-        originalX: 0,
-
-        originalY: 0
-
-    };
-
-
-    nodes[data.id] =
-        info;
-
-
-    setupNodePointerEvents(
-        info
-    );
-
-
-    return info;
+    map.style.transform =
+        `translate(${mapX}px, ${mapY}px) scale(${zoom})`;
 
 }
 
 
-/* =========================================================
-   ノード再構築
-========================================================= */
+/* ============================================================
+   マップ位置制限
+============================================================ */
 
-function rebuildNodes() {
+function clampMapPosition() {
 
-    Object.values(nodes)
-        .forEach(info => {
+    const width =
+        viewport.clientWidth;
 
-            info.element.remove();
+    const height =
+        viewport.clientHeight;
 
-        });
+    const scaledWidth =
+        MAP_WIDTH * zoom;
 
-
-    Object.keys(nodes)
-        .forEach(key => {
-
-            delete nodes[key];
-
-        });
+    const scaledHeight =
+        MAP_HEIGHT * zoom;
 
 
-    characterData.forEach(
-        createNode
-    );
+    if (scaledWidth <= width) {
+
+        mapX =
+            (width - scaledWidth) / 2;
+
+    } else {
+
+        const minX =
+            width - scaledWidth;
+
+        mapX =
+            Math.min(
+                0,
+                Math.max(minX, mapX)
+            );
+
+    }
+
+
+    if (scaledHeight <= height) {
+
+        mapY =
+            (height - scaledHeight) / 2;
+
+    } else {
+
+        const minY =
+            height - scaledHeight;
+
+        mapY =
+            Math.min(
+                0,
+                Math.max(minY, mapY)
+            );
+
+    }
 
 }
 
 
-/* =========================================================
-   ノード操作
-========================================================= */
+/* ============================================================
+   キャラクターノード描画
+============================================================ */
 
-function setupNodePointerEvents(
-    info
-) {
+function renderCharacters() {
 
-    const element =
-        info.element;
+    document
+        .querySelectorAll(".node")
+        .forEach(node => node.remove());
 
 
-    element.addEventListener(
+    characterData.forEach(character => {
+
+        const node =
+            document.createElement("div");
+
+        node.className = "node";
+
+        if (character.status === "CLOSE") {
+
+            node.classList.add("close");
+
+        }
+
+
+        node.dataset.id =
+            character.id;
+
+
+        node.innerHTML = `
+
+            <div class="node-name">
+                ${escapeHtml(character.name)}
+            </div>
+
+            <div class="node-status">
+                ${character.status}
+            </div>
+
+        `;
+
+
+        node.style.left =
+            character.x + "px";
+
+        node.style.top =
+            character.y + "px";
+
+
+        map.appendChild(node);
+
+
+        setupNodePointer(node);
+
+    });
+
+}
+
+
+/* ============================================================
+   キャラノード操作
+============================================================ */
+
+function setupNodePointer(node) {
+
+    let startX = 0;
+    let startY = 0;
+
+    let originalX = 0;
+    let originalY = 0;
+
+    let moved = false;
+
+    let pointerId = null;
+
+
+    node.addEventListener(
         "pointerdown",
         event => {
 
-            /*
-             * 関係追加モード
-             */
-
-            if (
-                relationModeActive
-            ) {
-
-                event.preventDefault();
-
-                event.stopPropagation();
-
-                handleRelationTarget(
-                    info.data.id
-                );
-
-                return;
-            }
-
-
-            /*
-             * 右クリック
-             */
-
-            if (
-                event.button === 2
-            ) {
-
-                return;
-
-            }
-
-
             event.stopPropagation();
 
+            pointerId =
+                event.pointerId;
 
-            element.setPointerCapture(
-                event.pointerId
-            );
-
-
-            info.dragging = true;
-
-            info.moved = false;
+            node.setPointerCapture(pointerId);
 
 
-            info.startX =
+            const id =
+                node.dataset.id;
+
+            const character =
+                getCharacter(id);
+
+            if (!character) return;
+
+
+            startX =
                 event.clientX;
 
-            info.startY =
+            startY =
                 event.clientY;
 
+            originalX =
+                character.x;
 
-            info.originalX =
-                info.x;
+            originalY =
+                character.y;
 
-            info.originalY =
-                info.y;
+            moved = false;
 
-
-            element.classList.add(
-                "dragging"
-            );
+            node.classList.add("dragging");
 
         }
     );
 
 
-    element.addEventListener(
+    node.addEventListener(
         "pointermove",
         event => {
 
             if (
-                !info.dragging
-            ) {
-
-                return;
-
-            }
+                pointerId !== event.pointerId
+            ) return;
 
 
             const dx =
-                event.clientX -
-                info.startX;
+                (event.clientX - startX)
+                / zoom;
 
             const dy =
-                event.clientY -
-                info.startY;
+                (event.clientY - startY)
+                / zoom;
 
 
             if (
-                Math.abs(dx) > 5 ||
-                Math.abs(dy) > 5
+                Math.abs(dx) > 3 ||
+                Math.abs(dy) > 3
             ) {
 
-                info.moved = true;
+                moved = true;
 
             }
 
 
-            if (
-                !info.moved
-            ) {
+            const character =
+                getCharacter(
+                    node.dataset.id
+                );
 
-                return;
-
-            }
-
-
-            let newX =
-                info.originalX +
-                dx / zoom;
+            if (!character) return;
 
 
-            let newY =
-                info.originalY +
-                dy / zoom;
-
-
-            newX =
+            character.x =
                 Math.max(
                     NODE_RADIUS,
                     Math.min(
-                        MAP_WIDTH -
-                        NODE_RADIUS,
-                        newX
+                        MAP_WIDTH - NODE_RADIUS,
+                        originalX + dx
                     )
                 );
 
 
-            newY =
+            character.y =
                 Math.max(
                     NODE_RADIUS,
                     Math.min(
-                        MAP_HEIGHT -
-                        NODE_RADIUS,
-                        newY
+                        MAP_HEIGHT - NODE_RADIUS,
+                        originalY + dy
                     )
                 );
 
 
-            info.x = newX;
+            node.style.left =
+                character.x + "px";
 
-            info.y = newY;
-
-            info.data.x = newX;
-
-            info.data.y = newY;
-
-
-            element.style.left =
-                newX + "px";
-
-            element.style.top =
-                newY + "px";
+            node.style.top =
+                character.y + "px";
 
 
             updateRelations();
@@ -1292,50 +942,89 @@ function setupNodePointerEvents(
     );
 
 
-    element.addEventListener(
+    node.addEventListener(
         "pointerup",
         event => {
 
             if (
-                !info.dragging
+                pointerId !== event.pointerId
+            ) return;
+
+
+            try {
+
+                node.releasePointerCapture(
+                    pointerId
+                );
+
+            } catch (e) {}
+
+
+            node.classList.remove("dragging");
+
+
+            /*
+             * 関係追加モード
+             */
+            if (
+                relationModeActive &&
+                relationStartId
             ) {
+
+                if (!moved) {
+
+                    handleRelationTarget(
+                        node.dataset.id
+                    );
+
+                }
+
+                pointerId = null;
 
                 return;
 
             }
 
 
-            info.dragging =
-                false;
+            /*
+             * 通常クリック
+             */
+            if (!moved) {
+
+                const character =
+                    getCharacter(
+                        node.dataset.id
+                    );
+
+                if (!character) return;
 
 
-            element.classList.remove(
-                "dragging"
-            );
+                character.status =
+                    character.status === "OPEN"
+                        ? "CLOSE"
+                        : "OPEN";
 
 
-            if (
-                !info.moved
-            ) {
+                renderCharacters();
 
-                toggleNode(
-                    info
-                );
+                updateRelations();
 
             }
+
+
+            pointerId = null;
 
         }
     );
 
 
-    element.addEventListener(
+    node.addEventListener(
         "pointercancel",
         () => {
 
-            info.dragging =
-                false;
+            pointerId = null;
 
-            element.classList.remove(
+            node.classList.remove(
                 "dragging"
             );
 
@@ -1344,10 +1033,9 @@ function setupNodePointerEvents(
 
 
     /*
-     * ノード右クリック
+     * 右クリック
      */
-
-    element.addEventListener(
+    node.addEventListener(
         "contextmenu",
         event => {
 
@@ -1355,11 +1043,10 @@ function setupNodePointerEvents(
 
             event.stopPropagation();
 
-
             showNodeMenu(
-                info,
                 event.clientX,
-                event.clientY
+                event.clientY,
+                node.dataset.id
             );
 
         }
@@ -1368,241 +1055,464 @@ function setupNodePointerEvents(
 }
 
 
-/* =========================================================
-   OPEN / CLOSE
-========================================================= */
+/* ============================================================
+   関係描画
+============================================================ */
 
-function toggleNode(info) {
+function updateRelations() {
 
-    info.data.status =
-        info.data.status === "OPEN"
-            ? "CLOSE"
-            : "OPEN";
+    relationLayer.innerHTML = "";
 
 
-    info.element.classList.toggle(
-        "open",
-        info.data.status === "OPEN"
+    relationData.forEach(
+        relation => {
+
+            const from =
+                getCharacter(relation.from);
+
+            const to =
+                getCharacter(relation.to);
+
+
+            if (!from || !to) return;
+
+
+            /*
+             * OPEN / CLOSE
+             *
+             * どちらかがCLOSEなら非表示
+             */
+            if (
+                from.status === "CLOSE" ||
+                to.status === "CLOSE"
+            ) {
+
+                return;
+
+            }
+
+
+            const group =
+                document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "g"
+                );
+
+            group.classList.add(
+                "relation-group"
+            );
+
+            group.dataset.id =
+                relation.id;
+
+
+            /*
+             * キャラ中心
+             */
+            const x1 = from.x;
+            const y1 = from.y;
+
+            const x2 = to.x;
+            const y2 = to.y;
+
+
+            const dx =
+                x2 - x1;
+
+            const dy =
+                y2 - y1;
+
+            const distance =
+                Math.sqrt(
+                    dx * dx +
+                    dy * dy
+                );
+
+
+            if (distance === 0) return;
+
+
+            const nx =
+                dx / distance;
+
+            const ny =
+                dy / distance;
+
+
+            /*
+             * ノード円周から線を開始
+             */
+            const startX =
+                x1 + nx * NODE_RADIUS;
+
+            const startY =
+                y1 + ny * NODE_RADIUS;
+
+
+            /*
+             * 矢印の先端を
+             * 関係先ノードの円周に置く
+             */
+            const endX =
+                x2 - nx * NODE_RADIUS;
+
+            const endY =
+                y2 - ny * NODE_RADIUS;
+
+
+            /*
+             * 通常の中間点
+             */
+            const centerX =
+                (startX + endX) / 2;
+
+            const centerY =
+                (startY + endY) / 2;
+
+
+            /*
+             * 関係名を動かした場合、
+             *
+             * 関係点
+             * ＋
+             * 線
+             * ＋
+             * 関係名
+             *
+             * 全体を同じ方向へ移動
+             */
+            const pointX =
+                centerX +
+                (relation.offsetX || 0);
+
+            const pointY =
+                centerY +
+                (relation.offsetY || 0);
+
+
+            /*
+             * 関係点までの線
+             *
+             * 関係元 → 関係点
+             */
+            const line1 =
+                document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "line"
+                );
+
+
+            line1.setAttribute(
+                "x1",
+                startX
+            );
+
+            line1.setAttribute(
+                "y1",
+                startY
+            );
+
+            line1.setAttribute(
+                "x2",
+                pointX
+            );
+
+            line1.setAttribute(
+                "y2",
+                pointY
+            );
+
+
+            line1.setAttribute(
+                "class",
+                "relation-line"
+            );
+
+            line1.setAttribute(
+                "stroke",
+                relation.color
+            );
+
+
+            /*
+             * 関係点 → 関係先
+             *
+             * この線の先端に矢印を付ける
+             */
+            const line2 =
+                document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "line"
+                );
+
+
+            line2.setAttribute(
+                "x1",
+                pointX
+            );
+
+            line2.setAttribute(
+                "y1",
+                pointY
+            );
+
+            line2.setAttribute(
+                "x2",
+                endX
+            );
+
+            line2.setAttribute(
+                "y2",
+                endY
+            );
+
+
+            line2.setAttribute(
+                "class",
+                "relation-line"
+            );
+
+            line2.setAttribute(
+                "stroke",
+                relation.color
+            );
+
+            line2.setAttribute(
+                "marker-end",
+                "url(#arrow)"
+            );
+
+
+            /*
+             * 関係点
+             */
+            const point =
+                document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "circle"
+                );
+
+
+            point.setAttribute(
+                "cx",
+                pointX
+            );
+
+            point.setAttribute(
+                "cy",
+                pointY
+            );
+
+            point.setAttribute(
+                "r",
+                9
+            );
+
+            point.setAttribute(
+                "class",
+                "relation-point"
+            );
+
+            point.setAttribute(
+                "fill",
+                relation.color
+            );
+
+
+            /*
+             * 関係名
+             */
+            const labelGroup =
+                document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "g"
+                );
+
+
+            labelGroup.classList.add(
+                "relation-label"
+            );
+
+
+            labelGroup.dataset.id =
+                relation.id;
+
+
+            /*
+             * 背景矩形
+             */
+            const text =
+                document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "text"
+                );
+
+
+            text.setAttribute(
+                "x",
+                pointX
+            );
+
+            text.setAttribute(
+                "y",
+                pointY
+            );
+
+            text.setAttribute(
+                "class",
+                "relation-label-text"
+            );
+
+            text.setAttribute(
+                "fill",
+                relation.color
+            );
+
+            text.textContent =
+                relation.name;
+
+
+            /*
+             * SVGでは文字幅を正確に取れない場合が
+             * あるため、おおよその幅を計算
+             */
+            const labelWidth =
+                Math.max(
+                    80,
+                    relation.name.length * 21 + 30
+                );
+
+            const labelHeight =
+                42;
+
+
+            const bg =
+                document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "rect"
+                );
+
+
+            bg.setAttribute(
+                "x",
+                pointX - labelWidth / 2
+            );
+
+            bg.setAttribute(
+                "y",
+                pointY - labelHeight / 2
+            );
+
+            bg.setAttribute(
+                "width",
+                labelWidth
+            );
+
+            bg.setAttribute(
+                "height",
+                labelHeight
+            );
+
+            bg.setAttribute(
+                "class",
+                "relation-label-bg"
+            );
+
+            bg.setAttribute(
+                "stroke",
+                relation.color
+            );
+
+
+            /*
+             * 関係名を前面に
+             */
+            labelGroup.appendChild(bg);
+            labelGroup.appendChild(text);
+
+
+            /*
+             * 関係名ドラッグ
+             */
+            setupRelationLabelPointer(
+                labelGroup,
+                relation.id
+            );
+
+
+            /*
+             * 右クリック
+             */
+            labelGroup.addEventListener(
+                "contextmenu",
+                event => {
+
+                    event.preventDefault();
+
+                    event.stopPropagation();
+
+                    showRelationMenu(
+                        event.clientX,
+                        event.clientY,
+                        relation.id
+                    );
+
+                }
+            );
+
+
+            group.appendChild(line1);
+            group.appendChild(line2);
+            group.appendChild(point);
+            group.appendChild(labelGroup);
+
+
+            relationLayer.appendChild(group);
+
+        }
     );
-
-
-    info.element.classList.toggle(
-        "close",
-        info.data.status === "CLOSE"
-    );
-
-
-    info.element.querySelector(
-        ".status"
-    ).textContent =
-        info.data.status;
-
-
-    updateRelations();
 
 }
 
 
-/* =========================================================
-   関係SVG作成
-========================================================= */
+/* ============================================================
+   関係名ドラッグ
+============================================================ */
 
-function createRelationElement(
-    relation
+function setupRelationLabelPointer(
+    label,
+    relationId
 ) {
 
-    const group =
-        document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "g"
-        );
-
-    group.classList.add(
-        "relation"
-    );
-
-
-    const line =
-        document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "line"
-        );
-
-    line.classList.add(
-        "relation-line"
-    );
-
-    line.setAttribute(
-        "stroke",
-        relation.color
-    );
-
-
-    const marker =
-        document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "circle"
-        );
-
-    marker.classList.add(
-        "relation-marker"
-    );
-
-    marker.setAttribute(
-        "r",
-        "7"
-    );
-
-    marker.setAttribute(
-        "fill",
-        relation.color
-    );
-
-
-    /*
-     * 関係名グループ
-     */
-
-    const label =
-        document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "g"
-        );
-
-    label.classList.add(
-        "relation-label"
-    );
-
-
-    const rect =
-        document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "rect"
-        );
-
-    rect.setAttribute(
-        "stroke",
-        relation.color
-    );
-
-
-    const text =
-        document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "text"
-        );
-
-    text.textContent =
-        relation.name;
-
-
-    label.appendChild(rect);
-
-    label.appendChild(text);
-
-    group.appendChild(line);
-
-    group.appendChild(marker);
-
-    group.appendChild(label);
-
-    svg.appendChild(group);
-
-
-    relationElements[
-        relation.id
-    ] = {
-
-        group,
-
-        line,
-
-        marker,
-
-        label,
-
-        rect,
-
-        text
-
-    };
-
-
-    setupRelationLabelEvents(
-        relation,
-        label
-    );
-
-}
-
-
-/* =========================================================
-   関係ラベルのドラッグ・右クリック
-========================================================= */
-
-function setupRelationLabelEvents(
-    relation,
-    label
-) {
-
-    let dragging = false;
-
-    let moved = false;
+    let pointerId = null;
 
     let startX = 0;
-
     let startY = 0;
 
-    let originalX = 0;
-
-    let originalY = 0;
+    let originalOffsetX = 0;
+    let originalOffsetY = 0;
 
 
     label.addEventListener(
         "pointerdown",
         event => {
 
-            /*
-             * 右クリックは
-             * ドラッグ開始しない
-             */
-
-            if (
-                event.button === 2
-            ) {
-
-                return;
-
-            }
-
-
-            /*
-             * 関係追加モード中なら
-             * ラベルを触っても開始しない
-             */
-
-            if (
-                relationModeActive
-            ) {
-
-                return;
-
-            }
-
-
             event.stopPropagation();
 
-            event.preventDefault();
-
+            pointerId =
+                event.pointerId;
 
             label.setPointerCapture(
-                event.pointerId
+                pointerId
             );
 
 
-            dragging = true;
+            const relation =
+                relationData.find(
+                    r => r.id === relationId
+                );
 
-            moved = false;
+            if (!relation) return;
 
 
             startX =
@@ -1612,16 +1522,11 @@ function setupRelationLabelEvents(
                 event.clientY;
 
 
-            originalX =
-                relation.labelOffsetX || 0;
+            originalOffsetX =
+                relation.offsetX || 0;
 
-            originalY =
-                relation.labelOffsetY || 0;
-
-
-            label.classList.add(
-                "dragging"
-            );
+            originalOffsetY =
+                relation.offsetY || 0;
 
         }
     );
@@ -1632,45 +1537,47 @@ function setupRelationLabelEvents(
         event => {
 
             if (
-                !dragging
-            ) {
-
-                return;
-
-            }
+                pointerId !== event.pointerId
+            ) return;
 
 
+            const relation =
+                relationData.find(
+                    r => r.id === relationId
+                );
+
+            if (!relation) return;
+
+
+            /*
+             * ズームを考慮
+             */
             const dx =
-                (
-                    event.clientX -
-                    startX
-                ) / zoom;
-
+                (event.clientX - startX)
+                / zoom;
 
             const dy =
-                (
-                    event.clientY -
-                    startY
-                ) / zoom;
+                (event.clientY - startY)
+                / zoom;
 
 
-            if (
-                Math.abs(dx) > 4 ||
-                Math.abs(dy) > 4
-            ) {
+            relation.offsetX =
+                originalOffsetX + dx;
 
-                moved = true;
-
-            }
+            relation.offsetY =
+                originalOffsetY + dy;
 
 
-            relation.labelOffsetX =
-                originalX + dx;
-
-            relation.labelOffsetY =
-                originalY + dy;
-
-
+            /*
+             * ここで
+             *
+             * 関係点
+             * 線
+             * 矢印
+             * 関係名
+             *
+             * が全部動く
+             */
             updateRelations();
 
         }
@@ -1682,19 +1589,20 @@ function setupRelationLabelEvents(
         event => {
 
             if (
-                !dragging
-            ) {
-
-                return;
-
-            }
+                pointerId !== event.pointerId
+            ) return;
 
 
-            dragging = false;
+            try {
 
-            label.classList.remove(
-                "dragging"
-            );
+                label.releasePointerCapture(
+                    pointerId
+                );
+
+            } catch (e) {}
+
+
+            pointerId = null;
 
         }
     );
@@ -1704,34 +1612,7 @@ function setupRelationLabelEvents(
         "pointercancel",
         () => {
 
-            dragging = false;
-
-            label.classList.remove(
-                "dragging"
-            );
-
-        }
-    );
-
-
-    /*
-     * 関係名右クリック
-     */
-
-    label.addEventListener(
-        "contextmenu",
-        event => {
-
-            event.preventDefault();
-
-            event.stopPropagation();
-
-
-            showRelationMenu(
-                relation,
-                event.clientX,
-                event.clientY
-            );
+            pointerId = null;
 
         }
     );
@@ -1739,256 +1620,30 @@ function setupRelationLabelEvents(
 }
 
 
-/* =========================================================
-   関係再構築
-========================================================= */
+/* ============================================================
+   背景パン
+============================================================ */
 
-function rebuildRelations() {
+let panPointerId = null;
 
-    Object.values(
-        relationElements
-    ).forEach(
-        item => {
+let panStartX = 0;
+let panStartY = 0;
 
-            item.group.remove();
-
-        }
-    );
-
-
-    Object.keys(
-        relationElements
-    ).forEach(
-        key => {
-
-            delete relationElements[key];
-
-        }
-    );
-
-
-    relationData.forEach(
-        createRelationElement
-    );
-
-
-    updateRelations();
-
-}
-
-
-/* =========================================================
-   関係位置更新
-========================================================= */
-
-function updateRelations() {
-
-    relationData.forEach(
-        relation => {
-
-            const a =
-                nodes[
-                    relation.from
-                ];
-
-            const b =
-                nodes[
-                    relation.to
-                ];
-
-            const e =
-                relationElements[
-                    relation.id
-                ];
-
-
-            if (
-                !a ||
-                !b ||
-                !e
-            ) {
-
-                return;
-
-            }
-
-
-            /*
-             * CLOSEなら非表示
-             */
-
-            const hidden =
-                a.data.status === "CLOSE" ||
-                b.data.status === "CLOSE";
-
-
-            e.group.classList.toggle(
-                "hidden",
-                hidden
-            );
-
-
-            /*
-             * 線
-             */
-
-            const x1 = a.x;
-
-            const y1 = a.y;
-
-            const x2 = b.x;
-
-            const y2 = b.y;
-
-
-            e.line.setAttribute(
-                "x1",
-                x1
-            );
-
-            e.line.setAttribute(
-                "y1",
-                y1
-            );
-
-            e.line.setAttribute(
-                "x2",
-                x2
-            );
-
-            e.line.setAttribute(
-                "y2",
-                y2
-            );
-
-
-            /*
-             * 線の中央
-             */
-
-            const centerX =
-                (x1 + x2) / 2;
-
-            const centerY =
-                (y1 + y2) / 2;
-
-
-            e.marker.setAttribute(
-                "cx",
-                centerX
-            );
-
-            e.marker.setAttribute(
-                "cy",
-                centerY
-            );
-
-
-            /*
-             * 関係名の位置
-             *
-             * 中央 + ユーザーによる移動量
-             */
-
-            const labelX =
-                centerX +
-                (
-                    relation.labelOffsetX ||
-                    0
-                );
-
-            const labelY =
-                centerY +
-                (
-                    relation.labelOffsetY ||
-                    0
-                );
-
-
-            e.text.textContent =
-                relation.name;
-
-
-            e.text.setAttribute(
-                "x",
-                labelX
-            );
-
-            e.text.setAttribute(
-                "y",
-                labelY
-            );
-
-
-            let width;
-
-            try {
-
-                width =
-                    e.text.getComputedTextLength();
-
-            } catch {
-
-                width =
-                    relation.name.length * 14;
-
-            }
-
-
-            width += 20;
-
-            const height = 27;
-
-
-            e.rect.setAttribute(
-                "x",
-                labelX - width / 2
-            );
-
-            e.rect.setAttribute(
-                "y",
-                labelY - height / 2
-            );
-
-            e.rect.setAttribute(
-                "width",
-                width
-            );
-
-            e.rect.setAttribute(
-                "height",
-                height
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   マップ移動
-========================================================= */
-
-let mapDragging = false;
-
-let mapStartX = 0;
-
-let mapStartY = 0;
-
-let mapOriginalX = 0;
-
-let mapOriginalY = 0;
+let panOriginalX = 0;
+let panOriginalY = 0;
 
 
 viewport.addEventListener(
     "pointerdown",
     event => {
 
+        /*
+         * キャラ・関係名をクリックした場合は
+         * 背景パンしない
+         */
         if (
-            event.target.closest(
-                ".node"
-            )
+            event.target.closest(".node") ||
+            event.target.closest(".relation-label")
         ) {
 
             return;
@@ -1996,50 +1651,40 @@ viewport.addEventListener(
         }
 
 
-        if (
-            event.target.closest(
-                ".relation-label"
-            )
-        ) {
+        /*
+         * 左ボタンのみ
+         */
+        if (event.button !== 0) {
 
             return;
 
         }
 
 
-        if (
-            event.button === 2
-        ) {
-
-            return;
-
-        }
-
+        panPointerId =
+            event.pointerId;
 
         viewport.setPointerCapture(
-            event.pointerId
+            panPointerId
         );
 
 
-        mapDragging = true;
-
-
-        mapStartX =
+        panStartX =
             event.clientX;
 
-        mapStartY =
+        panStartY =
             event.clientY;
 
 
-        mapOriginalX =
+        panOriginalX =
             mapX;
 
-        mapOriginalY =
+        panOriginalY =
             mapY;
 
 
-        map.classList.add(
-            "dragging-map"
+        viewport.classList.add(
+            "dragging"
         );
 
     }
@@ -2051,24 +1696,20 @@ viewport.addEventListener(
     event => {
 
         if (
-            !mapDragging
-        ) {
-
-            return;
-
-        }
+            panPointerId !== event.pointerId
+        ) return;
 
 
         mapX =
-            mapOriginalX +
+            panOriginalX +
             event.clientX -
-            mapStartX;
+            panStartX;
 
 
         mapY =
-            mapOriginalY +
+            panOriginalY +
             event.clientY -
-            mapStartY;
+            panStartY;
 
 
         clampMapPosition();
@@ -2081,35 +1722,35 @@ viewport.addEventListener(
 
 viewport.addEventListener(
     "pointerup",
-    () => {
+    event => {
 
-        mapDragging = false;
+        if (
+            panPointerId !== event.pointerId
+        ) return;
 
-        map.classList.remove(
-            "dragging-map"
+
+        try {
+
+            viewport.releasePointerCapture(
+                panPointerId
+            );
+
+        } catch (e) {}
+
+
+        panPointerId = null;
+
+        viewport.classList.remove(
+            "dragging"
         );
 
     }
 );
 
 
-viewport.addEventListener(
-    "pointercancel",
-    () => {
-
-        mapDragging = false;
-
-        map.classList.remove(
-            "dragging-map"
-        );
-
-    }
-);
-
-
-/* =========================================================
-   ホイールズーム
-========================================================= */
+/* ============================================================
+   ズーム
+============================================================ */
 
 viewport.addEventListener(
     "wheel",
@@ -2118,41 +1759,42 @@ viewport.addEventListener(
         event.preventDefault();
 
 
+        const oldZoom =
+            zoom;
+
+
         const rect =
             viewport.getBoundingClientRect();
 
 
+        /*
+         * マウス位置を基準にズーム
+         */
         const mouseX =
             event.clientX -
             rect.left;
-
 
         const mouseY =
             event.clientY -
             rect.top;
 
 
-        const mapPointX =
-            (
-                mouseX -
-                mapX
-            ) / zoom;
+        const worldX =
+            (mouseX - mapX)
+            / oldZoom;
 
-
-        const mapPointY =
-            (
-                mouseY -
-                mapY
-            ) / zoom;
+        const worldY =
+            (mouseY - mapY)
+            / oldZoom;
 
 
         const factor =
             event.deltaY < 0
-                ? 1.12
-                : 0.89;
+                ? 1.15
+                : 0.87;
 
 
-        const newZoom =
+        zoom =
             Math.max(
                 MIN_ZOOM,
                 Math.min(
@@ -2164,17 +1806,11 @@ viewport.addEventListener(
 
         mapX =
             mouseX -
-            mapPointX *
-            newZoom;
-
+            worldX * zoom;
 
         mapY =
             mouseY -
-            mapPointY *
-            newZoom;
-
-
-        zoom = newZoom;
+            worldY * zoom;
 
 
         clampMapPosition();
@@ -2188,174 +1824,9 @@ viewport.addEventListener(
 );
 
 
-/* =========================================================
-   マップ範囲制限
-========================================================= */
-
-function clampMapPosition() {
-
-    const width =
-        viewport.clientWidth;
-
-    const height =
-        viewport.clientHeight;
-
-
-    const scaledWidth =
-        MAP_WIDTH * zoom;
-
-    const scaledHeight =
-        MAP_HEIGHT * zoom;
-
-
-    if (
-        scaledWidth >= width
-    ) {
-
-        mapX =
-            Math.max(
-                width -
-                scaledWidth,
-
-                Math.min(
-                    0,
-                    mapX
-                )
-            );
-
-    } else {
-
-        mapX =
-            (
-                width -
-                scaledWidth
-            ) / 2;
-
-    }
-
-
-    if (
-        scaledHeight >= height
-    ) {
-
-        mapY =
-            Math.max(
-                height -
-                scaledHeight,
-
-                Math.min(
-                    0,
-                    mapY
-                )
-            );
-
-    } else {
-
-        mapY =
-            (
-                height -
-                scaledHeight
-            ) / 2;
-
-    }
-
-}
-
-
-/* =========================================================
-   Transform
-========================================================= */
-
-function applyTransform() {
-
-    map.style.transform =
-        `translate(${mapX}px,${mapY}px) scale(${zoom})`;
-
-}
-
-
-/* =========================================================
-   初期表示位置
-========================================================= */
-
-function centerOnCharacters() {
-
-    if (
-        characterData.length === 0
-    ) {
-
-        return;
-
-    }
-
-
-    let minX = Infinity;
-
-    let maxX = -Infinity;
-
-    let minY = Infinity;
-
-    let maxY = -Infinity;
-
-
-    characterData.forEach(
-        character => {
-
-            minX =
-                Math.min(
-                    minX,
-                    character.x
-                );
-
-            maxX =
-                Math.max(
-                    maxX,
-                    character.x
-                );
-
-            minY =
-                Math.min(
-                    minY,
-                    character.y
-                );
-
-            maxY =
-                Math.max(
-                    maxY,
-                    character.y
-                );
-
-        }
-    );
-
-
-    const centerX =
-        (minX + maxX) / 2;
-
-    const centerY =
-        (minY + maxY) / 2;
-
-
-    mapX =
-        viewport.clientWidth / 2 -
-        centerX * zoom;
-
-
-    mapY =
-        viewport.clientHeight / 2 -
-        centerY * zoom;
-
-
-    clampMapPosition();
-
-    applyTransform();
-
-}
-
-
-/* =========================================================
-   右クリック：背景
-========================================================= */
+/* ============================================================
+   右クリック
+============================================================ */
 
 viewport.addEventListener(
     "contextmenu",
@@ -2365,24 +1836,12 @@ viewport.addEventListener(
 
 
         /*
-         * ノード・関係名なら
-         * それぞれのイベントで処理済み
+         * キャラや関係名の右クリックは
+         * それぞれのイベントで処理する
          */
-
         if (
-            event.target.closest(
-                ".node"
-            )
-        ) {
-
-            return;
-
-        }
-
-        if (
-            event.target.closest(
-                ".relation-label"
-            )
+            event.target.closest(".node") ||
+            event.target.closest(".relation-label")
         ) {
 
             return;
@@ -2391,9 +1850,8 @@ viewport.addEventListener(
 
 
         /*
-         * 本当に何もない場所
+         * 空白部分
          */
-
         showBackgroundMenu(
             event.clientX,
             event.clientY
@@ -2403,223 +1861,11 @@ viewport.addEventListener(
 );
 
 
-/* =========================================================
-   背景メニュー
-========================================================= */
-
-function showBackgroundMenu(
-    x,
-    y
-) {
-
-    showMenu(
-        x,
-        y,
-
-        `
-        <div class="menu-title">
-            マップ操作
-        </div>
-
-        <div class="menu-section">
-
-            <div class="menu-section-title">
-                キャラクタ操作
-            </div>
-
-            <div
-                class="menu-item"
-                onclick="
-                    addCharacterAtScreen(
-                        ${x},
-                        ${y}
-                    )
-                "
-            >
-                ＋ キャラクタ追加
-            </div>
-
-        </div>
-
-        <div class="menu-section">
-
-            <div class="menu-section-title">
-                ファイル
-            </div>
-
-            <div
-                class="menu-item"
-                onclick="
-                    exportMap()
-                "
-            >
-                ↓ 相関図をファイル出力
-            </div>
-
-            <div
-                class="menu-item"
-                onclick="
-                    importMap()
-                "
-            >
-                ↑ 相関図をファイル入力
-            </div>
-
-        </div>
-        `
-    );
-
-}
-
-
-/* =========================================================
-   ノードメニュー
-========================================================= */
-
-function showNodeMenu(
-    info,
-    x,
-    y
-) {
-
-    showMenu(
-        x,
-        y,
-
-        `
-        <div class="menu-title">
-            ${escapeHTML(
-                info.data.name
-            )}
-        </div>
-
-        <div class="menu-section">
-
-            <div class="menu-section-title">
-                キャラクタ操作
-            </div>
-
-            <div
-                class="menu-item"
-                onclick="
-                    renameCharacter(
-                        '${info.data.id}'
-                    )
-                "
-            >
-                ✎ 変更
-            </div>
-
-            <div
-                class="menu-item"
-                onclick="
-                    addCharacterAtNode(
-                        '${info.data.id}'
-                    )
-                "
-            >
-                ＋ 追加
-            </div>
-
-            <div
-                class="menu-item delete"
-                onclick="
-                    deleteCharacter(
-                        '${info.data.id}'
-                    )
-                "
-            >
-                × 削除
-            </div>
-
-        </div>
-
-        <div class="menu-section">
-
-            <div class="menu-section-title">
-                関係操作
-            </div>
-
-            <div
-                class="menu-item"
-                onclick="
-                    startRelationMode(
-                        '${info.data.id}'
-                    )
-                "
-            >
-                ＋ 関係追加
-            </div>
-
-        </div>
-        `
-    );
-
-}
-
-
-/* =========================================================
-   関係名メニュー
-========================================================= */
-
-function showRelationMenu(
-    relation,
-    x,
-    y
-) {
-
-    showMenu(
-        x,
-        y,
-
-        `
-        <div class="menu-title">
-            関係：
-            ${escapeHTML(
-                relation.name
-            )}
-        </div>
-
-        <div class="menu-section">
-
-            <div class="menu-section-title">
-                関係操作
-            </div>
-
-            <div
-                class="menu-item"
-                onclick="
-                    renameRelation(
-                        '${relation.id}'
-                    )
-                "
-            >
-                ✎ 変更
-            </div>
-
-            <div
-                class="menu-item delete"
-                onclick="
-                    deleteRelation(
-                        '${relation.id}'
-                    )
-                "
-            >
-                × 削除
-            </div>
-
-        </div>
-        `
-    );
-
-}
-
-
-/* =========================================================
+/* ============================================================
    メニュー表示
-========================================================= */
+============================================================ */
 
-function showMenu(
+function openMenu(
     x,
     y,
     html
@@ -2634,60 +1880,41 @@ function showMenu(
 
 
     /*
-     * 一旦表示して高さ取得
+     * 画面外にはみ出さない
      */
-
-    const width =
+    const menuWidth =
         contextMenu.offsetWidth;
 
-    const height =
+    const menuHeight =
         contextMenu.offsetHeight;
 
 
-    x =
+    const px =
         Math.min(
             x,
             window.innerWidth -
-            width -
+            menuWidth -
             8
         );
 
 
-    y =
+    const py =
         Math.min(
             y,
             window.innerHeight -
-            height -
+            menuHeight -
             8
-        );
-
-
-    x =
-        Math.max(
-            5,
-            x
-        );
-
-
-    y =
-        Math.max(
-            5,
-            y
         );
 
 
     contextMenu.style.left =
-        x + "px";
+        Math.max(5, px) + "px";
 
     contextMenu.style.top =
-        y + "px";
+        Math.max(5, py) + "px";
 
 }
 
-
-/* =========================================================
-   メニューを閉じる
-========================================================= */
 
 function closeMenu() {
 
@@ -2697,18 +1924,12 @@ function closeMenu() {
 }
 
 
-/* =========================================================
-   外側クリック
-========================================================= */
-
 document.addEventListener(
     "pointerdown",
     event => {
 
         if (
-            !contextMenu.contains(
-                event.target
-            )
+            !event.target.closest("#contextMenu")
         ) {
 
             closeMenu();
@@ -2719,36 +1940,209 @@ document.addEventListener(
 );
 
 
-/* =========================================================
-   キャラクター名前変更
-========================================================= */
+/* ============================================================
+   キャラメニュー
+============================================================ */
 
-function renameCharacter(id) {
+function showNodeMenu(
+    x,
+    y,
+    characterId
+) {
+
+    const character =
+        getCharacter(characterId);
+
+    if (!character) return;
+
+
+    openMenu(
+        x,
+        y,
+
+        `
+        <div class="menu-title">
+            キャラクタ操作
+        </div>
+
+        <div
+            class="menu-item"
+            onclick="renameCharacter('${characterId}')">
+            名前を変更
+        </div>
+
+        <div
+            class="menu-item"
+            onclick="startRelationMode('${characterId}')">
+            ＋ 関係追加
+        </div>
+
+        <div class="menu-separator"></div>
+
+        <div
+            class="menu-item danger"
+            onclick="deleteCharacter('${characterId}')">
+            キャラ削除
+        </div>
+        `
+    );
+
+}
+
+
+/* ============================================================
+   背景メニュー
+============================================================ */
+
+let lastContextMapX = 0;
+let lastContextMapY = 0;
+
+
+function showBackgroundMenu(
+    screenX,
+    screenY
+) {
+
+    /*
+     * 右クリックした場所を
+     * マップ座標へ変換
+     */
+    lastContextMapX =
+        (screenX - mapX) / zoom;
+
+    lastContextMapY =
+        (screenY - mapY) / zoom;
+
+
+    openMenu(
+        screenX,
+        screenY,
+
+        `
+        <div class="menu-title">
+            マップ操作
+        </div>
+
+        <div
+            class="menu-item"
+            onclick="addCharacterAtContextPosition()">
+            ＋ キャラ追加
+        </div>
+
+        <div class="menu-separator"></div>
+
+        <div class="menu-title">
+            ファイル
+        </div>
+
+        <div
+            class="menu-item"
+            onclick="exportMap()">
+            マップを書き出す
+        </div>
+
+        <div
+            class="menu-item"
+            onclick="importMap()">
+            マップを読み込む
+        </div>
+        `
+    );
+
+}
+
+
+/* ============================================================
+   キャラ追加
+============================================================ */
+
+function addCharacterAtContextPosition() {
+
+    const name =
+        prompt(
+            "キャラクター名を入力してください"
+        );
+
+
+    if (!name) {
+
+        closeMenu();
+
+        return;
+
+    }
+
+
+    const character = {
+
+        id: createId("char"),
+
+        name: name,
+
+        x:
+            Math.max(
+                NODE_RADIUS,
+                Math.min(
+                    MAP_WIDTH - NODE_RADIUS,
+                    lastContextMapX
+                )
+            ),
+
+        y:
+            Math.max(
+                NODE_RADIUS,
+                Math.min(
+                    MAP_HEIGHT - NODE_RADIUS,
+                    lastContextMapY
+                )
+            ),
+
+        status: "OPEN"
+
+    };
+
+
+    characterData.push(
+        character
+    );
+
+
+    renderCharacters();
+
+    updateRelations();
+
+    closeMenu();
+
+}
+
+
+/* ============================================================
+   キャラ名変更
+============================================================ */
+
+function renameCharacter(
+    characterId
+) {
+
+    const character =
+        getCharacter(characterId);
+
+    if (!character) return;
+
 
     closeMenu();
 
 
-    const character =
-        characterData.find(
-            c => c.id === id
-        );
-
-
-    if (!character) {
-        return;
-    }
-
-
-    const name =
+    const newName =
         prompt(
-            "キャラクター名",
+            "新しいキャラクター名",
             character.name
         );
 
 
     if (
-        name === null ||
-        name.trim() === ""
+        newName === null ||
+        newName.trim() === ""
     ) {
 
         return;
@@ -2757,207 +2151,36 @@ function renameCharacter(id) {
 
 
     character.name =
-        name.trim();
+        newName.trim();
 
 
-    if (nodes[id]) {
-
-        nodes[id]
-            .element
-            .querySelector(
-                ".node-name"
-            )
-            .textContent =
-                character.name;
-
-    }
-
+    renderCharacters();
 
     updateRelations();
 
 }
 
 
-/* =========================================================
-   背景クリック位置へキャラクター追加
-========================================================= */
+/* ============================================================
+   キャラ削除
+============================================================ */
 
-function addCharacterAtScreen(
-    screenX,
-    screenY
+function deleteCharacter(
+    characterId
 ) {
-
-    closeMenu();
-
-
-    const rect =
-        viewport.getBoundingClientRect();
-
-
-    /*
-     * 画面座標
-     * ↓
-     * マップ座標
-     */
-
-    const x =
-        (
-            screenX -
-            rect.left -
-            mapX
-        ) / zoom;
-
-
-    const y =
-        (
-            screenY -
-            rect.top -
-            mapY
-        ) / zoom;
-
-
-    addCharacter(
-        x,
-        y
-    );
-
-}
-
-
-/* =========================================================
-   ノード付近へキャラクター追加
-========================================================= */
-
-function addCharacterAtNode(
-    id
-) {
-
-    closeMenu();
-
-
-    const info =
-        nodes[id];
-
-
-    if (!info) {
-        return;
-    }
-
-
-    addCharacter(
-        info.x + 220,
-        info.y + 120
-    );
-
-}
-
-
-/* =========================================================
-   キャラクター追加本体
-========================================================= */
-
-function addCharacter(
-    x,
-    y
-) {
-
-    const name =
-        prompt(
-            "キャラクター名",
-            "新キャラクター"
-        );
-
-
-    if (
-        name === null ||
-        name.trim() === ""
-    ) {
-
-        return;
-
-    }
-
-
-    x =
-        Math.max(
-            NODE_RADIUS,
-            Math.min(
-                MAP_WIDTH -
-                NODE_RADIUS,
-                x
-            )
-        );
-
-
-    y =
-        Math.max(
-            NODE_RADIUS,
-            Math.min(
-                MAP_HEIGHT -
-                NODE_RADIUS,
-                y
-            )
-        );
-
-
-    const data = {
-
-        id:
-            createId(
-                "character"
-            ),
-
-        name:
-            name.trim(),
-
-        x: x,
-
-        y: y,
-
-        status:
-            "OPEN"
-
-    };
-
-
-    characterData.push(
-        data
-    );
-
-
-    createNode(
-        data
-    );
-
-
-    updateRelations();
-
-}
-
-
-/* =========================================================
-   キャラクター削除
-========================================================= */
-
-function deleteCharacter(id) {
-
-    closeMenu();
-
 
     const character =
-        characterData.find(
-            c => c.id === id
-        );
+        getCharacter(characterId);
+
+    if (!character) return;
 
 
-    if (!character) {
-        return;
-    }
+    closeMenu();
 
 
     if (
         !confirm(
-            `「${character.name}」を削除しますか？\n\n接続されている関係も削除されます。`
+            `「${character.name}」を削除しますか？\n関連する関係も削除されます。`
         )
     ) {
 
@@ -2966,39 +2189,35 @@ function deleteCharacter(id) {
     }
 
 
-    relationData =
-        relationData.filter(
-            relation =>
-                relation.from !== id &&
-                relation.to !== id
-        );
-
-
     characterData =
         characterData.filter(
-            c => c.id !== id
+            c => c.id !== characterId
         );
 
 
-    if (nodes[id]) {
-
-        nodes[id]
-            .element
-            .remove();
-
-        delete nodes[id];
-
-    }
+    relationData =
+        relationData.filter(
+            r =>
+                r.from !== characterId &&
+                r.to !== characterId
+        );
 
 
-    rebuildRelations();
+    renderCharacters();
+
+    updateRelations();
 
 }
 
 
-/* =========================================================
-   関係追加モード開始
-========================================================= */
+/* ============================================================
+   関係追加モード
+============================================================ */
+
+let relationModeActive = false;
+
+let relationStartId = null;
+
 
 function startRelationMode(
     characterId
@@ -3007,80 +2226,40 @@ function startRelationMode(
     closeMenu();
 
 
-    relationModeActive =
-        true;
-
+    relationModeActive = true;
 
     relationStartId =
         characterId;
 
 
-    relationMode.style.display =
+    modeIndicator.style.display =
         "block";
 
 }
 
 
-/* =========================================================
-   関係追加モード終了
-========================================================= */
-
 function cancelRelationMode() {
 
-    relationModeActive =
-        false;
+    relationModeActive = false;
 
-    relationStartId =
-        null;
+    relationStartId = null;
 
-    relationMode.style.display =
+
+    modeIndicator.style.display =
         "none";
 
 }
 
 
-/* =========================================================
-   関係追加：次のキャラクター
-========================================================= */
+/* ============================================================
+   関係追加
+============================================================ */
 
 function handleRelationTarget(
     targetId
 ) {
 
-    if (
-        targetId ===
-        relationStartId
-    ) {
-
-        alert(
-            "同じキャラクター同士には関係を作れません。"
-        );
-
-        return;
-
-    }
-
-
-    const from =
-        characterData.find(
-            c =>
-                c.id ===
-                relationStartId
-        );
-
-
-    const to =
-        characterData.find(
-            c =>
-                c.id ===
-                targetId
-        );
-
-
-    if (
-        !from ||
-        !to
-    ) {
+    if (!relationStartId) {
 
         cancelRelationMode();
 
@@ -3089,10 +2268,48 @@ function handleRelationTarget(
     }
 
 
+    if (
+        targetId === relationStartId
+    ) {
+
+        alert(
+            "同じキャラクター同士は接続できません。"
+        );
+
+        return;
+
+    }
+
+
+    const from =
+        getCharacter(
+            relationStartId
+        );
+
+    const to =
+        getCharacter(
+            targetId
+        );
+
+
+    if (!from || !to) {
+
+        cancelRelationMode();
+
+        return;
+
+    }
+
+
+    /*
+     * 関係名
+     *
+     * 「fromがtoに何を思っているか」
+     */
     const name =
         prompt(
-            `${from.name} と ${to.name} の関係名`,
-            "友人"
+            `${from.name} → ${to.name}\n\n${from.name}が${to.name}に何を思っているか、関係名を入力してください。`,
+            "信頼"
         );
 
 
@@ -3110,90 +2327,136 @@ function handleRelationTarget(
 
     const color =
         prompt(
-            "関係線の色",
+            "関係線の色を入力してください。\n例：#00eaff",
             "#00eaff"
         );
-
-
-    if (
-        color === null ||
-        color.trim() === ""
-    ) {
-
-        cancelRelationMode();
-
-        return;
-
-    }
 
 
     relationData.push({
 
         id:
-            createId(
-                "relation"
-            ),
+            createId("rel"),
 
         from:
-            from.id,
+            relationStartId,
 
         to:
-            to.id,
+            targetId,
 
         name:
             name.trim(),
 
         color:
-            color.trim(),
+            color && color.trim()
+                ? color.trim()
+                : "#00eaff",
 
-        labelOffsetX:
-            0,
+        offsetX: 0,
 
-        labelOffsetY:
-            0
+        offsetY: 0
 
     });
 
 
-    rebuildRelations();
-
     cancelRelationMode();
+
+    updateRelations();
 
 }
 
 
-/* =========================================================
-   関係名前変更
-========================================================= */
+/* ============================================================
+   関係メニュー
+============================================================ */
+
+function showRelationMenu(
+    x,
+    y,
+    relationId
+) {
+
+    const relation =
+        relationData.find(
+            r => r.id === relationId
+        );
+
+    if (!relation) return;
+
+
+    openMenu(
+        x,
+        y,
+
+        `
+        <div class="menu-title">
+            関係操作
+        </div>
+
+        <div
+            class="menu-item"
+            onclick="renameRelation('${relationId}')">
+            関係名を変更
+        </div>
+
+        <div
+            class="menu-item"
+            onclick="changeRelationColor('${relationId}')">
+            関係線の色を変更
+        </div>
+
+        <div class="menu-separator"></div>
+
+        <div
+            class="menu-item danger"
+            onclick="deleteRelation('${relationId}')">
+            関係削除
+        </div>
+        `
+    );
+
+}
+
+
+/* ============================================================
+   関係名変更
+============================================================ */
 
 function renameRelation(
-    id
+    relationId
 ) {
+
+    const relation =
+        relationData.find(
+            r => r.id === relationId
+        );
+
+    if (!relation) return;
+
 
     closeMenu();
 
 
-    const relation =
-        relationData.find(
-            r => r.id === id
+    const from =
+        getCharacter(
+            relation.from
+        );
+
+    const to =
+        getCharacter(
+            relation.to
         );
 
 
-    if (!relation) {
-        return;
-    }
-
-
-    const name =
+    const newName =
         prompt(
-            "関係名",
+            `${from?.name || "?"} → ${to?.name || "?"}\n\n関係名`,
             relation.name
         );
 
 
     if (
-        name === null ||
-        name.trim() === ""
+        newName === null ||
+        newName.trim() === ""
     ) {
 
         return;
@@ -3202,39 +2465,73 @@ function renameRelation(
 
 
     relation.name =
-        name.trim();
+        newName.trim();
 
 
-    rebuildRelations();
+    updateRelations();
 
 }
 
 
-/* =========================================================
+/* ============================================================
+   関係色変更
+============================================================ */
+
+function changeRelationColor(
+    relationId
+) {
+
+    const relation =
+        relationData.find(
+            r => r.id === relationId
+        );
+
+    if (!relation) return;
+
+
+    closeMenu();
+
+
+    const color =
+        prompt(
+            "関係線の色",
+            relation.color
+        );
+
+
+    if (
+        color === null ||
+        color.trim() === ""
+    ) {
+
+        return;
+
+    }
+
+
+    relation.color =
+        color.trim();
+
+
+    updateRelations();
+
+}
+
+
+/* ============================================================
    関係削除
-========================================================= */
+============================================================ */
 
 function deleteRelation(
-    id
+    relationId
 ) {
 
     closeMenu();
 
 
-    const relation =
-        relationData.find(
-            r => r.id === id
-        );
-
-
-    if (!relation) {
-        return;
-    }
-
-
     if (
         !confirm(
-            `関係「${relation.name}」を削除しますか？`
+            "この関係を削除しますか？"
         )
     ) {
 
@@ -3245,27 +2542,27 @@ function deleteRelation(
 
     relationData =
         relationData.filter(
-            r => r.id !== id
+            r => r.id !== relationId
         );
 
 
-    rebuildRelations();
+    updateRelations();
 
 }
 
 
-/* =========================================================
-   JSONファイル出力
-========================================================= */
+/* ============================================================
+   エクスポート
+============================================================ */
 
 function exportMap() {
 
     closeMenu();
 
 
-    const saveData = {
+    const data = {
 
-        version: 1,
+        version: 2,
 
         map: {
 
@@ -3286,17 +2583,15 @@ function exportMap() {
     };
 
 
-    const json =
-        JSON.stringify(
-            saveData,
-            null,
-            2
-        );
-
-
     const blob =
         new Blob(
-            [json],
+            [
+                JSON.stringify(
+                    data,
+                    null,
+                    2
+                )
+            ],
             {
                 type:
                     "application/json"
@@ -3310,66 +2605,51 @@ function exportMap() {
         );
 
 
-    const link =
-        document.createElement(
-            "a"
-        );
+    const a =
+        document.createElement("a");
 
 
-    link.href = url;
+    a.href = url;
 
-    link.download =
-        "character-relation-map.json";
-
-
-    document.body.appendChild(
-        link
-    );
+    a.download =
+        "character_relation_map.json";
 
 
-    link.click();
+    document.body.appendChild(a);
+
+    a.click();
+
+    a.remove();
 
 
-    link.remove();
-
-
-    URL.revokeObjectURL(
-        url
-    );
+    URL.revokeObjectURL(url);
 
 }
 
 
-/* =========================================================
-   JSONファイル入力
-========================================================= */
+/* ============================================================
+   インポート
+============================================================ */
 
 function importMap() {
 
     closeMenu();
 
-    fileInput.value = "";
+    importFile.value = "";
 
-    fileInput.click();
+    importFile.click();
 
 }
 
 
-/* =========================================================
-   JSON読み込み
-========================================================= */
-
-fileInput.addEventListener(
+importFile.addEventListener(
     "change",
     event => {
 
         const file =
             event.target.files[0];
 
-
-        if (!file) {
-            return;
-        }
+        if (!file) return;
 
 
         const reader =
@@ -3377,19 +2657,15 @@ fileInput.addEventListener(
 
 
         reader.onload =
-            event => {
+            () => {
 
                 try {
 
                     const data =
                         JSON.parse(
-                            event.target.result
+                            reader.result
                         );
 
-
-                    /*
-                     * 簡易チェック
-                     */
 
                     if (
                         !Array.isArray(
@@ -3401,129 +2677,66 @@ fileInput.addEventListener(
                     ) {
 
                         throw new Error(
-                            "データ形式が正しくありません。"
+                            "データ形式が違います"
                         );
 
                     }
 
 
-                    /*
-                     * データを反映
-                     */
-
                     characterData =
-                        data.characters.map(
-                            character => ({
-
-                                id:
-                                    character.id,
-
-                                name:
-                                    character.name,
-
-                                x:
-                                    Number(
-                                        character.x
-                                    ),
-
-                                y:
-                                    Number(
-                                        character.y
-                                    ),
-
-                                status:
-                                    character.status ===
-                                    "CLOSE"
-                                        ? "CLOSE"
-                                        : "OPEN"
-
-                            })
-                        );
+                        data.characters;
 
 
                     relationData =
-                        data.relations.map(
-                            relation => ({
-
-                                id:
-                                    relation.id,
-
-                                from:
-                                    relation.from,
-
-                                to:
-                                    relation.to,
-
-                                name:
-                                    relation.name,
-
-                                color:
-                                    relation.color ||
-                                    "#00eaff",
-
-                                labelOffsetX:
-                                    Number(
-                                        relation.labelOffsetX ||
-                                        0
-                                    ),
-
-                                labelOffsetY:
-                                    Number(
-                                        relation.labelOffsetY ||
-                                        0
-                                    )
-
-                            })
-                        );
+                        data.relations;
 
 
                     /*
-                     * 存在しないキャラクターを
-                     * 参照する関係を除外
+                     * 古いデータにも対応
                      */
+                    relationData.forEach(
+                        relation => {
 
-                    const ids =
-                        new Set(
-                            characterData.map(
-                                c => c.id
-                            )
-                        );
+                            if (
+                                relation.offsetX === undefined
+                            ) {
 
+                                relation.offsetX =
+                                    relation.labelOffsetX || 0;
 
-                    relationData =
-                        relationData.filter(
-                            relation =>
-                                ids.has(
-                                    relation.from
-                                ) &&
-                                ids.has(
-                                    relation.to
-                                )
-                        );
+                            }
 
 
-                    rebuildNodes();
+                            if (
+                                relation.offsetY === undefined
+                            ) {
 
-                    rebuildRelations();
+                                relation.offsetY =
+                                    relation.labelOffsetY || 0;
+
+                            }
+
+                        }
+                    );
 
 
-                    /*
-                     * 読み込んだデータの
-                     * キャラクター中央へ移動
-                     */
+                    renderCharacters();
+
+                    updateRelations();
 
                     centerOnCharacters();
 
 
                     alert(
-                        "相関図を読み込みました。"
+                        "マップを読み込みました。"
                     );
 
+                }
 
-                } catch (error) {
+                catch (error) {
 
                     alert(
-                        "ファイルを読み込めませんでした。\n\n" +
+                        "読み込みに失敗しました。\n" +
                         error.message
                     );
 
@@ -3532,75 +2745,161 @@ fileInput.addEventListener(
             };
 
 
-        reader.readAsText(
-            file
-        );
+        reader.readAsText(file);
 
     }
 );
 
 
-/* =========================================================
-   HTMLエスケープ
-========================================================= */
+/* ============================================================
+   キャラクター中央表示
+============================================================ */
 
-function escapeHTML(
-    text
-) {
+function centerOnCharacters() {
 
-    return String(text)
+    if (
+        characterData.length === 0
+    ) {
 
-        .replace(
-            /&/g,
-            "&amp;"
-        )
+        zoom = 1;
 
-        .replace(
-            /</g,
-            "&lt;"
-        )
+        mapX =
+            (
+                viewport.clientWidth -
+                MAP_WIDTH
+            ) / 2;
 
-        .replace(
-            />/g,
-            "&gt;"
-        )
+        mapY =
+            (
+                viewport.clientHeight -
+                MAP_HEIGHT
+            ) / 2;
 
-        .replace(
-            /"/g,
-            "&quot;"
-        )
+        clampMapPosition();
 
-        .replace(
-            /'/g,
-            "&#039;"
+        applyTransform();
+
+        return;
+
+    }
+
+
+    let minX = Infinity;
+    let minY = Infinity;
+
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+
+    characterData.forEach(
+        character => {
+
+            minX =
+                Math.min(
+                    minX,
+                    character.x
+                );
+
+            minY =
+                Math.min(
+                    minY,
+                    character.y
+                );
+
+            maxX =
+                Math.max(
+                    maxX,
+                    character.x
+                );
+
+            maxY =
+                Math.max(
+                    maxY,
+                    character.y
+                );
+
+        }
+    );
+
+
+    const centerX =
+        (minX + maxX) / 2;
+
+    const centerY =
+        (minY + maxY) / 2;
+
+
+    /*
+     * 初期ズーム
+     */
+    const clusterWidth =
+        Math.max(
+            500,
+            maxX - minX + 400
         );
+
+    const clusterHeight =
+        Math.max(
+            500,
+            maxY - minY + 400
+        );
+
+
+    const viewportWidth =
+        viewport.clientWidth;
+
+    const viewportHeight =
+        viewport.clientHeight;
+
+
+    zoom =
+        Math.min(
+            1.4,
+            viewportWidth / clusterWidth,
+            viewportHeight / clusterHeight
+        );
+
+
+    zoom =
+        Math.max(
+            MIN_ZOOM,
+            Math.min(
+                MAX_ZOOM,
+                zoom
+            )
+        );
+
+
+    mapX =
+        viewportWidth / 2 -
+        centerX * zoom;
+
+    mapY =
+        viewportHeight / 2 -
+        centerY * zoom;
+
+
+    clampMapPosition();
+
+    applyTransform();
 
 }
 
 
-/* =========================================================
+/* ============================================================
    初期化
-========================================================= */
+============================================================ */
 
-function initialize() {
+function init() {
 
-    rebuildNodes();
+    renderCharacters();
 
-    rebuildRelations();
-
-    zoom = 1;
+    updateRelations();
 
     centerOnCharacters();
 
 }
 
-
-initialize();
-
-
-/* =========================================================
-   リサイズ
-========================================================= */
 
 window.addEventListener(
     "resize",
@@ -3613,8 +2912,11 @@ window.addEventListener(
     }
 );
 
+
+init();
+
 </script>
 
 </body>
-
 </html>
+```

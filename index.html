@@ -3577,3 +3577,485 @@ init();
 </body>
 </html>
 ```
+#mapControls {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 10000;
+
+    display: flex;
+    gap: 8px;
+
+    padding: 8px;
+
+    background: rgba(10, 15, 30, 0.9);
+    border: 1px solid rgba(0, 234, 255, 0.35);
+    border-radius: 10px;
+
+    box-shadow:
+        0 0 15px rgba(0, 234, 255, 0.15);
+
+    backdrop-filter: blur(6px);
+}
+
+#mapControls button {
+    padding: 8px 12px;
+
+    border: 1px solid rgba(0, 234, 255, 0.45);
+    border-radius: 6px;
+
+    background: #111a2d;
+    color: #dffaff;
+
+    font-size: 13px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s,
+        transform 0.1s,
+        box-shadow 0.15s;
+}
+
+#mapControls button:hover {
+    background: #19304a;
+
+    box-shadow:
+        0 0 10px rgba(0, 234, 255, 0.3);
+}
+
+#mapControls button:active {
+    transform: scale(0.95);
+}
+
+
+document.getElementById("allCloseBtn")
+    .addEventListener("click", () => {
+
+        characters.forEach(character => {
+            character.status = "CLOSE";
+        });
+
+        updateNodes();
+        updateRelations();
+    });
+
+
+document.getElementById("allOpenBtn")
+    .addEventListener("click", () => {
+
+        characters.forEach(character => {
+            character.status = "OPEN";
+        });
+
+        updateNodes();
+        updateRelations();
+    });
+function arrangeCharacters() {
+
+    if (characters.length <= 1) {
+        return;
+    }
+
+    const CENTER_X = MAP_WIDTH / 2;
+    const CENTER_Y = MAP_HEIGHT / 2;
+
+    const SPACING = NODE_RADIUS * 3.2;
+
+    /*
+     * -----------------------------
+     * 1. 各キャラクターの接続数を調べる
+     * -----------------------------
+     */
+
+    const connectionCount = {};
+
+    characters.forEach(c => {
+        connectionCount[c.id] = 0;
+    });
+
+    relationData.forEach(r => {
+
+        if (
+            connectionCount[r.from] !== undefined
+        ) {
+            connectionCount[r.from]++;
+        }
+
+        if (
+            connectionCount[r.to] !== undefined
+        ) {
+            connectionCount[r.to]++;
+        }
+    });
+
+
+    /*
+     * -----------------------------
+     * 2. 接続数の多いキャラを中心へ
+     * -----------------------------
+     */
+
+    const sorted = [...characters].sort(
+        (a, b) =>
+            connectionCount[b.id] -
+            connectionCount[a.id]
+    );
+
+
+    /*
+     * -----------------------------
+     * 3. 最初は円形に配置
+     * -----------------------------
+     */
+
+    const radius =
+        Math.max(
+            SPACING,
+            SPACING * Math.sqrt(characters.length)
+        );
+
+    sorted.forEach((character, index) => {
+
+        const angle =
+            (Math.PI * 2 * index) /
+            sorted.length;
+
+        character.x =
+            CENTER_X +
+            Math.cos(angle) * radius;
+
+        character.y =
+            CENTER_Y +
+            Math.sin(angle) * radius;
+    });
+
+
+    /*
+     * -----------------------------
+     * 4. 関係線を短くするため
+     *    ノードを引っ張る
+     * -----------------------------
+     */
+
+    for (let iteration = 0; iteration < 80; iteration++) {
+
+        const forces = {};
+
+        characters.forEach(c => {
+
+            forces[c.id] = {
+                x: 0,
+                y: 0
+            };
+        });
+
+
+        /*
+         * 関係のあるノード同士を近づける
+         */
+
+        relationData.forEach(relation => {
+
+            const from =
+                characters.find(
+                    c => c.id === relation.from
+                );
+
+            const to =
+                characters.find(
+                    c => c.id === relation.to
+                );
+
+            if (!from || !to) {
+                return;
+            }
+
+            const dx = to.x - from.x;
+            const dy = to.y - from.y;
+
+            const distance =
+                Math.sqrt(
+                    dx * dx +
+                    dy * dy
+                ) || 1;
+
+            const targetDistance =
+                SPACING * 1.15;
+
+            const strength =
+                (distance - targetDistance) *
+                0.012;
+
+            const fx =
+                (dx / distance) *
+                strength;
+
+            const fy =
+                (dy / distance) *
+                strength;
+
+            forces[from.id].x += fx;
+            forces[from.id].y += fy;
+
+            forces[to.id].x -= fx;
+            forces[to.id].y -= fy;
+        });
+
+
+        /*
+         * ノード同士が近すぎる場合は反発
+         */
+
+        for (let i = 0; i < characters.length; i++) {
+
+            for (
+                let j = i + 1;
+                j < characters.length;
+                j++
+            ) {
+
+                const a = characters[i];
+                const b = characters[j];
+
+                const dx = b.x - a.x;
+                const dy = b.y - a.y;
+
+                const distance =
+                    Math.sqrt(
+                        dx * dx +
+                        dy * dy
+                    ) || 1;
+
+                if (distance >= SPACING) {
+                    continue;
+                }
+
+                const force =
+                    (SPACING - distance) *
+                    0.05;
+
+                const fx =
+                    (dx / distance) *
+                    force;
+
+                const fy =
+                    (dy / distance) *
+                    force;
+
+                forces[a.id].x -= fx;
+                forces[a.id].y -= fy;
+
+                forces[b.id].x += fx;
+                forces[b.id].y += fy;
+            }
+        }
+
+
+        /*
+         * 中央から離れすぎないようにする
+         */
+
+        characters.forEach(character => {
+
+            const dx =
+                CENTER_X - character.x;
+
+            const dy =
+                CENTER_Y - character.y;
+
+            forces[character.id].x +=
+                dx * 0.0008;
+
+            forces[character.id].y +=
+                dy * 0.0008;
+        });
+
+
+        /*
+         * 移動
+         */
+
+        characters.forEach(character => {
+
+            character.x +=
+                forces[character.id].x;
+
+            character.y +=
+                forces[character.id].y;
+        });
+    }
+
+
+    /*
+     * -----------------------------
+     * 5. ノード位置をきれいな
+     *    数値に丸める
+     * -----------------------------
+     */
+
+    characters.forEach(character => {
+
+        character.x =
+            Math.round(character.x);
+
+        character.y =
+            Math.round(character.y);
+
+
+        /*
+         * マップ外へ出さない
+         */
+
+        character.x =
+            Math.max(
+                NODE_RADIUS + 50,
+                Math.min(
+                    MAP_WIDTH -
+                    NODE_RADIUS -
+                    50,
+                    character.x
+                )
+            );
+
+        character.y =
+            Math.max(
+                NODE_RADIUS + 50,
+                Math.min(
+                    MAP_HEIGHT -
+                    NODE_RADIUS -
+                    50,
+                    character.y
+                )
+            );
+    });
+
+
+    /*
+     * -----------------------------
+     * 6. 最終的にノード同士の
+     *    距離をもう一度調整
+     * -----------------------------
+     */
+
+    separateCharacters();
+
+
+    /*
+     * -----------------------------
+     * 7. 関係線の表示を更新
+     * -----------------------------
+     */
+
+    updateNodes();
+    updateRelations();
+
+
+    /*
+     * 現在の表示位置も
+     * キャラクター群へ合わせる
+     */
+
+    centerOnCharacters();
+}
+function separateCharacters() {
+
+    const minDistance =
+        NODE_RADIUS * 3.0;
+
+    for (let iteration = 0; iteration < 30; iteration++) {
+
+        let moved = false;
+
+        for (let i = 0; i < characters.length; i++) {
+
+            for (
+                let j = i + 1;
+                j < characters.length;
+                j++
+            ) {
+
+                const a = characters[i];
+                const b = characters[j];
+
+                const dx = b.x - a.x;
+                const dy = b.y - a.y;
+
+                let distance =
+                    Math.sqrt(
+                        dx * dx +
+                        dy * dy
+                    );
+
+                if (distance === 0) {
+                    distance = 0.01;
+                }
+
+                if (distance >= minDistance) {
+                    continue;
+                }
+
+                const push =
+                    (minDistance - distance) /
+                    2;
+
+                const nx =
+                    dx / distance;
+
+                const ny =
+                    dy / distance;
+
+                a.x -= nx * push;
+                a.y -= ny * push;
+
+                b.x += nx * push;
+                b.y += ny * push;
+
+                moved = true;
+            }
+        }
+
+        if (!moved) {
+            break;
+        }
+    }
+
+
+    /*
+     * マップ範囲に収める
+     */
+
+    characters.forEach(character => {
+
+        character.x =
+            Math.max(
+                NODE_RADIUS + 50,
+                Math.min(
+                    MAP_WIDTH -
+                    NODE_RADIUS -
+                    50,
+                    character.x
+                )
+            );
+
+        character.y =
+            Math.max(
+                NODE_RADIUS + 50,
+                Math.min(
+                    MAP_HEIGHT -
+                    NODE_RADIUS -
+                    50,
+                    character.y
+                )
+            );
+    });
+}
+
+
+
+document.getElementById("arrangeBtn")
+    .addEventListener(
+        "click",
+        arrangeCharacters
+    );              

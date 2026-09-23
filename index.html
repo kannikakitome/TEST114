@@ -2,240 +2,473 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>キャラクター相関図</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>サイバーパンク キャラクター相関図</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: sans-serif; background-color: #1e1e24; color: #fff; overflow: hidden; width: 100vw; height: 100vh; }
+        :root {
+            --bg-color: #0d0f12;
+            --grid-color: rgba(0, 242, 254, 0.05);
+            --node-open-color: #00f2fe;
+            --node-close-color: #ff0055;
+            --text-color: #ffffff;
+            --panel-bg: rgba(20, 24, 33, 0.85);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        /* ビューポート（画面サイズ） */
+        #viewport {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            cursor: grab;
+            touch-action: none; /* ブラウザ標準のスクロール・ズームを無効化 */
+        }
+
+        #viewport:active {
+            cursor: grabbing;
+        }
+
+        /* 広大なマップコンテナ */
+        #map-container {
+            width: 3000px;
+            height: 3000px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: var(--bg-color);
+            /* グリッド背景のデザイン */
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            transform-origin: 0 0;
+        }
+
+        /* SVGレイヤー（関係線用） */
+        #svg-layer {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            pointer-events: none; /* 下の要素の操作を邪魔しない */
+        }
+
+        .relation-line {
+            stroke-width: 2;
+            stroke-dasharray: 4 4;
+            animation: dash 30s linear infinite;
+            transition: opacity 0.3s ease;
+        }
+
+        @keyframes dash {
+            to { stroke-dashoffset: -1000; }
+        }
+
+        /* 関係名テキストと座布団（SVG内） */
+        .relation-label-bg {
+            fill: #141821;
+            stroke-width: 1;
+            rx: 4;
+            ry: 4;
+        }
         
-        /* 全体のコンテナ */
-        #canvas-container { width: 100%; height: 100%; position: relative; overflow: hidden; }
-        
-        /* 広大なマップ背景 */
-        #workspace { width: 3000px; height: 3000px; position: absolute; top: 0; left: 0; background-image: radial-gradient(#333 1px, transparent 1px); background-size: 20px 20px; }
-        
-        /* キャラクターノードのコンテナ（線をキャラクターの下に敷くためにz-indexを調整） */
-        #character-container { position: absolute; top: 0; left: 0; width: 3000px; height: 3000px; z-index: 10; pointer-events: none; }
-        
-        /* キャラクターノード */
-        .character { position: absolute; width: 100px; height: 100px; border-radius: 50%; background: #2a2a35; border: 3px solid #00ffff; box-shadow: 0 0 15px rgba(0,255,255,0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: move; user-select: none; font-size: 14px; font-weight: bold; text-align: center; padding: 5px; touch-action: none; pointer-events: auto; }
-        .character.close { border-color: #ff4757; box-shadow: 0 0 15px rgba(255,71,87,0.4); background: #3a2226; }
-        .character .status-badge { font-size: 9px; background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 10px; margin-top: 4px; color: #00ffff; }
-        .character.close .status-badge { color: #ff4757; }
-        
-        /* 関係線を描くSVGレイヤー（巨大サイズにしてz-indexを5にし、確実に描画させる） */
-        #svg-layer { position: absolute; top: 0; left: 0; width: 3000px; height: 3000px; z-index: 5; pointer-events: none; display: block !important; }
-        
-        /* 操作説明パネル */
-        #info-panel { position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 8px; font-size: 12px; z-index: 100; pointer-events: none; line-height: 1.5; }
+        .relation-label-text {
+            fill: #ffffff;
+            font-size: 11px;
+            font-weight: bold;
+            text-anchor: middle;
+            dominant-baseline: central;
+            letter-spacing: 1px;
+        }
+
+        .relation-point {
+            stroke-width: 2;
+        }
+
+        /* キャラクターノードの配置エリア */
+        #nodes-layer {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* キャラクターノード単体 */
+        .node {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            pointer-events: auto; /* ノード自体は操作可能に */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+            transition: border 0.3s, box-shadow 0.3s, transform 0.1s;
+            background: radial-gradient(circle, rgba(25,32,45,0.9) 0%, rgba(14,18,26,0.95) 100%);
+            border: 2px solid transparent;
+        }
+
+        /* 状態別のネオンエフェクト */
+        .node.state-open {
+            border-color: var(--node-open-color);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.3), inset 0 0 15px rgba(0, 242, 254, 0.2);
+        }
+
+        .node.state-close {
+            border-color: var(--node-close-color);
+            box-shadow: 0 0 15px rgba(ff, 0, 85, 0.3), inset 0 0 15px rgba(ff, 0, 85, 0.2);
+        }
+
+        .node:active {
+            transform: scale(0.96);
+        }
+
+        /* ノード内のテキスト */
+        .node-name {
+            color: var(--text-color);
+            font-size: 13px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 4px;
+            padding: 0 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 100%;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        /* 状態バッジ */
+        .node-badge {
+            font-size: 9px;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .state-open .node-badge {
+            background-color: rgba(0, 242, 254, 0.15);
+            color: var(--node-open-color);
+        }
+
+        .state-close .node-badge {
+            background-color: rgba(250, 0, 85, 0.15);
+            color: var(--node-close-color);
+        }
+
+        /* 説明用簡易ヘルプパネル */
+        #info-panel {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--panel-bg);
+            border-left: 4px solid var(--node-open-color);
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            color: var(--text-color);
+            font-size: 12px;
+            line-height: 1.6;
+            z-index: 10;
+            pointer-events: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+        }
+        #info-panel h1 { font-size: 14px; margin-bottom: 4px; color: var(--node-open-color); }
     </style>
 </head>
 <body>
+
     <div id="info-panel">
-        <strong>【操作方法】</strong><br>
-        ・背景をドラッグ/スライド：画面のスクロール<br>
-        ・ノードを短くタップ：Open/Close（線の切り替え）<br>
-        ・ノードを長押し/ドラッグ：キャラクターの移動
+        <h1>REATION MAP SYSTEM</h1>
+        <p>・背景ドラッグ：マップのスクロール</p>
+        <p>・ノードドラッグ：位置の移動</p>
+        <p>・ノードタップ：OPEN / CLOSE の切り替え</p>
     </div>
-    <div id="canvas-container">
-        <div id="workspace">
-            <!-- 順番を入れ替え、さらに確実な描画環境にしました -->
-            <div id="character-container"></div>
+
+    <div id="viewport">
+        <div id="map-container">
+            <!-- 関係線を描画するSVGレイヤー -->
             <svg id="svg-layer"></svg>
+            <!-- キャラクターを配置するHTMLレイヤー -->
+            <div id="nodes-layer"></div>
         </div>
     </div>
+
     <script>
-        // データ定義
-        const characters = [
-            { id: 'ch1', name: '主人公', x: 400, y: 300, state: 'open' },
-            { id: 'ch2', name: 'ライバル', x: 200, y: 150, state: 'open' },
-            { id: 'ch3', name: '幼馴染', x: 600, y: 200, state: 'open' },
-            { id: 'ch4', name: '組織ボス', x: 300, y: 550, state: 'open' }
-        ];
-        const relations = [
-            { from: 'ch1', to: 'ch2', type: 'ライバル', color: '#ff9f43' },
-            { from: 'ch1', to: 'ch3', type: '友人', color: '#1dd1a1' },
-            { from: 'ch1', to: 'ch4', type: '敵対', color: '#ff4757' },
-            { from: 'ch2', to: 'ch4', type: '裏取引？', color: '#fece57' }
-        ];
+        // --- 初期データ定義 ---
+        const initialData = {
+            nodes: [
+                { id: "hero", name: "主人公", state: "OPEN", x: 400, y: 400 },
+                { id: "rival", name: "ライバル", state: "OPEN", x: 750, y: 350 },
+                { id: "childhood", name: "幼馴染", state: "OPEN", x: 350, y: 700 },
+                { id: "boss", name: "組織ボス", state: "OPEN", x: 800, y: 750 }
+            ],
+            relations: [
+                { from: "hero", to: "rival", name: "切磋琢磨", color: "#39ff14" },
+                { from: "hero", to: "childhood", name: "好意・信頼", color: "#ff007f" },
+                { from: "hero", to: "boss", name: "宿敵", color: "#ff0055" },
+                { from: "rival", to: "boss", name: "利用関係", color: "#ffff00" }
+            ]
+        };
 
-        const container = document.getElementById('canvas-container');
-        const workspace = document.getElementById('workspace');
-        const charContainer = document.getElementById('character-container');
+        // --- 定数・変数の初期化 ---
+        const MAP_WIDTH = 3000;
+        const MAP_HEIGHT = 3000;
+        const NODE_RADIUS = 50; // ノードの半径 (width 100px / 2)
+
+        let nodes = [...initialData.nodes];
+        let relations = [...initialData.relations];
+
+        const viewport = document.getElementById('viewport');
+        const mapContainer = document.getElementById('map-container');
         const svgLayer = document.getElementById('svg-layer');
+        const nodesLayer = document.getElementById('nodes-layer');
 
-        // 表示位置の初期化
-        let currentX = -100;
-        let currentY = -100;
-        workspace.style.transform = `translate(${currentX}px, ${currentY}px)`;
+        // マップスクロール（位置）管理
+        let mapX = 0;
+        let mapY = 0;
+        let isPanning = false;
+        let panStart = { x: 0, y: 0 };
 
-        let isDraggingWorkspace = false;
-        let isDraggingNode = false;
-        let activeNode = null;
-        let pointerStartX = 0;
-        let pointerStartY = 0;
-        let nodeStartX = 0;
-        let nodeStartY = 0;
-        let wsStartX = 0;
-        let wsStartY = 0;
-        let hasMoved = false;
-
-        // キャラクター初期配置
-        function init() {
-            charContainer.innerHTML = '';
-            characters.forEach(char => {
-                const div = document.createElement('div');
-                div.className = `character ${char.state}`;
-                div.id = char.id;
-                div.style.left = `${char.x}px`;
-                div.style.top = `${char.y}px`;
-                div.innerHTML = `<div>${char.name}</div><div class="status-badge" id="badge-${char.id}">${char.state.toUpperCase()}</div>`;
-                
-                // ポインターイベント（マウス・タッチ共通）
-                div.addEventListener('pointerdown', (e) => {
-                    e.stopPropagation();
-                    isDraggingNode = true;
-                    activeNode = char;
-                    pointerStartX = e.clientX;
-                    pointerStartY = e.clientY;
-                    nodeStartX = char.x;
-                    nodeStartY = char.y;
-                    hasMoved = false;
-                    div.setPointerCapture(e.pointerId);
-                });
-
-                div.addEventListener('pointermove', (e) => {
-                    if (!isDraggingNode || activeNode !== char) return;
-                    e.stopPropagation();
-                    const dx = e.clientX - pointerStartX;
-                    const dy = e.clientY - pointerStartY;
-                    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-                        hasMoved = true;
-                    }
-                    char.x = nodeStartX + dx;
-                    char.y = nodeStartY + dy;
-                    
-                    // 画面外へのはみ出し制限
-                    char.x = Math.max(0, Math.min(char.x, 2900));
-                    char.y = Math.max(0, Math.min(char.y, 2900));
-                    
-                    div.style.left = `${char.x}px`;
-                    div.style.top = `${char.y}px`;
-                    drawLines();
-                });
-
-                div.addEventListener('pointerup', (e) => {
-                    if (!isDraggingNode || activeNode !== char) return;
-                    e.stopPropagation();
-                    div.releasePointerCapture(e.pointerId);
-                    isDraggingNode = false;
-                    activeNode = null;
-
-                    // 動かさずにタップだけしたなら状態を反転
-                    if (!hasMoved) {
-                        if (char.state === 'open') {
-                            char.state = 'close';
-                            div.classList.add('close');
-                            document.getElementById(`badge-${char.id}`).innerText = 'CLOSE';
-                        } else {
-                            char.state = 'open';
-                            div.classList.remove('close');
-                            document.getElementById(`badge-${char.id}`).innerText = 'OPEN';
-                        }
-                        drawLines();
-                    }
-                });
-
-                charContainer.appendChild(div);
-            });
-            drawLines();
+        // --- 画面初期中央寄せ計算 ---
+        function initMapPosition() {
+            const vW = viewport.clientWidth;
+            const vH = viewport.clientHeight;
+            // 最初のノードの塊が中央あたりに見えるように配置
+            mapX = Math.max(Math.min(0, (vW / 2) - 550), vW - MAP_WIDTH);
+            mapY = Math.max(Math.min(0, (vH / 2) - 500), vH - MAP_HEIGHT);
+            updateMapTransform();
         }
 
-        // 背景スクロールの処理
-        container.addEventListener('pointerdown', (e) => {
-            if (e.target.closest('.character')) return;
-            isDraggingWorkspace = true;
-            pointerStartX = e.clientX;
-            pointerStartY = e.clientY;
-            wsStartX = currentX;
-            wsStartY = currentY;
-            container.setPointerCapture(e.pointerId);
+        function updateMapTransform() {
+            mapContainer.style.transform = `translate(${mapX}px, ${mapY}px)`;
+        }
+
+        // --- 背景ドラッグ（マップスクロール）処理 ---
+        viewport.addEventListener('pointerdown', (e) => {
+            // ノードのドラッグ中はマップスクロールを発生させない
+            if (e.target.closest('.node')) return;
+            
+            isPanning = true;
+            viewport.setPointerCapture(e.pointerId);
+            panStart.x = e.clientX - mapX;
+            panStart.y = e.clientY - mapY;
         });
 
-        container.addEventListener('pointermove', (e) => {
-            if (!isDraggingWorkspace) return;
-            const dx = e.clientX - pointerStartX;
-            const dy = e.clientY - pointerStartY;
-            currentX = wsStartX + dx;
-            currentY = wsStartY + dy;
+        viewport.addEventListener('pointermove', (e) => {
+            if (!isPanning) return;
+            
+            let targetX = e.clientX - panStart.x;
+            let targetY = e.clientY - panStart.y;
 
-            // スクロール範囲の制限
-            currentX = Math.min(0, Math.max(currentX, -(3000 - window.innerWidth)));
-            currentY = Math.min(0, Math.max(currentY, -(3000 - window.innerHeight)));
+            // 画面外はみ出し制限（バウンズ制御）
+            const minX = viewport.clientWidth - MAP_WIDTH;
+            const minY = viewport.clientHeight - MAP_HEIGHT;
 
-            workspace.style.transform = `translate(${currentX}px, ${currentY}px)`;
+            // マップサイズが画面より小さい場合も考慮しつつ制限
+            mapX = Math.min(0, Math.max(minX, targetX));
+            mapY = Math.min(0, Math.max(minY, targetY));
+
+            updateMapTransform();
         });
 
-        container.addEventListener('pointerup', (e) => {
-            if (!isDraggingWorkspace) return;
-            container.releasePointerCapture(e.pointerId);
-            isDraggingWorkspace = false;
+        viewport.addEventListener('pointerup', (e) => {
+            if (isPanning) {
+                viewport.releasePointerCapture(e.pointerId);
+                isPanning = false;
+            }
         });
 
-        // 線の描画（完全にバグを回避する安全な実装）
-        function drawLines() {
-            svgLayer.innerHTML = '';
-            relations.forEach(rel => {
-                const fromChar = characters.find(c => c.id === rel.from);
-                const toChar = characters.find(c => c.id === rel.to);
+        // --- ノード・関係線の生成と描画群 ---
 
-                if (fromChar.state === 'close' || toChar.state === 'close') return;
+        // ノードDOMの生成
+        function createNodes() {
+            nodesLayer.innerHTML = '';
+            nodes.forEach(node => {
+                const div = document.createElement('div');
+                div.id = `node-${node.id}`;
+                div.className = `node state-${node.state.toLowerCase()}`;
+                div.style.left = `${node.x - NODE_RADIUS}px`;
+                div.style.top = `${node.y - NODE_RADIUS}px`;
 
-                const x1 = fromChar.x + 50; const y1 = fromChar.y + 50;
-                const x2 = toChar.x + 50; const y2 = toChar.y + 50;
+                div.innerHTML = `
+                    <div class="node-name">${node.name}</div>
+                    <div class="node-badge">${node.state}</div>
+                `;
 
-                // 1. 直線
-                const line = document.createElementNS('http://w3.org', 'line');
-                line.setAttribute('x1', x1); line.setAttribute('y1', y1);
-                line.setAttribute('x2', x2); line.setAttribute('y2', y2);
-                line.setAttribute('stroke', rel.color); line.setAttribute('stroke-width', '3');
-                line.setAttribute('opacity', '0.7');
-                svgLayer.appendChild(line);
-
-                const mx = (x1 + x2) / 2;
-                const my = (y1 + y2) / 2;
-
-                // 2. 中心の黒い座布団（四角形）
-                const rect = document.createElementNS('http://w3.org', 'rect');
-                rect.setAttribute('x', mx - 35);
-                rect.setAttribute('y', my - 12);
-                rect.setAttribute('width', '70');
-                rect.setAttribute('height', '22');
-                rect.setAttribute('fill', '#1e1e24'); // 背景と同じ色にして線を隠す
-                rect.setAttribute('rx', '4'); // 少し角丸
-                rect.setAttribute('stroke', rel.color);
-                rect.setAttribute('stroke-width', '1');
-                svgLayer.appendChild(rect);
-
-                // 3. 中心の点（小さなサークル）
-                const circle = document.createElementNS('w3.org', 'circle');
-
-		        circle.setAttribute('cx', mx);
-                circle.setAttribute('cy', my);
-                circle.setAttribute('r', '4');
-                circle.setAttribute('fill', rel.color);
-                svgLayer.appendChild(circle);
-                // 4. 関係名テキスト（エラーの起きないシンプルな描画に変更）const text = document.createElementNS('w3.org', 'text');
-                text.setAttribute('x', mx);
-                text.setAttribute('y', my + 5);
-                 // 四角の真ん中に来るように調整text.setAttribute('fill', '#ffffff');
-                text.setAttribute('font-size', '11px');
-                text.setAttribute('font-weight', 'bold');
-                text.setAttribute('text-anchor', 'middle');
-                text.textContent = rel.type;
-                svgLayer.appendChild(text);
-     }
-);
-}init();
-
-                
+                setupNodeDragAndTap(div, node);
+                nodesLayer.appendChild(div);
+            });
+コードは注意してご使用ください。
+}
+// 関係線（SVG）の生成
+function createRelations() {
+svgLayer.innerHTML = '';
+relations.forEach((rel, index) => {
+const g = document.createElementNS('w3.org', 'g');
+g.id = rel-group-${index};
+// 直線
+const line = document.createElementNS('w3.org', 'line');
+line.setAttribute('class', 'relation-line');
+line.setAttribute('stroke', rel.color || '#00f2fe');
+g.appendChild(line);
+// 中心点マーカー
+const circle = document.createElementNS('w3.org', 'circle');
+circle.setAttribute('class', 'relation-point');
+circle.setAttribute('r', '4');
+circle.setAttribute('fill', '#141821');
+circle.setAttribute('stroke', rel.color || '#00f2fe');
+g.appendChild(circle);
+// テキストの座布団（背景の矩形）
+const rect = document.createElementNS('w3.org', 'rect');
+rect.setAttribute('class', 'relation-label-bg');
+rect.setAttribute('stroke', rel.color || '#00f2fe');
+g.appendChild(rect);
+// 関係名テキスト
+const text = document.createElementNS('w3.org', 'text');
+text.setAttribute('class', 'relation-label-text');
+text.textContent = rel.name;
+g.appendChild(text);
+svgLayer.appendChild(g);
+});
+updateRelationsPositions();
+}
+// 関係線の位置・表示状態のリアルタイム更新
+function updateRelationsPositions() {
+relations.forEach((rel, index) => {
+const g = document.getElementById(rel-group-${index});
+if (!g) return;
+const fromNode = nodes.find(n => n.id === rel.from);
+const toNode = nodes.find(n => n.id === rel.to);
+if (!fromNode || !toNode) return;
+// どちらか一方でもCLOSEならグループごと非表示
+if (fromNode.state === 'CLOSE' || toNode.state === 'CLOSE') {
+g.style.opacity = '0';
+g.style.pointerEvents = 'none';
+return;
+} else {
+g.style.opacity = '1';
+}
+// 位置計算
+const x1 = fromNode.x;
+const y1 = fromNode.y;
+const x2 = toNode.x;
+const y2 = toNode.y;
+const midX = (x1 + x2) / 2;
+const midY = (y1 + y2) / 2;
+// ライン更新
+const line = g.querySelector('.relation-line');
+line.setAttribute('x1', x1);
+line.setAttribute('y1', y1);
+line.setAttribute('x2', x2);
+line.setAttribute('y2', y2);
+// マーカー更新
+const circle = g.querySelector('.relation-point');
+circle.setAttribute('cx', midX);
+circle.setAttribute('cy', midY);
+// テキスト位置更新と座布団のサイズ自動フィッティング
+const text = g.querySelector('.relation-label-text');
+text.setAttribute('x', midX);
+text.setAttribute('y', midY);
+const rect = g.querySelector('.relation-label-bg');
+// getBBoxで描画テキストの実際のサイズを取得（数ミリ秒のラグ回避のため初期値考慮）
+const bbox = text.getBBox();
+const paddingW = 12;
+const paddingH = 6;
+// 初回描画時などでBBoxが0になる場合のフォールバック値
+const w = bbox.width > 0 ? bbox.width + paddingW : rel.name.length * 12 + paddingW;
+const h = bbox.height > 0 ? bbox.height + paddingH : 16 + paddingH;
+rect.setAttribute('x', midX - w / 2);
+rect.setAttribute('y', midY - h / 2);
+rect.setAttribute('width', w);
+rect.setAttribute('height', h);
+});
+}
+// --- ノードのドラッグ＆タップ判定ロジック ---
+function setupNodeDragAndTap(el, nodeData) {
+let dragStart = { x: 0, y: 0 };
+let isDragging = false;
+let startTime = 0;
+el.addEventListener('pointerdown', (e) => {
+e.stopPropagation(); // 背景のスクロールを発火させない
+el.setPointerCapture(e.pointerId);
+// ノードの中心からのオフセットではなく、現在のマップ座標系上の位置を基準に
+dragStart.x = e.clientX - nodeData.x;
+dragStart.y = e.clientY - nodeData.y;
+isDragging = true;
+startTime = Date.now();
+});
+el.addEventListener('pointermove', (e) => {
+if (!isDragging) return;
+e.stopPropagation();
+let newX = e.clientX - dragStart.x;
+let newY = e.clientY - dragStart.y;
+// マップ内へ移動を制限（ノードが外にはみ出さないように）
+nodeData.x = Math.max(NODE_RADIUS, Math.min(MAP_WIDTH - NODE_RADIUS, newX));
+nodeData.y = Math.max(NODE_RADIUS, Math.min(MAP_HEIGHT - NODE_RADIUS, newY));
+// DOM位置更新
+el.style.left = ${nodeData.x - NODE_RADIUS}px;
+el.style.top = ${nodeData.y - NODE_RADIUS}px;
+// 関係線をリアルタイムに追随
+updateRelationsPositions();
+});
+el.addEventListener('pointerup', (e) => {
+if (!isDragging) return;
+e.stopPropagation();
+el.releasePointerCapture(e.pointerId);
+isDragging = false;
+// タップ判定：時間が短く、移動距離がほぼ無い場合は「タップ（状態切り替え）」とみなす
+const duration = Date.now() - startTime;
+if (duration < 250) {
+// 状態反転
+nodeData.state = nodeData.state === 'OPEN' ? 'CLOSE' : 'OPEN';
+// クラスとバッジテキストを更新
+el.className = node state-${nodeData.state.toLowerCase()};
+el.querySelector('.node-badge').textContent = nodeData.state;
+// 線表示の再計算
+updateRelationsPositions();
+}
+});
+}
+// --- 初期化起動 ---
+window.addEventListener('DOMContentLoaded', () => {
+initMapPosition();
+createNodes();
+createRelations();
+// レイアウト確定後にもう一度線を正確にフィッティング
+setTimeout(updateRelationsPositions, 50);
+});
+// 画面リサイズ時にマップ位置がバグるのを防ぐ
+window.addEventListener('resize', () => {
+// スクリスクロール位置の限界値を再調整
+const minX = viewport.clientWidth - MAP_WIDTH;
+const minY = viewport.clientHeight - MAP_HEIGHT;
+mapX = Math.min(0, Math.max(minX, mapX));
+mapY = Math.min(0, Math.max(minY, mapY));
+updateMapTransform();
+});

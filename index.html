@@ -1892,9 +1892,9 @@ function updateRelations() {
 
 }
 
-
 /* =========================================================
    関係名ドラッグ
+   ★修正版
 ========================================================= */
 
 function setupRelationLabelPointer(
@@ -1902,43 +1902,38 @@ function setupRelationLabelPointer(
     relationId
 ) {
 
+    let dragging = false;
+
     let pointerId = null;
 
     let startX = 0;
-
     let startY = 0;
 
     let originalOffsetX = 0;
-
     let originalOffsetY = 0;
 
+
+    /* -----------------------------------------------------
+       ドラッグ開始
+    ----------------------------------------------------- */
 
     label.addEventListener(
         "pointerdown",
         event => {
 
             /*
-             * 左クリック・タッチだけ
+             * 左クリック・タッチのみ
              */
             if (
                 event.button !== 0
             ) {
-
                 return;
-
             }
 
 
+            event.preventDefault();
+
             event.stopPropagation();
-
-
-            pointerId =
-                event.pointerId;
-
-
-            label.setPointerCapture(
-                pointerId
-            );
 
 
             const relation =
@@ -1949,10 +1944,14 @@ function setupRelationLabelPointer(
 
 
             if (!relation) {
-
                 return;
-
             }
+
+
+            dragging = true;
+
+            pointerId =
+                event.pointerId;
 
 
             startX =
@@ -1968,112 +1967,154 @@ function setupRelationLabelPointer(
             originalOffsetY =
                 relation.offsetY || 0;
 
-        }
-    );
-
-
-    label.addEventListener(
-        "pointermove",
-        event => {
-
-            if (
-                pointerId !==
-                event.pointerId
-            ) {
-
-                return;
-
-            }
-
-
-            const relation =
-                relationData.find(
-                    r =>
-                        r.id === relationId
-                );
-
-
-            if (!relation) {
-
-                return;
-
-            }
-
-
-            const dx =
-                (
-                    event.clientX -
-                    startX
-                ) / zoom;
-
-
-            const dy =
-                (
-                    event.clientY -
-                    startY
-                ) / zoom;
-
-
-            relation.offsetX =
-                originalOffsetX + dx;
-
-
-            relation.offsetY =
-                originalOffsetY + dy;
-
 
             /*
-             * ★ここで全部追従
+             * documentでPointer Eventを
+             * 受け取るようにする。
              *
-             * ・関係名
-             * ・関係点
-             * ・関係元→関係点の線
-             * ・関係点→関係先の線
-             * ・矢印
+             * updateRelations()によって
+             * label DOMが作り直されても
+             * ドラッグが途切れない。
              */
-            updateRelations();
+            document.addEventListener(
+                "pointermove",
+                relationDragMove
+            );
+
+            document.addEventListener(
+                "pointerup",
+                relationDragEnd
+            );
+
+            document.addEventListener(
+                "pointercancel",
+                relationDragEnd
+            );
 
         }
     );
 
 
-    label.addEventListener(
-        "pointerup",
-        event => {
+    /* -----------------------------------------------------
+       ドラッグ中
+    ----------------------------------------------------- */
 
-            if (
-                pointerId !==
-                event.pointerId
-            ) {
+    function relationDragMove(event) {
 
-                return;
-
-            }
-
-
-            try {
-
-                label.releasePointerCapture(
-                    pointerId
-                );
-
-            } catch(e) {}
-
-
-            pointerId = null;
-
+        if (!dragging) {
+            return;
         }
-    );
 
 
-    label.addEventListener(
-        "pointercancel",
-        () => {
-
-            pointerId = null;
-
+        if (
+            event.pointerId !== pointerId
+        ) {
+            return;
         }
-    );
+
+
+        const relation =
+            relationData.find(
+                r =>
+                    r.id === relationId
+            );
+
+
+        if (!relation) {
+            relationDragEnd(event);
+            return;
+        }
+
+
+        /*
+         * 画面上の移動量を
+         * マップ座標へ変換
+         */
+        const dx =
+            (
+                event.clientX -
+                startX
+            ) / zoom;
+
+
+        const dy =
+            (
+                event.clientY -
+                startY
+            ) / zoom;
+
+
+        relation.offsetX =
+            originalOffsetX + dx;
+
+
+        relation.offsetY =
+            originalOffsetY + dy;
+
+
+        /*
+         * ★ここで関係を再描画
+         *
+         * 関係名
+         * 関係点
+         * 線
+         * 矢印
+         *
+         * が全部追従する。
+         *
+         * document側でイベントを取っているので
+         * DOMが作り直されても止まらない。
+         */
+        updateRelations();
+
+    }
+
+
+    /* -----------------------------------------------------
+       ドラッグ終了
+    ----------------------------------------------------- */
+
+    function relationDragEnd(event) {
+
+        if (!dragging) {
+            return;
+        }
+
+
+        /*
+         * pointerup / pointercancel の
+         * pointerIdを確認
+         */
+        if (
+            event &&
+            event.pointerId !== undefined &&
+            event.pointerId !== pointerId
+        ) {
+            return;
+        }
+
+
+        dragging = false;
+
+        pointerId = null;
+
+
+        document.removeEventListener(
+            "pointermove",
+            relationDragMove
+        );
+
+        document.removeEventListener(
+            "pointerup",
+            relationDragEnd
+        );
+
+        document.removeEventListener(
+            "pointercancel",
+            relationDragEnd
+        );
+
+    }
 
 }
 

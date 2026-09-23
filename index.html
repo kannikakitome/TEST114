@@ -1,494 +1,1389 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" 
-          content="width=device-width, 
-                 initial-scale=1.0, 
-                 user-scalable=no">
-    <title>サイバーパンク キャラクター相関図</title>
-    <style>
-        :root {
-            --bg-color: #0d0f12;
-            --grid-color: rgba(0, 242, 254, 0.05);
-            --node-open-color: #00f2fe;
-            --node-close-color: #ff0055;
-            --text-color: #ffffff;
-            --panel-bg: rgba(20, 24, 33, 0.85);
-        }
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none;
-            -webkit-user-select: none;
-        }
+<title>キャラクター相関図</title>
 
-        body, html {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: var(--bg-color);
-            font-family: 'Helvetica Neue', 
-                         Arial, sans-serif;
-        }
+<style>
+/* =========================================================
+   基本設定
+========================================================= */
 
-        /* ビューポート（画面サイズ） */
-        #viewport {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            overflow: hidden;
-            cursor: grab;
-            touch-action: none;
-        }
+* {
+    box-sizing: border-box;
+}
 
-        #viewport:active {
-            cursor: grabbing;
-        }
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: #101218;
+    color: #fff;
+    font-family:
+        "Segoe UI",
+        "Hiragino Kaku Gothic ProN",
+        "Yu Gothic",
+        sans-serif;
+}
 
-        /* 広大なマップコンテナ */
-        #map-container {
-            width: 3000px;
-            height: 3000px;
-            position: absolute;
-            top: 0;
-            left: 0;
-            background-color: var(--bg-color);
-            background-image: 
-                linear-gradient(
-                    var(--grid-color) 1px, 
-                    transparent 1px
-                ),
-                linear-gradient(
-                    90deg, 
-                    var(--grid-color) 1px, 
-                    transparent 1px
-                );
-            background-size: 40px 40px;
-            transform-origin: 0 0;
-        }
+body {
+    touch-action: none;
+    user-select: none;
+}
 
-        /* SVGレイヤー（関係線用） */
-        #svg-layer {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
-            pointer-events: none;
-        }
 
-        .relation-line {
-            stroke-width: 2;
-            stroke-dasharray: 4 4;
-            animation: dash 30s linear infinite;
-            transition: opacity 0.3s ease;
-        }
+/* =========================================================
+   画面
+========================================================= */
 
-        @keyframes dash {
-            to { stroke-dashoffset: -1000; }
-        }
+#viewport {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at center,
+            rgba(80, 90, 120, 0.08),
+            transparent 55%),
+        #101218;
+}
 
-        /* 関係名テキストと座布団（SVG内） */
-        .relation-label-bg {
-            fill: #141821;
-            stroke-width: 1;
-            rx: 4;
-            ry: 4;
-        }
-        
-        .relation-label-text {
-            fill: #ffffff;
-            font-size: 11px;
-            font-weight: bold;
-            text-anchor: middle;
-            dominant-baseline: central;
-            letter-spacing: 1px;
-        }
 
-        .relation-point {
-            stroke-width: 2;
-        }
+/* =========================================================
+   3000 × 3000 マップ
+========================================================= */
 
-        /* キャラクターノードの配置エリア */
-        #nodes-layer {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 2;
-            pointer-events: none;
-        }
+#map {
+    position: absolute;
 
-        /* キャラクターノード単体 */
-        .node {
-            width: 100px;
-            height: 100px;
-            position: absolute;
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            pointer-events: auto;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
-            transition: border 0.3s, 
-                        box-shadow 0.3s, 
-                        transform 0.1s;
-            background: radial-gradient(
-                circle, 
-                rgba(25,32,45,0.9) 0%, 
-                rgba(14,18,26,0.95) 100__
-            );
-            border: 2px solid transparent;
-        }
+    width: 3000px;
+    height: 3000px;
 
-        /* 状態別のネオンエフェクト */
-        .node.state-open {
-            border-color: var(--node-open-color);
-            box-shadow: 
-                0 0 15px rgba(0, 242, 254, 0.3), 
-                inset 0 0 15px rgba(0, 242, 254, 0.2);
-        }
+    left: 0;
+    top: 0;
 
-        .node.state-close {
-            border-color: var(--node-close-color);
-            box-shadow: 
-                0 0 15px rgba(255, 0, 85, 0.3), 
-                inset 0 0 15px rgba(255, 0, 85, 0.2);
-        }
+    background-color: #161922;
 
-        .node:active {
-            transform: scale(0.96);
-        }
+    background-image:
+        radial-gradient(
+            circle,
+            rgba(255,255,255,0.12) 1px,
+            transparent 1px
+        );
 
-        /* ノード内のテキスト */
-        .node-name {
-            color: var(--text-color);
-            font-size: 13px;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 4px;
-            padding: 0 8px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            width: 100%;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-        }
+    background-size: 40px 40px;
 
-        /* 状態バッジ */
-        .node-badge {
-            font-size: 9px;
-            font-weight: 900;
-            padding: 2px 6px;
-            border-radius: 10px;
-            letter-spacing: 0.5px;
-        }
+    box-shadow:
+        inset 0 0 100px rgba(0,0,0,0.7);
 
-        .state-open .node-badge {
-            background-color: rgba(0, 242, 254, 0.15);
-            color: var(--node-open-color);
-        }
+    transform-origin: 0 0;
+}
 
-        .state-close .node-badge {
-            background-color: rgba(250, 0, 85, 0.15);
-            color: var(--node-close-color);
-        }
 
-        /* 説明用簡易ヘルプパネル */
-        #info-panel {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: var(--panel-bg);
-            border-left: 4px solid var(--node-open-color);
-            padding: 12px 16px;
-            border-radius: 0 8px 8px 0;
-            color: var(--text-color);
-            font-size: 12px;
-            line-height: 1.6;
-            z-index: 10;
-            pointer-events: none;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            backdrop-filter: blur(4px);
-        }
-        #info-panel h1 { 
-            font-size: 14px; 
-            margin-bottom: 4px; 
-            color: var(--node-open-color); 
-        }
-    </style>
+/* =========================================================
+   SVG関係線レイヤー
+========================================================= */
+
+#relations {
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: 3000px;
+    height: 3000px;
+
+    overflow: visible;
+
+    z-index: 10;
+
+    pointer-events: none;
+}
+
+
+/* 関係線 */
+
+.relation-line {
+    stroke-width: 4;
+    stroke-linecap: round;
+
+    filter:
+        drop-shadow(0 0 4px rgba(0,255,255,0.7));
+
+    transition: opacity 0.15s;
+}
+
+
+/* 関係線の中央マーカー */
+
+.relation-marker {
+    stroke-width: 2;
+
+    filter:
+        drop-shadow(0 0 5px rgba(255,255,255,0.8));
+}
+
+
+/* 関係名 */
+
+.relation-label rect {
+    fill: rgba(15,18,25,0.95);
+
+    stroke-width: 2;
+
+    rx: 6;
+    ry: 6;
+
+    filter:
+        drop-shadow(0 0 4px rgba(0,0,0,0.8));
+}
+
+.relation-label text {
+    font-size: 14px;
+    font-weight: bold;
+
+    dominant-baseline: middle;
+    text-anchor: middle;
+
+    pointer-events: none;
+}
+
+
+/* CLOSEによって非表示になる要素 */
+
+.relation.hidden {
+    opacity: 0;
+}
+
+
+/* =========================================================
+   キャラクターノード
+========================================================= */
+
+.node {
+    position: absolute;
+
+    width: 150px;
+    height: 150px;
+
+    margin-left: -75px;
+    margin-top: -75px;
+
+    border-radius: 50%;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    cursor: grab;
+
+    z-index: 20;
+
+    touch-action: none;
+
+    border: 3px solid #00eaff;
+
+    background:
+        radial-gradient(
+            circle at 35% 25%,
+            rgba(255,255,255,0.35),
+            transparent 18%
+        ),
+        radial-gradient(
+            circle at center,
+            #273647 0%,
+            #101721 65%,
+            #080b10 100%
+        );
+
+    box-shadow:
+        0 0 10px rgba(0,234,255,0.8),
+        0 0 25px rgba(0,234,255,0.35),
+        inset 0 0 20px rgba(0,234,255,0.15);
+
+    transition:
+        box-shadow 0.2s,
+        border-color 0.2s,
+        transform 0.1s;
+}
+
+.node:hover {
+    box-shadow:
+        0 0 15px rgba(0,234,255,1),
+        0 0 40px rgba(0,234,255,0.5),
+        inset 0 0 25px rgba(0,234,255,0.25);
+}
+
+.node.dragging {
+    cursor: grabbing;
+
+    box-shadow:
+        0 0 20px rgba(255,255,255,1),
+        0 0 45px rgba(0,234,255,0.8),
+        inset 0 0 25px rgba(255,255,255,0.2);
+
+    transform: scale(1.05);
+}
+
+
+/* ノード名 */
+
+.node-name {
+    max-width: 115px;
+
+    text-align: center;
+
+    font-size: 17px;
+    font-weight: bold;
+
+    line-height: 1.3;
+
+    text-shadow:
+        0 0 5px #000,
+        0 0 8px rgba(0,234,255,0.7);
+
+    pointer-events: none;
+}
+
+
+/* OPEN / CLOSE バッジ */
+
+.status {
+    margin-top: 8px;
+
+    min-width: 58px;
+    padding: 3px 9px;
+
+    border-radius: 20px;
+
+    text-align: center;
+
+    font-size: 11px;
+    font-weight: bold;
+
+    letter-spacing: 1px;
+
+    pointer-events: none;
+}
+
+
+/* OPEN */
+
+.node.open {
+    border-color: #00eaff;
+}
+
+.node.open .status {
+    color: #061014;
+
+    background: #00f0ff;
+
+    box-shadow:
+        0 0 10px rgba(0,240,255,0.8);
+}
+
+
+/* CLOSE */
+
+.node.close {
+    border-color: #ff416c;
+
+    box-shadow:
+        0 0 10px rgba(255,65,108,0.8),
+        0 0 30px rgba(255,65,108,0.35),
+        inset 0 0 20px rgba(255,65,108,0.15);
+}
+
+.node.close .status {
+    color: white;
+
+    background: #ff416c;
+
+    box-shadow:
+        0 0 10px rgba(255,65,108,0.8);
+}
+
+
+/* =========================================================
+   UI
+========================================================= */
+
+#ui {
+    position: fixed;
+
+    top: 15px;
+    left: 15px;
+
+    z-index: 100;
+
+    padding: 12px 16px;
+
+    border: 1px solid rgba(0,234,255,0.35);
+
+    border-radius: 10px;
+
+    background: rgba(10,13,20,0.85);
+
+    backdrop-filter: blur(8px);
+
+    box-shadow:
+        0 0 20px rgba(0,0,0,0.4);
+
+    pointer-events: none;
+}
+
+#ui-title {
+    color: #00eaff;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    letter-spacing: 1px;
+}
+
+#ui-help {
+    margin-top: 5px;
+
+    color: #aeb8c8;
+
+    font-size: 11px;
+
+    line-height: 1.5;
+}
+
+
+/* スマホ */
+
+@media (max-width: 600px) {
+
+    #ui {
+        top: 10px;
+        left: 10px;
+
+        padding: 9px 12px;
+    }
+
+    #ui-title {
+        font-size: 12px;
+    }
+
+    #ui-help {
+        font-size: 9px;
+    }
+
+    .node {
+        width: 130px;
+        height: 130px;
+
+        margin-left: -65px;
+        margin-top: -65px;
+    }
+
+    .node-name {
+        font-size: 14px;
+        max-width: 100px;
+    }
+}
+</style>
 </head>
+
+
 <body>
 
-    <div id="info-panel">
-        <h1>RELATION MAP SYSTEM</h1>
-        <p>・背景ドラッグ：マップのスクロール</p>
-        <p>・ノードドラッグ：位置の移動</p>
-        <p>・ノードタップ：OPEN / CLOSE の切り替え</p>
+<div id="viewport">
+
+    <div id="map">
+
+        <!-- SVG関係線レイヤー -->
+        <svg id="relations"
+             viewBox="0 0 3000 3000"
+             preserveAspectRatio="none">
+        </svg>
+
+        <!-- キャラクターはJavaScriptで生成 -->
+
     </div>
 
-    <div id="viewport">
-        <div id="map-container">
-            <svg id="svg-layer"></svg>
-            <div id="nodes-layer"></div>
-        </div>
-    </div>
+</div>
 
-    <script>
-        // --- 初期データ定義 ---
-        const initialData = {
-            nodes: [
-                { id: "hero", name: "主人公", state: "OPEN", x: 400, y: 400 },
-                { id: "rival", name: "ライバル", state: "OPEN", x: 750, y: 350 },
-                { id: "childhood", name: "幼馴染", state: "OPEN", x: 350, y: 700 },
-                { id: "boss", name: "組織ボス", state: "OPEN", x: 800, y: 750 }
-            ],
-            relations: [
-                { from: "hero", to: "rival", name: "切磋琢磨", color: "#39ff14" },
-                { from: "hero", to: "childhood", name: "好意・信頼", color: "#ff007f" },
-                { from: "hero", to: "boss", name: "宿敵", color: "#ff0055" },
-                { from: "rival", to: "boss", name: "利用関係", color: "#ffff00" }
-            ]
+
+<div id="ui">
+    <div id="ui-title">CHARACTER RELATION MAP</div>
+
+    <div id="ui-help">
+        背景：ドラッグでマップ移動<br>
+        キャラクター：ドラッグで移動／タップでOPEN・CLOSE
+    </div>
+</div>
+
+
+<script>
+/* =========================================================
+   サンプルデータ
+========================================================= */
+
+const characterData = [
+
+    {
+        id: "hero",
+        name: "主人公",
+        x: 1000,
+        y: 1100,
+        status: "OPEN"
+    },
+
+    {
+        id: "rival",
+        name: "ライバル",
+        x: 1450,
+        y: 900,
+        status: "OPEN"
+    },
+
+    {
+        id: "childhood",
+        name: "幼馴染",
+        x: 700,
+        y: 1450,
+        status: "OPEN"
+    },
+
+    {
+        id: "boss",
+        name: "組織ボス",
+        x: 1750,
+        y: 1450,
+        status: "OPEN"
+    }
+
+];
+
+
+/* =========================================================
+   関係データ
+========================================================= */
+
+const relationData = [
+
+    {
+        id: "r1",
+        from: "hero",
+        to: "rival",
+        name: "ライバル",
+        color: "#ff4d8d"
+    },
+
+    {
+        id: "r2",
+        from: "hero",
+        to: "childhood",
+        name: "幼馴染",
+        color: "#00eaff"
+    },
+
+    {
+        id: "r3",
+        from: "rival",
+        to: "boss",
+        name: "敵対",
+        color: "#ff416c"
+    },
+
+    {
+        id: "r4",
+        from: "hero",
+        to: "boss",
+        name: "因縁",
+        color: "#ffc857"
+    }
+
+];
+
+
+/* =========================================================
+   DOM取得
+========================================================= */
+
+const viewport =
+    document.getElementById("viewport");
+
+const map =
+    document.getElementById("map");
+
+const svg =
+    document.getElementById("relations");
+
+
+/* =========================================================
+   マップ状態
+========================================================= */
+
+const MAP_WIDTH = 3000;
+const MAP_HEIGHT = 3000;
+
+let mapX = 0;
+let mapY = 0;
+
+
+/* =========================================================
+   ノード管理
+========================================================= */
+
+const nodes = {};
+
+characterData.forEach(data => {
+
+    const node =
+        document.createElement("div");
+
+    node.className =
+        "node " +
+        (data.status === "OPEN"
+            ? "open"
+            : "close");
+
+    node.dataset.id =
+        data.id;
+
+    node.style.left =
+        data.x + "px";
+
+    node.style.top =
+        data.y + "px";
+
+
+    /* キャラクター名 */
+
+    const name =
+        document.createElement("div");
+
+    name.className =
+        "node-name";
+
+    name.textContent =
+        data.name;
+
+
+    /* 状態バッジ */
+
+    const status =
+        document.createElement("div");
+
+    status.className =
+        "status";
+
+    status.textContent =
+        data.status;
+
+
+    node.appendChild(name);
+    node.appendChild(status);
+
+    map.appendChild(node);
+
+    nodes[data.id] = {
+        data,
+        element: node,
+        x: data.x,
+        y: data.y,
+        dragging: false,
+        moved: false,
+        startX: 0,
+        startY: 0,
+        originalX: 0,
+        originalY: 0
+    };
+
+});
+
+
+/* =========================================================
+   SVG関係線生成
+========================================================= */
+
+const relationElements = {};
+
+
+function createRelations() {
+
+    relationData.forEach(relation => {
+
+        const group =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "g"
+            );
+
+        group.classList.add(
+            "relation"
+        );
+
+        group.dataset.id =
+            relation.id;
+
+
+        /* 線 */
+
+        const line =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "line"
+            );
+
+        line.classList.add(
+            "relation-line"
+        );
+
+        line.setAttribute(
+            "stroke",
+            relation.color
+        );
+
+
+        /* 中央マーカー */
+
+        const marker =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "circle"
+            );
+
+        marker.classList.add(
+            "relation-marker"
+        );
+
+        marker.setAttribute(
+            "r",
+            "7"
+        );
+
+        marker.setAttribute(
+            "fill",
+            relation.color
+        );
+
+        marker.setAttribute(
+            "stroke",
+            "#ffffff"
+        );
+
+
+        /* 関係名グループ */
+
+        const label =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "g"
+            );
+
+        label.classList.add(
+            "relation-label"
+        );
+
+
+        /* 背景矩形 */
+
+        const rect =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "rect"
+            );
+
+        rect.setAttribute(
+            "fill",
+            "#10141c"
+        );
+
+        rect.setAttribute(
+            "stroke",
+            relation.color
+        );
+
+
+        /* テキスト */
+
+        const text =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "text"
+            );
+
+        text.textContent =
+            relation.name;
+
+        text.setAttribute(
+            "fill",
+            "#ffffff"
+        );
+
+
+        label.appendChild(rect);
+        label.appendChild(text);
+
+        group.appendChild(line);
+        group.appendChild(marker);
+        group.appendChild(label);
+
+        svg.appendChild(group);
+
+
+        relationElements[relation.id] = {
+            group,
+            line,
+            marker,
+            label,
+            rect,
+            text,
+            relation
         };
 
-        // --- 定数・変数の初期化 ---
-        const MAP_WIDTH = 3000;
-        const MAP_HEIGHT = 3000;
-        const NODE_RADIUS = 50;
+    });
 
-        let nodes = [...initialData.nodes];
-        let relations = [...initialData.relations];
+}
 
-        const viewport = document.getElementById('viewport');
-        const mapContainer = document.getElementById('map-container');
-        const svgLayer = document.getElementById('svg-layer');
-        const nodesLayer = document.getElementById('nodes-layer');
 
-        let mapX = 0;
-        let mapY = 0;
-        let isPanning = false;
-        let panStart = { x: 0, y: 0 };
+/* =========================================================
+   関係線更新
+========================================================= */
 
-        // --- 画面初期中央寄せ計算 ---
-        function initMapPosition() {
-            const vW = viewport.clientWidth;
-            const vH = viewport.clientHeight;
-            mapX = Math.max(
-                Math.min(0, (vW / 2) - 550), 
-                vW - MAP_WIDTH
-            );
-            mapY = Math.max(
-                Math.min(0, (vH / 2) - 500), 
-                vH - MAP_HEIGHT
-            );
-            updateMapTransform();
+function updateRelations() {
+
+    relationData.forEach(relation => {
+
+        const a =
+            nodes[relation.from];
+
+        const b =
+            nodes[relation.to];
+
+        const elements =
+            relationElements[relation.id];
+
+
+        if (!a || !b || !elements) {
+            return;
         }
 
-        function updateMapTransform() {
-            mapContainer.style.transform = 
-                `translate(${mapX}px, ${mapY}px)`;
+
+        /* CLOSE状態なら完全非表示 */
+
+        const hidden =
+            a.data.status === "CLOSE" ||
+            b.data.status === "CLOSE";
+
+        elements.group.classList.toggle(
+            "hidden",
+            hidden
+        );
+
+
+        /* ノード中心 */
+
+        const x1 = a.x;
+        const y1 = a.y;
+
+        const x2 = b.x;
+        const y2 = b.y;
+
+
+        /* 線 */
+
+        elements.line.setAttribute(
+            "x1",
+            x1
+        );
+
+        elements.line.setAttribute(
+            "y1",
+            y1
+        );
+
+        elements.line.setAttribute(
+            "x2",
+            x2
+        );
+
+        elements.line.setAttribute(
+            "y2",
+            y2
+        );
+
+
+        /* 中央 */
+
+        const centerX =
+            (x1 + x2) / 2;
+
+        const centerY =
+            (y1 + y2) / 2;
+
+
+        elements.marker.setAttribute(
+            "cx",
+            centerX
+        );
+
+        elements.marker.setAttribute(
+            "cy",
+            centerY
+        );
+
+
+        /* 関係名 */
+
+        elements.text.setAttribute(
+            "x",
+            centerX
+        );
+
+        elements.text.setAttribute(
+            "y",
+            centerY
+        );
+
+
+        /*
+         * SVG textの幅を取得
+         * getBBoxが使用できない環境対策として
+         * おおよその幅も計算
+         */
+
+        let width = 0;
+
+        try {
+
+            width =
+                elements.text.getComputedTextLength();
+
+        } catch {
+
+            width =
+                relation.name.length * 14;
+
         }
 
-        // --- 背景ドラッグ（マップスクロール）処理 ---
-        viewport.addEventListener('pointerdown', (e) => {
-            if (e.target.closest('.node')) return;
-            
-            isPanning = true;
-            viewport.setPointerCapture(e.pointerId);
-            panStart.x = e.clientX - mapX;
-            panStart.y = e.clientY - mapY;
-        });
 
-        viewport.addEventListener('pointermove', (e) => {
-            if (!isPanning) return;
-            
-            let targetX = e.clientX - panStart.x;
-            let targetY = e.clientY - panStart.y;
+        width += 18;
 
-            const minX = viewport.clientWidth - MAP_WIDTH;
-            const minY = viewport.clientHeight - MAP_HEIGHT;
+        const height = 26;
 
-            mapX = Math.min(0, Math.max(minX, targetX));
-            mapY = Math.min(0, Math.max(minY, targetY));
 
-            updateMapTransform();
-        });
+        elements.rect.setAttribute(
+            "x",
+            centerX - width / 2
+        );
 
-        viewport.addEventListener('pointerup', (e) => {
-            if (isPanning) {
-                viewport.releasePointerCapture(e.pointerId);
-                isPanning = false;
+        elements.rect.setAttribute(
+            "y",
+            centerY - height / 2
+        );
+
+        elements.rect.setAttribute(
+            "width",
+            width
+        );
+
+        elements.rect.setAttribute(
+            "height",
+            height
+        );
+
+    });
+
+}
+
+
+/* =========================================================
+   ノード状態切替
+========================================================= */
+
+function toggleNode(nodeInfo) {
+
+    nodeInfo.data.status =
+        nodeInfo.data.status === "OPEN"
+            ? "CLOSE"
+            : "OPEN";
+
+
+    nodeInfo.element.classList.toggle(
+        "open",
+        nodeInfo.data.status === "OPEN"
+    );
+
+    nodeInfo.element.classList.toggle(
+        "close",
+        nodeInfo.data.status === "CLOSE"
+    );
+
+
+    nodeInfo.element.querySelector(
+        ".status"
+    ).textContent =
+        nodeInfo.data.status;
+
+
+    updateRelations();
+
+}
+
+
+/* =========================================================
+   ノード Pointer Events
+========================================================= */
+
+Object.values(nodes).forEach(nodeInfo => {
+
+    const element =
+        nodeInfo.element;
+
+
+    element.addEventListener(
+        "pointerdown",
+        event => {
+
+            /*
+             * Pointer Capture
+             * PC / スマホ両方で同じ処理をする
+             */
+
+            element.setPointerCapture(
+                event.pointerId
+            );
+
+
+            nodeInfo.dragging = true;
+            nodeInfo.moved = false;
+
+
+            nodeInfo.startX =
+                event.clientX;
+
+            nodeInfo.startY =
+                event.clientY;
+
+
+            nodeInfo.originalX =
+                nodeInfo.x;
+
+            nodeInfo.originalY =
+                nodeInfo.y;
+
+
+            element.classList.add(
+                "dragging"
+            );
+
+        }
+    );
+
+
+    element.addEventListener(
+        "pointermove",
+        event => {
+
+            if (!nodeInfo.dragging) {
+                return;
             }
-        });
 
-        // --- ノード・関係線の生成と描画群 ---
-        function createNodes() {
-            nodesLayer.innerHTML = '';
-            nodes.forEach(node => {
-                const div = document.createElement('div');
-                div.id = `node-${node.id}`;
-                div.className = `node state-${node.state.toLowerCase()}`;
-                div.style.left = `${node.x - NODE_RADIUS}px`;
-                div.style.top = `${node.y - NODE_RADIUS}px`;
 
-                div.innerHTML = `
-                    <div class="node-name">${node.name}</div>
-${node.state}
-`;
-setupNodeDragAndTap(div, node);
-nodesLayer.appendChild(div);
+            const dx =
+                event.clientX -
+                nodeInfo.startX;
+
+            const dy =
+                event.clientY -
+                nodeInfo.startY;
+
+
+            /*
+             * 少しでも移動したら
+             * タップではなくドラッグと判定
+             */
+
+            if (
+                Math.abs(dx) > 5 ||
+                Math.abs(dy) > 5
+            ) {
+                nodeInfo.moved = true;
+            }
+
+
+            if (!nodeInfo.moved) {
+                return;
+            }
+
+
+            let newX =
+                nodeInfo.originalX +
+                dx / getZoom();
+
+            let newY =
+                nodeInfo.originalY +
+                dy / getZoom();
+
+
+            /*
+             * マップ外へ出ないよう制限
+             */
+
+            const radius = 75;
+
+            newX =
+                Math.max(
+                    radius,
+                    Math.min(
+                        MAP_WIDTH - radius,
+                        newX
+                    )
+                );
+
+            newY =
+                Math.max(
+                    radius,
+                    Math.min(
+                        MAP_HEIGHT - radius,
+                        newY
+                    )
+                );
+
+
+            nodeInfo.x = newX;
+            nodeInfo.y = newY;
+
+
+            element.style.left =
+                newX + "px";
+
+            element.style.top =
+                newY + "px";
+
+
+            updateRelations();
+
+        }
+    );
+
+
+    element.addEventListener(
+        "pointerup",
+        event => {
+
+            if (!nodeInfo.dragging) {
+                return;
+            }
+
+
+            nodeInfo.dragging =
+                false;
+
+
+            element.classList.remove(
+                "dragging"
+            );
+
+
+            /*
+             * 移動していなければ
+             * タップとして状態変更
+             */
+
+            if (!nodeInfo.moved) {
+
+                toggleNode(
+                    nodeInfo
+                );
+
+            }
+
+        }
+    );
+
+
+    element.addEventListener(
+        "pointercancel",
+        event => {
+
+            nodeInfo.dragging =
+                false;
+
+            element.classList.remove(
+                "dragging"
+            );
+
+        }
+    );
+
 });
+
+
+/* =========================================================
+   マップ移動
+========================================================= */
+
+let mapDragging = false;
+let mapMoved = false;
+
+let mapStartPointerX = 0;
+let mapStartPointerY = 0;
+
+let mapOriginalX = 0;
+let mapOriginalY = 0;
+
+
+/*
+ * ノード上ではなく
+ * 背景部分だけでマップ移動
+ */
+
+viewport.addEventListener(
+    "pointerdown",
+    event => {
+
+        if (
+            event.target.closest(".node")
+        ) {
+            return;
+        }
+
+
+        viewport.setPointerCapture(
+            event.pointerId
+        );
+
+
+        mapDragging = true;
+        mapMoved = false;
+
+
+        mapStartPointerX =
+            event.clientX;
+
+        mapStartPointerY =
+            event.clientY;
+
+
+        mapOriginalX =
+            mapX;
+
+        mapOriginalY =
+            mapY;
+
+    }
+);
+
+
+viewport.addEventListener(
+    "pointermove",
+    event => {
+
+        if (!mapDragging) {
+            return;
+        }
+
+
+        const dx =
+            event.clientX -
+            mapStartPointerX;
+
+        const dy =
+            event.clientY -
+            mapStartPointerY;
+
+
+        if (
+            Math.abs(dx) > 3 ||
+            Math.abs(dy) > 3
+        ) {
+            mapMoved = true;
+        }
+
+
+        let newX =
+            mapOriginalX + dx;
+
+        let newY =
+            mapOriginalY + dy;
+
+
+        /*
+         * マップの端が画面外に行き過ぎないよう制限
+         */
+
+        const viewportWidth =
+            viewport.clientWidth;
+
+        const viewportHeight =
+            viewport.clientHeight;
+
+
+        const minX =
+            Math.min(
+                0,
+                viewportWidth - MAP_WIDTH
+            );
+
+        const minY =
+            Math.min(
+                0,
+                viewportHeight - MAP_HEIGHT
+            );
+
+
+        const maxX = 0;
+        const maxY = 0;
+
+
+        newX =
+            Math.max(
+                minX,
+                Math.min(
+                    maxX,
+                    newX
+                )
+            );
+
+        newY =
+            Math.max(
+                minY,
+                Math.min(
+                    maxY,
+                    newY
+                )
+            );
+
+
+        mapX = newX;
+        mapY = newY;
+
+
+        applyMapTransform();
+
+    }
+);
+
+
+viewport.addEventListener(
+    "pointerup",
+    event => {
+
+        mapDragging = false;
+
+    }
+);
+
+
+viewport.addEventListener(
+    "pointercancel",
+    event => {
+
+        mapDragging = false;
+
+    }
+);
+
+
+/* =========================================================
+   マップ位置適用
+========================================================= */
+
+function applyMapTransform() {
+
+    map.style.transform =
+        `translate(${mapX}px, ${mapY}px)`;
+
 }
-function createRelations() {
-svgLayer.innerHTML = '';
-relations.forEach((rel, index) => {
-const g = document.createElementNS(
-'w3.org', 'g'
-);
-g.id = rel-group-${index};
-const line = document.createElementNS(
-'w3.org', 'line'
-);
-line.setAttribute('class', 'relation-line');
-line.setAttribute('stroke', rel.color || '#00f2fe');
-g.appendChild(line);
-const circle = document.createElementNS(
-'w3.org', 'circle'
-);
-circle.setAttribute('class', 'relation-point');
-circle.setAttribute('r', '4');
-circle.setAttribute('fill', '#141821');
-circle.setAttribute('stroke', rel.color || '#00f2fe');
-g.appendChild(circle);
-const rect = document.createElementNS(
-'w3.org', 'rect'
-);
-rect.setAttribute('class', 'relation-label-bg');
-rect.setAttribute('stroke', rel.color || '#00f2fe');
-g.appendChild(rect);
-const text = document.createElementNS(
-'w3.org', 'text'
-);
-text.setAttribute('class', 'relation-label-text');
-text.textContent = rel.name;
-g.appendChild(text);
-svgLayer.appendChild(g);
-});
-updateRelationsPositions();
+
+
+/* =========================================================
+   ズーム関連
+   現在は1倍固定。
+   将来的な拡張用。
+========================================================= */
+
+let zoom = 1;
+
+function getZoom() {
+    return zoom;
 }
-function updateRelationsPositions() {
-relations.forEach((rel, index) => {
-const g = document.getElementById(rel-group-${index});
-if (!g) return;
-const fromNode = nodes.find(n => n.id === rel.from);
-const toNode = nodes.find(n => n.id === rel.to);
-if (!fromNode || !toNode) return;
-if (fromNode.state === 'CLOSE' ||
-toNode.state === 'CLOSE') {
-g.style.opacity = '0';
-g.style.pointerEvents = 'none';
-return;
-} else {
-g.style.opacity = '1';
-}
-const x1 = fromNode.x;
-const y1 = fromNode.y;
-const x2 = toNode.x;
-const y2 = toNode.y;
-const midX = (x1 + x2) / 2;
-const midY = (y1 + y2) / 2;
-const line = g.querySelector('.relation-line');
-line.setAttribute('x1', x1);
-line.setAttribute('y1', y1);
-line.setAttribute('x2', x2);
-line.setAttribute('y2', y2);
-const circle = g.querySelector('.relation-point');
-circle.setAttribute('cx', midX);
-circle.setAttribute('cy', midY);
-const text = g.querySelector('.relation-label-text');
-text.setAttribute('x', midX);
-text.setAttribute('y', midY);
-const rect = g.querySelector('.relation-label-bg');
-const bbox = text.getBBox();
-const paddingW = 12;
-const paddingH = 6;
-const w = bbox.width > 0 ?
-bbox.width + paddingW :
-rel.name.length * 12 + paddingW;
-const h = bbox.height > 0 ?
-bbox.height + paddingH :
-16 + paddingH;
-rect.setAttribute('x', midX - w / 2);
-rect.setAttribute('y', midY - h / 2);
-rect.setAttribute('width', w);
-rect.setAttribute('height', h);
-});
-}
-// --- ノードのドラッグ＆タップ判定ロジック ---
-function setupNodeDragAndTap(el, nodeData) {
-let dragStart = { x: 0, y: 0 };
-let isDragging = false;
-let startTime = 0;
-el.addEventListener('pointerdown', (e) => {
-e.stopPropagation();
-el.setPointerCapture(e.pointerId);
-dragStart.x = e.clientX - nodeData.x;
-dragStart.y = e.clientY - nodeData.y;
-isDragging = true;
-startTime = Date.now();
-});
-el.addEventListener('pointermove', (e) => {
-if (!isDragging) return;
-e.stopPropagation();
-let newX = e.clientX - dragStart.x;
-let newY = e.clientY - dragStart.y;
-nodeData.x = Math.max(
-NODE_RADIUS,
-Math.min(MAP_WIDTH - NODE_RADIUS, newX)
-);
-nodeData.y = Math.max(
-NODE_RADIUS,
-Math.min(MAP_HEIGHT - NODE_RADIUS, newY)
-);
-el.style.left = ${nodeData.x - NODE_RADIUS}px;
-el.style.top = ${nodeData.y - NODE_RADIUS}px;
-updateRelationsPositions();
-});
-el.addEventListener('pointerup', (e) => {
-if (!isDragging) return;
-e.stopPropagation();
-el.releasePointerCapture(e.pointerId);
-isDragging = false;
-const duration = Date.now() - startTime;
-if (duration < 250) {
-nodeData.state = nodeData.state === 'OPEN' ?
-'CLOSE' : 'OPEN';
-el.className =
-node state-${nodeData.state.toLowerCase()};
-el.querySelector('.node-badge')
-.textContent = nodeData.state;
-updateRelationsPositions();
-}
-});
-}
-// --- 初期化起動 ---
-window.addEventListener('DOMContentLoaded', () => {
-initMapPosition();
-createNodes();
+
+
+/* =========================================================
+   初期化
+========================================================= */
+
 createRelations();
-setTimeout(updateRelationsPositions, 50);
-});
-window.addEventListener('resize', () => {
-const minX = viewport.clientWidth - MAP_WIDTH;
-const minY = viewport.clientHeight - MAP_HEIGHT;
-mapX = Math.min(0, Math.max(minX, mapX));
-mapY = Math.min(0, Math.max(minY, mapY));
-updateMapTransform();
-});
+
+updateRelations();
+
+applyMapTransform();
+
+
+/* =========================================================
+   ウィンドウサイズ変更時
+========================================================= */
+
+window.addEventListener(
+    "resize",
+    () => {
+
+        /*
+         * 画面サイズが変わった場合、
+         * マップが外へ飛び出さないよう再計算
+         */
+
+        const viewportWidth =
+            viewport.clientWidth;
+
+        const viewportHeight =
+            viewport.clientHeight;
+
+
+        const minX =
+            Math.min(
+                0,
+                viewportWidth - MAP_WIDTH
+            );
+
+        const minY =
+            Math.min(
+                0,
+                viewportHeight - MAP_HEIGHT
+            );
+
+
+        mapX =
+            Math.max(
+                minX,
+                Math.min(
+                    0,
+                    mapX
+                )
+            );
+
+        mapY =
+            Math.max(
+                minY,
+                Math.min(
+                    0,
+                    mapY
+                )
+            );
+
+
+        applyMapTransform();
+
+        updateRelations();
+
+    }
+);
+
+</script>
+
+</body>
+</html>

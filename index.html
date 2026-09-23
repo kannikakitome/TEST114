@@ -11,11 +11,11 @@
         /* 全体のコンテナ */
         #canvas-container { width: 100%; height: 100%; position: relative; overflow: hidden; }
         
-        /* 広大なマップ背景 */
+        /* 広大なマップ背景（3000px × 3000px） */
         #workspace { width: 3000px; height: 3000px; position: absolute; top: 0; left: 0; background-image: radial-gradient(#333 1px, transparent 1px); background-size: 20px 20px; }
         
-        /* 関係線を描くSVGレイヤー */
-        #svg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        /* 関係線を描くSVGレイヤー（ワークスペースと同じ巨大サイズに修正） */
+        #svg-layer { position: absolute; top: 0; left: 0; width: 3000px; height: 3000px; pointer-events: none; }
         
         /* キャラクターノード */
         .character { position: absolute; width: 100px; height: 100px; border-radius: 50%; background: #2a2a35; border: 3px solid #00ffff; box-shadow: 0 0 15px rgba(0,255,255,0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: move; user-select: none; z-index: 10; font-size: 14px; font-weight: bold; text-align: center; padding: 5px; touch-action: none; }
@@ -220,5 +220,3 @@
 
         init();
     </script>
-</body>
-</html>

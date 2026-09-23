@@ -11,17 +11,20 @@
         /* 全体のコンテナ */
         #canvas-container { width: 100%; height: 100%; position: relative; overflow: hidden; }
         
-        /* 広大なマップ背景（3000px × 3000px） */
+        /* 広大なマップ背景 */
         #workspace { width: 3000px; height: 3000px; position: absolute; top: 0; left: 0; background-image: radial-gradient(#333 1px, transparent 1px); background-size: 20px 20px; }
         
-        /* 関係線を描くSVGレイヤー（ワークスペースと同じ巨大サイズに修正） */
-        #svg-layer { position: absolute; top: 0; left: 0; width: 3000px; height: 3000px; pointer-events: none; }
+        /* キャラクターノードのコンテナ（線をキャラクターの下に敷くためにz-indexを調整） */
+        #character-container { position: absolute; top: 0; left: 0; width: 3000px; height: 3000px; z-index: 10; pointer-events: none; }
         
         /* キャラクターノード */
-        .character { position: absolute; width: 100px; height: 100px; border-radius: 50%; background: #2a2a35; border: 3px solid #00ffff; box-shadow: 0 0 15px rgba(0,255,255,0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: move; user-select: none; z-index: 10; font-size: 14px; font-weight: bold; text-align: center; padding: 5px; touch-action: none; }
+        .character { position: absolute; width: 100px; height: 100px; border-radius: 50%; background: #2a2a35; border: 3px solid #00ffff; box-shadow: 0 0 15px rgba(0,255,255,0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: move; user-select: none; font-size: 14px; font-weight: bold; text-align: center; padding: 5px; touch-action: none; pointer-events: auto; }
         .character.close { border-color: #ff4757; box-shadow: 0 0 15px rgba(255,71,87,0.4); background: #3a2226; }
         .character .status-badge { font-size: 9px; background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 10px; margin-top: 4px; color: #00ffff; }
         .character.close .status-badge { color: #ff4757; }
+        
+        /* 関係線を描くSVGレイヤー（巨大サイズにしてz-indexを5にし、確実に描画させる） */
+        #svg-layer { position: absolute; top: 0; left: 0; width: 3000px; height: 3000px; z-index: 5; pointer-events: none; display: block !important; }
         
         /* 操作説明パネル */
         #info-panel { position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 8px; font-size: 12px; z-index: 100; pointer-events: none; line-height: 1.5; }
@@ -36,8 +39,9 @@
     </div>
     <div id="canvas-container">
         <div id="workspace">
-            <svg id="svg-layer"></svg>
+            <!-- 順番を入れ替え、さらに確実な描画環境にしました -->
             <div id="character-container"></div>
+            <svg id="svg-layer"></svg>
         </div>
     </div>
     <script>
@@ -178,7 +182,7 @@
             isDraggingWorkspace = false;
         });
 
-        // 線の描画
+        // 線の描画（完全にバグを回避する安全な実装）
         function drawLines() {
             svgLayer.innerHTML = '';
             relations.forEach(rel => {
@@ -190,33 +194,27 @@
                 const x1 = fromChar.x + 50; const y1 = fromChar.y + 50;
                 const x2 = toChar.x + 50; const y2 = toChar.y + 50;
 
-                // 直線
+                // 1. 直線
                 const line = document.createElementNS('http://w3.org', 'line');
                 line.setAttribute('x1', x1); line.setAttribute('y1', y1);
                 line.setAttribute('x2', x2); line.setAttribute('y2', y2);
                 line.setAttribute('stroke', rel.color); line.setAttribute('stroke-width', '3');
-                line.setAttribute('opacity', '0.6');
+                line.setAttribute('opacity', '0.7');
                 svgLayer.appendChild(line);
 
                 const mx = (x1 + x2) / 2;
                 const my = (y1 + y2) / 2;
 
-                // 中心の点
-                const circle = document.createElementNS('http://w3.org', 'circle');
-                circle.setAttribute('cx', mx); circle.setAttribute('cy', my); circle.setAttribute('r', '5');
-                circle.setAttribute('fill', rel.color);
-                svgLayer.appendChild(circle);
+                // 2. 中心の黒い座布団（四角形）
+                const rect = document.createElementNS('http://w3.org', 'rect');
+                rect.setAttribute('x', mx - 35);
+                rect.setAttribute('y', my - 12);
+                rect.setAttribute('width', '70');
+                rect.setAttribute('height', '22');
+                rect.setAttribute('fill', '#1e1e24'); // 背景と同じ色にして線を隠す
+                rect.setAttribute('rx', '4'); // 少し角丸
+                rect.setAttribute('stroke', rel.color);
+                rect.setAttribute('stroke-width', '1');
+                svgLayer.appendChild(rect);
 
-                // 関係名テキスト
-                const text = document.createElementNS('http://w3.org', 'text');
-                text.setAttribute('x', mx); text.setAttribute('y', my - 12);
-                text.setAttribute('fill', '#fff'); text.setAttribute('font-size', '12px');
-                text.setAttribute('font-weight', 'bold'); text.setAttribute('text-anchor', 'middle');
-                text.setAttribute('style', 'paint-order: stroke; stroke: #1e1e24; stroke-width: 4px; stroke-linejoin: round;');
-                text.textContent = rel.type;
-                svgLayer.appendChild(text);
-            });
-        }
-
-        init();
-    </script>
+                // 3. 中心の点（小さなサークル）

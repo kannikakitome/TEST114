@@ -218,3 +218,5 @@
                 svgLayer.appendChild(rect);
 
                 // 3. 中心の点（小さなサークル）
+                const circle = document.createElementNS('w3.org', 'circle');circle.setAttribute('cx', mx); circle.setAttribute('cy', my); circle.setAttribute('r', '4');circle.setAttribute('fill', rel.color);svgLayer.appendChild(circle);// 4. 関係名テキスト（エラーの起きないシンプルな描画に変更）const text = document.createElementNS('w3.org', 'text');text.setAttribute('x', mx);text.setAttribute('y', my + 5); // 四角の真ん中に来るように調整text.setAttribute('fill', '#ffffff');text.setAttribute('font-size', '11px');text.setAttribute('font-weight', 'bold');text.setAttribute('text-anchor', 'middle');text.textContent = rel.type;svgLayer.appendChild(text);});}init();
+                

@@ -37,7 +37,7 @@
             position: relative;
             overflow: hidden;
             cursor: grab;
-            touch-action: none; /* ブラウザ標準のスクロール・ズームを無効化 */
+            touch-action: none;
         }
 
         #viewport:active {
@@ -52,7 +52,6 @@
             top: 0;
             left: 0;
             background-color: var(--bg-color);
-            /* グリッド背景のデザイン */
             background-image: 
                 linear-gradient(var(--grid-color) 1px, transparent 1px),
                 linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
@@ -68,7 +67,7 @@
             top: 0;
             left: 0;
             z-index: 1;
-            pointer-events: none; /* 下の要素の操作を邪魔しない */
+            pointer-events: none;
         }
 
         .relation-line {
@@ -125,7 +124,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            pointer-events: auto; /* ノード自体は操作可能に */
+            pointer-events: auto;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
             transition: border 0.3s, box-shadow 0.3s, transform 0.1s;
             background: radial-gradient(circle, rgba(25,32,45,0.9) 0%, rgba(14,18,26,0.95) 100%);
@@ -140,7 +139,7 @@
 
         .node.state-close {
             border-color: var(--node-close-color);
-            box-shadow: 0 0 15px rgba(ff, 0, 85, 0.3), inset 0 0 15px rgba(ff, 0, 85, 0.2);
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.3), inset 0 0 15px rgba(255, 0, 85, 0.2);
         }
 
         .node:active {
@@ -204,7 +203,7 @@
 <body>
 
     <div id="info-panel">
-        <h1>REATION MAP SYSTEM</h1>
+        <h1>RELATION MAP SYSTEM</h1>
         <p>・背景ドラッグ：マップのスクロール</p>
         <p>・ノードドラッグ：位置の移動</p>
         <p>・ノードタップ：OPEN / CLOSE の切り替え</p>
@@ -212,9 +211,7 @@
 
     <div id="viewport">
         <div id="map-container">
-            <!-- 関係線を描画するSVGレイヤー -->
             <svg id="svg-layer"></svg>
-            <!-- キャラクターを配置するHTMLレイヤー -->
             <div id="nodes-layer"></div>
         </div>
     </div>
@@ -239,7 +236,7 @@
         // --- 定数・変数の初期化 ---
         const MAP_WIDTH = 3000;
         const MAP_HEIGHT = 3000;
-        const NODE_RADIUS = 50; // ノードの半径 (width 100px / 2)
+        const NODE_RADIUS = 50;
 
         let nodes = [...initialData.nodes];
         let relations = [...initialData.relations];
@@ -249,7 +246,6 @@
         const svgLayer = document.getElementById('svg-layer');
         const nodesLayer = document.getElementById('nodes-layer');
 
-        // マップスクロール（位置）管理
         let mapX = 0;
         let mapY = 0;
         let isPanning = false;
@@ -259,7 +255,6 @@
         function initMapPosition() {
             const vW = viewport.clientWidth;
             const vH = viewport.clientHeight;
-            // 最初のノードの塊が中央あたりに見えるように配置
             mapX = Math.max(Math.min(0, (vW / 2) - 550), vW - MAP_WIDTH);
             mapY = Math.max(Math.min(0, (vH / 2) - 500), vH - MAP_HEIGHT);
             updateMapTransform();
@@ -271,7 +266,6 @@
 
         // --- 背景ドラッグ（マップスクロール）処理 ---
         viewport.addEventListener('pointerdown', (e) => {
-            // ノードのドラッグ中はマップスクロールを発生させない
             if (e.target.closest('.node')) return;
             
             isPanning = true;
@@ -286,11 +280,9 @@
             let targetX = e.clientX - panStart.x;
             let targetY = e.clientY - panStart.y;
 
-            // 画面外はみ出し制限（バウンズ制御）
             const minX = viewport.clientWidth - MAP_WIDTH;
             const minY = viewport.clientHeight - MAP_HEIGHT;
 
-            // マップサイズが画面より小さい場合も考慮しつつ制限
             mapX = Math.min(0, Math.max(minX, targetX));
             mapY = Math.min(0, Math.max(minY, targetY));
 
@@ -305,8 +297,6 @@
         });
 
         // --- ノード・関係線の生成と描画群 ---
-
-        // ノードDOMの生成
         function createNodes() {
             nodesLayer.innerHTML = '';
             nodes.forEach(node => {
@@ -324,31 +314,28 @@
                 setupNodeDragAndTap(div, node);
                 nodesLayer.appendChild(div);
             });
-}
-// 関係線（SVG）の生成
-function createRelations() {
-svgLayer.innerHTML = '';
-relations.forEach((rel, index) => {
-const g = document.createElementNS('w3.org', 'g');
-g.id = rel-group-${index};
-// 直線
-const line = document.createElementNS('w3.org', 'line');
+        }
+
+        function createRelations() {
+            svgLayer.innerHTML = '';
+            relations.forEach((rel, index) => {
+                const g = document.createElementNS('http://w3.org', 'g');
+                g.id = `rel-group-${index}`;
+
+                const line = document.createElementNS('http://w3.org', 'line');
 line.setAttribute('class', 'relation-line');
 line.setAttribute('stroke', rel.color || '#00f2fe');
 g.appendChild(line);
-// 中心点マーカー
 const circle = document.createElementNS('w3.org', 'circle');
 circle.setAttribute('class', 'relation-point');
 circle.setAttribute('r', '4');
 circle.setAttribute('fill', '#141821');
 circle.setAttribute('stroke', rel.color || '#00f2fe');
 g.appendChild(circle);
-// テキストの座布団（背景の矩形）
 const rect = document.createElementNS('w3.org', 'rect');
 rect.setAttribute('class', 'relation-label-bg');
 rect.setAttribute('stroke', rel.color || '#00f2fe');
 g.appendChild(rect);
-// 関係名テキスト
 const text = document.createElementNS('w3.org', 'text');
 text.setAttribute('class', 'relation-label-text');
 text.textContent = rel.name;
@@ -357,7 +344,6 @@ svgLayer.appendChild(g);
 });
 updateRelationsPositions();
 }
-// 関係線の位置・表示状態のリアルタイム更新
 function updateRelationsPositions() {
 relations.forEach((rel, index) => {
 const g = document.getElementById(rel-group-${index});
@@ -365,7 +351,6 @@ if (!g) return;
 const fromNode = nodes.find(n => n.id === rel.from);
 const toNode = nodes.find(n => n.id === rel.to);
 if (!fromNode || !toNode) return;
-// どちらか一方でもCLOSEならグループごと非表示
 if (fromNode.state === 'CLOSE' || toNode.state === 'CLOSE') {
 g.style.opacity = '0';
 g.style.pointerEvents = 'none';
@@ -373,33 +358,27 @@ return;
 } else {
 g.style.opacity = '1';
 }
-// 位置計算
 const x1 = fromNode.x;
 const y1 = fromNode.y;
 const x2 = toNode.x;
 const y2 = toNode.y;
 const midX = (x1 + x2) / 2;
 const midY = (y1 + y2) / 2;
-// ライン更新
 const line = g.querySelector('.relation-line');
 line.setAttribute('x1', x1);
 line.setAttribute('y1', y1);
 line.setAttribute('x2', x2);
 line.setAttribute('y2', y2);
-// マーカー更新
 const circle = g.querySelector('.relation-point');
 circle.setAttribute('cx', midX);
 circle.setAttribute('cy', midY);
-// テキスト位置更新と座布団のサイズ自動フィッティング
 const text = g.querySelector('.relation-label-text');
 text.setAttribute('x', midX);
 text.setAttribute('y', midY);
 const rect = g.querySelector('.relation-label-bg');
-// getBBoxで描画テキストの実際のサイズを取得（数ミリ秒のラグ回避のため初期値考慮）
 const bbox = text.getBBox();
 const paddingW = 12;
 const paddingH = 6;
-// 初回描画時などでBBoxが0になる場合のフォールバック値
 const w = bbox.width > 0 ? bbox.width + paddingW : rel.name.length * 12 + paddingW;
 const h = bbox.height > 0 ? bbox.height + paddingH : 16 + paddingH;
 rect.setAttribute('x', midX - w / 2);
@@ -414,9 +393,8 @@ let dragStart = { x: 0, y: 0 };
 let isDragging = false;
 let startTime = 0;
 el.addEventListener('pointerdown', (e) => {
-e.stopPropagation(); // 背景のスクロールを発火させない
+e.stopPropagation();
 el.setPointerCapture(e.pointerId);
-// ノードの中心からのオフセットではなく、現在のマップ座標系上の位置を基準に
 dragStart.x = e.clientX - nodeData.x;
 dragStart.y = e.clientY - nodeData.y;
 isDragging = true;
@@ -427,13 +405,10 @@ if (!isDragging) return;
 e.stopPropagation();
 let newX = e.clientX - dragStart.x;
 let newY = e.clientY - dragStart.y;
-// マップ内へ移動を制限（ノードが外にはみ出さないように）
 nodeData.x = Math.max(NODE_RADIUS, Math.min(MAP_WIDTH - NODE_RADIUS, newX));
 nodeData.y = Math.max(NODE_RADIUS, Math.min(MAP_HEIGHT - NODE_RADIUS, newY));
-// DOM位置更新
 el.style.left = ${nodeData.x - NODE_RADIUS}px;
 el.style.top = ${nodeData.y - NODE_RADIUS}px;
-// 関係線をリアルタイムに追随
 updateRelationsPositions();
 });
 el.addEventListener('pointerup', (e) => {
@@ -441,15 +416,11 @@ if (!isDragging) return;
 e.stopPropagation();
 el.releasePointerCapture(e.pointerId);
 isDragging = false;
-// タップ判定：時間が短く、移動距離がほぼ無い場合は「タップ（状態切り替え）」とみなす
 const duration = Date.now() - startTime;
 if (duration < 250) {
-// 状態反転
 nodeData.state = nodeData.state === 'OPEN' ? 'CLOSE' : 'OPEN';
-// クラスとバッジテキストを更新
 el.className = node state-${nodeData.state.toLowerCase()};
 el.querySelector('.node-badge').textContent = nodeData.state;
-// 線表示の再計算
 updateRelationsPositions();
 }
 });
@@ -459,12 +430,9 @@ window.addEventListener('DOMContentLoaded', () => {
 initMapPosition();
 createNodes();
 createRelations();
-// レイアウト確定後にもう一度線を正確にフィッティング
 setTimeout(updateRelationsPositions, 50);
 });
-// 画面リサイズ時にマップ位置がバグるのを防ぐ
 window.addEventListener('resize', () => {
-// スクリスクロール位置の限界値を再調整
 const minX = viewport.clientWidth - MAP_WIDTH;
 const minY = viewport.clientHeight - MAP_HEIGHT;
 mapX = Math.min(0, Math.max(minX, mapX));

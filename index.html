@@ -3,8 +3,11 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
 
 <title>キャラクター関係図</title>
 
@@ -20,13 +23,16 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
+
   background: #080b12;
   color: #fff;
+
   font-family:
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+
   touch-action: none;
 }
 
@@ -34,14 +40,16 @@ body {
   position: relative;
 }
 
-/* =========================
+/* =====================================================
    UI
-========================= */
+===================================================== */
 
 #ui {
   position: fixed;
+
   top: 12px;
   right: 12px;
+
   z-index: 1000;
 
   display: flex;
@@ -52,14 +60,20 @@ body {
 }
 
 .ui-button {
-  border: 1px solid rgba(255,255,255,.22);
-  background: rgba(12,17,28,.92);
+  border:
+    1px solid rgba(255,255,255,.22);
+
+  background:
+    rgba(12,17,28,.94);
+
   color: #fff;
 
   padding: 8px 12px;
+
   border-radius: 8px;
 
   font-size: 13px;
+
   cursor: pointer;
 
   box-shadow:
@@ -69,19 +83,22 @@ body {
 }
 
 .ui-button:hover {
-  background: rgba(30,40,60,.95);
+  background:
+    rgba(30,40,60,.95);
 }
 
 .ui-button:active {
   transform: translateY(1px);
 }
 
-/* =========================
-   自動保存表示
-========================= */
+
+/* =====================================================
+   保存表示
+===================================================== */
 
 #saveStatus {
   position: fixed;
+
   left: 12px;
   top: 12px;
 
@@ -91,27 +108,38 @@ body {
 
   border-radius: 7px;
 
-  background: rgba(8,12,20,.82);
-  border: 1px solid rgba(255,255,255,.12);
+  background:
+    rgba(8,12,20,.82);
+
+  border:
+    1px solid rgba(255,255,255,.12);
 
   color: #aebbd0;
+
   font-size: 11px;
 
   pointer-events: none;
 }
 
-/* =========================
-   マップ
-========================= */
+
+/* =====================================================
+   VIEWPORT
+===================================================== */
 
 #viewport {
   position: fixed;
+
   inset: 0;
 
   overflow: hidden;
 
   touch-action: none;
 }
+
+
+/* =====================================================
+   MAP
+===================================================== */
 
 #map {
   position: absolute;
@@ -145,18 +173,22 @@ body {
     200px 200px;
 
   touch-action: none;
+
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
 }
 
-/* =========================
+
+/* =====================================================
    SVG
-========================= */
+===================================================== */
 
 #relationLayer {
   position: absolute;
-  inset: 0;
+
+  left: 0;
+  top: 0;
 
   width: 6000px;
   height: 6000px;
@@ -181,7 +213,8 @@ body {
 }
 
 .relation-label-bg {
-  fill: rgba(8,12,20,.95);
+  fill:
+    rgba(8,12,20,.96);
 
   stroke-width: 2;
 
@@ -191,6 +224,13 @@ body {
   pointer-events: all;
 
   cursor: grab;
+
+  touch-action: none;
+}
+
+.relation-label-bg:hover {
+  fill:
+    rgba(30,40,55,.98);
 }
 
 .relation-label-bg:active {
@@ -209,13 +249,15 @@ body {
   pointer-events: none;
 
   paint-order: stroke;
+
   stroke: #080b12;
   stroke-width: 4;
 }
 
-/* =========================
-   キャラクターノード
-========================= */
+
+/* =====================================================
+   CHARACTER NODE
+===================================================== */
 
 .character-node {
   position: absolute;
@@ -229,6 +271,7 @@ body {
   border-radius: 50%;
 
   display: flex;
+
   flex-direction: column;
 
   align-items: center;
@@ -244,7 +287,8 @@ body {
       #090d15
     );
 
-  border: 4px solid #4d82ff;
+  border:
+    4px solid #4d82ff;
 
   box-shadow:
     0 0 0 5px rgba(77,130,255,.10),
@@ -255,6 +299,7 @@ body {
   z-index: 20;
 
   touch-action: none;
+
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
@@ -279,12 +324,15 @@ body {
   max-width: 125px;
 
   font-size: 17px;
+
   font-weight: 700;
 
   line-height: 1.25;
 
   overflow: hidden;
+
   text-overflow: ellipsis;
+
   white-space: nowrap;
 
   pointer-events: none;
@@ -298,6 +346,7 @@ body {
   border-radius: 999px;
 
   font-size: 10px;
+
   font-weight: 800;
 
   letter-spacing: .05em;
@@ -317,9 +366,10 @@ body {
   background: #555e6c;
 }
 
-/* =========================
-   コンテキストメニュー
-========================= */
+
+/* =====================================================
+   CONTEXT MENU
+===================================================== */
 
 #contextMenu {
   position: fixed;
@@ -330,7 +380,8 @@ body {
 
   padding: 6px;
 
-  background: rgba(12,17,28,.97);
+  background:
+    rgba(12,17,28,.98);
 
   border:
     1px solid rgba(255,255,255,.18);
@@ -361,15 +412,19 @@ body {
   font-size: 13px;
 
   cursor: pointer;
+
+  -webkit-tap-highlight-color: transparent;
 }
 
 .context-item:hover {
-  background: rgba(255,255,255,.09);
+  background:
+    rgba(255,255,255,.09);
 }
 
-/* =========================
-   関係追加モード
-========================= */
+
+/* =====================================================
+   RELATION MODE
+===================================================== */
 
 #relationMode {
   position: fixed;
@@ -405,12 +460,14 @@ body {
   color: #00eaff;
 }
 
-/* =========================
-   ダイアログ
-========================= */
+
+/* =====================================================
+   DIALOG
+===================================================== */
 
 #dialogOverlay {
   position: fixed;
+
   inset: 0;
 
   z-index: 4000;
@@ -420,15 +477,18 @@ body {
   align-items: center;
   justify-content: center;
 
-  background: rgba(0,0,0,.58);
+  background:
+    rgba(0,0,0,.58);
 }
 
 #dialog {
-  width: min(420px, calc(100vw - 32px));
+  width:
+    min(420px, calc(100vw - 32px));
 
   padding: 20px;
 
-  background: #111827;
+  background:
+    #111827;
 
   border:
     1px solid rgba(255,255,255,.16);
@@ -443,6 +503,7 @@ body {
   margin-bottom: 14px;
 
   font-size: 17px;
+
   font-weight: 700;
 }
 
@@ -456,7 +517,8 @@ body {
 
   border-radius: 7px;
 
-  background: #080d16;
+  background:
+    #080d16;
 
   color: #fff;
 
@@ -467,22 +529,24 @@ body {
   margin-top: 14px;
 
   display: flex;
+
   justify-content: flex-end;
 
   gap: 8px;
 }
 
-/* =========================
-   スマホ
-========================= */
+
+/* =====================================================
+   MOBILE
+===================================================== */
 
 @media (max-width: 700px) {
 
   #ui {
     top: auto;
+
     right: 8px;
     bottom: 8px;
-
     left: 8px;
 
     justify-content: flex-end;
@@ -490,6 +554,7 @@ body {
 
   .ui-button {
     padding: 8px 10px;
+
     font-size: 12px;
   }
 
@@ -508,6 +573,7 @@ body {
 
   .character-name {
     max-width: 108px;
+
     font-size: 15px;
   }
 
@@ -518,7 +584,8 @@ body {
   #relationMode {
     bottom: 72px;
 
-    max-width: calc(100vw - 24px);
+    max-width:
+      calc(100vw - 24px);
 
     text-align: center;
   }
@@ -527,27 +594,45 @@ body {
 </style>
 </head>
 
+
 <body>
+
+
+<!-- =====================================================
+     UI
+===================================================== -->
 
 <div id="ui">
 
-  <button class="ui-button" id="allCloseButton">
+  <button
+    class="ui-button"
+    id="allCloseButton">
     全部CLOSE
   </button>
 
-  <button class="ui-button" id="allOpenButton">
+  <button
+    class="ui-button"
+    id="allOpenButton">
     全部OPEN
   </button>
 
-  <button class="ui-button" id="arrangeButton">
-    整地
+  <button
+    class="ui-button"
+    id="arrangeButton">
+    整列
   </button>
 
 </div>
+
 
 <div id="saveStatus">
   自動保存：準備中
 </div>
+
+
+<!-- =====================================================
+     VIEWPORT
+===================================================== -->
 
 <div id="viewport">
 
@@ -584,13 +669,36 @@ body {
 
 </div>
 
+
+<!-- =====================================================
+     CONTEXT MENU
+===================================================== -->
+
 <div id="contextMenu"></div>
 
+
+<!-- =====================================================
+     RELATION MODE
+===================================================== -->
+
 <div id="relationMode">
-  <strong>関係追加モード</strong>
+
+  <strong>
+    関係追加モード
+  </strong>
+
  　関係先のキャラをクリックしてください　
-  <span>ESCでキャンセル</span>
+
+  <span>
+    ESCでキャンセル
+  </span>
+
 </div>
+
+
+<!-- =====================================================
+     DIALOG
+===================================================== -->
 
 <div id="dialogOverlay">
 
@@ -623,11 +731,12 @@ body {
 
 </div>
 
+
 <script>
 
-/* =========================================================
+/* =====================================================
    基本設定
-========================================================= */
+===================================================== */
 
 const MAP_WIDTH = 6000;
 const MAP_HEIGHT = 6000;
@@ -641,9 +750,9 @@ const AUTO_SAVE_KEY =
   "character_relationship_map_v4";
 
 
-/* =========================================================
+/* =====================================================
    データ
-========================================================= */
+===================================================== */
 
 let characters = [
 
@@ -753,9 +862,9 @@ let relationData = [
 ];
 
 
-/* =========================================================
+/* =====================================================
    DOM
-========================================================= */
+===================================================== */
 
 const viewport =
   document.getElementById("viewport");
@@ -791,9 +900,9 @@ const dialogCancel =
   document.getElementById("dialogCancel");
 
 
-/* =========================================================
-   マップ表示状態
-========================================================= */
+/* =====================================================
+   表示状態
+===================================================== */
 
 let zoom = 1;
 
@@ -801,9 +910,9 @@ let panX = 0;
 let panY = 0;
 
 
-/* =========================================================
-   PC / 1本指パン
-========================================================= */
+/* =====================================================
+   マップパン
+===================================================== */
 
 let isPanning = false;
 
@@ -816,9 +925,9 @@ let panStartPanX = 0;
 let panStartPanY = 0;
 
 
-/* =========================================================
-   ノードドラッグ
-========================================================= */
+/* =====================================================
+   キャラドラッグ
+===================================================== */
 
 let draggingCharacter = null;
 
@@ -830,10 +939,19 @@ let dragStartWorldY = 0;
 let dragStartCharacterX = 0;
 let dragStartCharacterY = 0;
 
+/*
+  ★重要
 
-/* =========================================================
-   スマホ長押し
-========================================================= */
+  ドラッグしたかどうかを
+  OPEN/CLOSE切替とは別に管理する。
+*/
+
+let characterWasDragged = false;
+
+
+/* =====================================================
+   長押し
+===================================================== */
 
 let longPressTimer = null;
 
@@ -845,9 +963,9 @@ let longPressStartY = 0;
 let longPressTriggered = false;
 
 
-/* =========================================================
-   ピンチズーム
-========================================================= */
+/* =====================================================
+   タッチ
+===================================================== */
 
 let touchPointers = new Map();
 
@@ -862,38 +980,47 @@ let pinchWorldX = 0;
 let pinchWorldY = 0;
 
 
-/* =========================================================
+/* =====================================================
    関係追加
-========================================================= */
+===================================================== */
 
 let relationModeSourceId = null;
 
 
-/* =========================================================
+/* =====================================================
    ダイアログ
-========================================================= */
+===================================================== */
 
 let dialogResolver = null;
 
 
-/* =========================================================
-   関係ラベルドラッグ
-========================================================= */
+/* =====================================================
+   関係名ドラッグ
+===================================================== */
 
 let draggingRelation = null;
 
 let relationDragPointerId = null;
 
+let relationWasDragged = false;
 
-/* =========================================================
+
+/* =====================================================
    共通
-========================================================= */
+===================================================== */
 
-function clamp(value, min, max) {
+function clamp(
+  value,
+  min,
+  max
+) {
 
   return Math.max(
     min,
-    Math.min(max, value)
+    Math.min(
+      max,
+      value
+    )
   );
 }
 
@@ -921,9 +1048,20 @@ function getCharacter(id) {
 }
 
 
-/* =========================================================
+function escapeHtml(text) {
+
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+
+/* =====================================================
    座標変換
-========================================================= */
+===================================================== */
 
 function screenToWorld(
   screenX,
@@ -948,31 +1086,13 @@ function screenToWorld(
         rect.top -
         panY
       ) / zoom
-
   };
 }
 
 
-function worldToScreen(
-  worldX,
-  worldY
-) {
-
-  return {
-
-    x:
-      worldX * zoom + panX,
-
-    y:
-      worldY * zoom + panY
-
-  };
-}
-
-
-/* =========================================================
-   表示変換
-========================================================= */
+/* =====================================================
+   Transform
+===================================================== */
 
 function applyTransform() {
 
@@ -981,9 +1101,9 @@ function applyTransform() {
 }
 
 
-/* =========================================================
-   マップ範囲内にパンを制限
-========================================================= */
+/* =====================================================
+   パン範囲
+===================================================== */
 
 function constrainPan() {
 
@@ -1012,29 +1132,44 @@ function constrainPan() {
     clamp(
       panX,
       minX,
-      Math.max(0, rect.width - scaledWidth)
+      Math.max(
+        0,
+        rect.width - scaledWidth
+      )
     );
 
   panY =
     clamp(
       panY,
       minY,
-      Math.max(0, rect.height - scaledHeight)
+      Math.max(
+        0,
+        rect.height - scaledHeight
+      )
     );
 }
 
 
-/* =========================================================
-   ノード表示
-========================================================= */
+/* =====================================================
+   ノード更新
+===================================================== */
 
 function updateNodes() {
 
   document
-    .querySelectorAll(".character-node")
-    .forEach(node => node.remove());
+    .querySelectorAll(
+      ".character-node"
+    )
+    .forEach(
+      node =>
+        node.remove()
+    );
 
-  for (const character of characters) {
+
+  for (
+    const character
+    of characters
+  ) {
 
     const node =
       document.createElement("div");
@@ -1056,6 +1191,7 @@ function updateNodes() {
     node.style.top =
       character.y + "px";
 
+
     node.innerHTML = `
 
       <div class="character-name">
@@ -1068,20 +1204,12 @@ function updateNodes() {
 
     `;
 
+
     node.addEventListener(
       "pointerdown",
       handleCharacterPointerDown
     );
 
-    node.addEventListener(
-      "pointerup",
-      handleCharacterPointerUp
-    );
-
-    node.addEventListener(
-      "pointercancel",
-      handleCharacterPointerCancel
-    );
 
     node.addEventListener(
       "contextmenu",
@@ -1098,50 +1226,50 @@ function updateNodes() {
       }
     );
 
+
     map.appendChild(node);
   }
 }
 
 
-/* =========================================================
-   HTMLエスケープ
-========================================================= */
-
-function escapeHtml(text) {
-
-  return String(text)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-
-/* =========================================================
-   関係表示
-========================================================= */
+/* =====================================================
+   関係更新
+===================================================== */
 
 function updateRelations() {
 
   relationLayer
-    .querySelectorAll(".relation-group")
+    .querySelectorAll(
+      ".relation-group"
+    )
     .forEach(
-      element => element.remove()
+      element =>
+        element.remove()
     );
+
 
   const pairMap =
     new Map();
 
-  for (const relation of relationData) {
+
+  for (
+    const relation
+    of relationData
+  ) {
 
     const key =
       [relation.from, relation.to]
         .sort()
         .join("|");
 
-    if (!pairMap.has(key)) {
-      pairMap.set(key, []);
+    if (
+      !pairMap.has(key)
+    ) {
+
+      pairMap.set(
+        key,
+        []
+      );
     }
 
     pairMap
@@ -1149,21 +1277,33 @@ function updateRelations() {
       .push(relation);
   }
 
-  for (const relation of relationData) {
+
+  for (
+    const relation
+    of relationData
+  ) {
 
     const from =
-      getCharacter(relation.from);
+      getCharacter(
+        relation.from
+      );
 
     const to =
-      getCharacter(relation.to);
+      getCharacter(
+        relation.to
+      );
 
-    if (!from || !to) {
+    if (
+      !from ||
+      !to
+    ) {
       continue;
     }
 
+
     /*
-      CLOSEキャラから出る関係だけ非表示。
-      CLOSEキャラへ向かう関係は表示する。
+      CLOSEキャラから出る関係は非表示。
+      CLOSEキャラへ向かう関係は表示。
     */
 
     if (
@@ -1171,6 +1311,7 @@ function updateRelations() {
     ) {
       continue;
     }
+
 
     const pairKey =
       [relation.from, relation.to]
@@ -1180,12 +1321,13 @@ function updateRelations() {
     const pair =
       pairMap.get(pairKey) || [];
 
-    const isReciprocal =
-      pair.length >= 2;
 
     let perpendicularOffset = 0;
 
-    if (isReciprocal) {
+
+    if (
+      pair.length >= 2
+    ) {
 
       const reverse =
         pair.find(
@@ -1203,6 +1345,7 @@ function updateRelations() {
       }
     }
 
+
     drawRelation(
       relation,
       from,
@@ -1213,9 +1356,9 @@ function updateRelations() {
 }
 
 
-/* =========================================================
-   関係線描画
-========================================================= */
+/* =====================================================
+   関係描画
+===================================================== */
 
 function drawRelation(
   relation,
@@ -1230,21 +1373,28 @@ function drawRelation(
   let dy =
     to.y - from.y;
 
+
   const distance =
     Math.sqrt(
       dx * dx +
       dy * dy
     );
 
-  if (distance < 1) {
+
+  if (
+    distance < 1
+  ) {
     return;
   }
+
 
   dx /= distance;
   dy /= distance;
 
+
   const px = -dy;
   const py = dx;
+
 
   const startX =
     from.x +
@@ -1256,6 +1406,7 @@ function drawRelation(
     dy * NODE_RADIUS +
     py * perpendicularOffset;
 
+
   const endX =
     to.x -
     dx * NODE_RADIUS +
@@ -1266,23 +1417,35 @@ function drawRelation(
     dy * NODE_RADIUS +
     py * perpendicularOffset;
 
+
   const centerX =
     (startX + endX) / 2;
 
   const centerY =
     (startY + endY) / 2;
 
+
   const offsetX =
-    relation.offsetX || 0;
+    Number.isFinite(
+      relation.offsetX
+    )
+      ? relation.offsetX
+      : 0;
 
   const offsetY =
-    relation.offsetY || 0;
+    Number.isFinite(
+      relation.offsetY
+    )
+      ? relation.offsetY
+      : 0;
+
 
   const labelX =
     centerX + offsetX;
 
   const labelY =
     centerY + offsetY;
+
 
   const group =
     document.createElementNS(
@@ -1299,17 +1462,10 @@ function drawRelation(
 
 
   /*
-    関係名を移動した場合、
-    線を2本に分割する
+    線1
   */
 
   const line1 =
-    document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "line"
-    );
-
-  const line2 =
     document.createElementNS(
       "http://www.w3.org/2000/svg",
       "line"
@@ -1319,9 +1475,21 @@ function drawRelation(
     "relation-line"
   );
 
+
+  /*
+    線2
+  */
+
+  const line2 =
+    document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "line"
+    );
+
   line2.classList.add(
     "relation-line"
   );
+
 
   line1.setAttribute(
     "x1",
@@ -1343,6 +1511,7 @@ function drawRelation(
     labelY
   );
 
+
   line2.setAttribute(
     "x1",
     labelX
@@ -1363,20 +1532,27 @@ function drawRelation(
     endY
   );
 
+
   line2.setAttribute(
     "marker-end",
     "url(#arrow)"
   );
 
+
+  const relationColor =
+    relation.color ||
+    "#00eaff";
+
+
   line1.style.stroke =
-    relation.color || "#00eaff";
+    relationColor;
 
   line2.style.stroke =
-    relation.color || "#00eaff";
+    relationColor;
 
 
   /*
-    中間の丸マーカー
+    中央マーカー
   */
 
   const circle =
@@ -1402,12 +1578,12 @@ function drawRelation(
 
   circle.setAttribute(
     "fill",
-    relation.color || "#00eaff"
+    relationColor
   );
 
 
   /*
-    関係名背景
+    関係名
   */
 
   const text =
@@ -1434,11 +1610,16 @@ function drawRelation(
     relation.name;
 
 
+  /*
+    ラベル幅
+  */
+
   const estimatedWidth =
     Math.max(
-      80,
-      relation.name.length * 25 + 30
+      90,
+      relation.name.length * 25 + 34
     );
+
 
   const rect =
     document.createElementNS(
@@ -1450,14 +1631,16 @@ function drawRelation(
     "relation-label-bg"
   );
 
+
   rect.setAttribute(
     "x",
-    labelX - estimatedWidth / 2
+    labelX -
+    estimatedWidth / 2
   );
 
   rect.setAttribute(
     "y",
-    labelY - 20
+    labelY - 21
   );
 
   rect.setAttribute(
@@ -1467,14 +1650,18 @@ function drawRelation(
 
   rect.setAttribute(
     "height",
-    40
+    42
   );
 
   rect.setAttribute(
     "stroke",
-    relation.color || "#00eaff"
+    relationColor
   );
 
+
+  /*
+    関係名のドラッグ
+  */
 
   rect.addEventListener(
     "pointerdown",
@@ -1491,19 +1678,61 @@ function drawRelation(
   );
 
 
+  /*
+    関係名の右クリックメニュー
+  */
+
+  rect.addEventListener(
+    "contextmenu",
+    event => {
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      showRelationContextMenu(
+        event.clientX,
+        event.clientY,
+        relation
+      );
+    }
+  );
+
+
+  /*
+    関係名のダブルクリックでも
+    名前変更
+  */
+
+  rect.addEventListener(
+    "dblclick",
+    event => {
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      renameRelation(
+        relation
+      );
+    }
+  );
+
+
   group.appendChild(line1);
   group.appendChild(line2);
   group.appendChild(circle);
   group.appendChild(rect);
   group.appendChild(text);
 
-  relationLayer.appendChild(group);
+
+  relationLayer.appendChild(
+    group
+  );
 }
 
 
-/* =========================================================
-   関係ラベルドラッグ
-========================================================= */
+/* =====================================================
+   関係名ドラッグ
+===================================================== */
 
 function startRelationLabelDrag(
   event,
@@ -1516,23 +1745,30 @@ function startRelationLabelDrag(
   relationDragPointerId =
     event.pointerId;
 
+  relationWasDragged =
+    false;
+
+
   const world =
     screenToWorld(
       event.clientX,
       event.clientY
     );
 
-  draggingRelation.__dragStartX =
+
+  relation.__dragStartX =
     world.x;
 
-  draggingRelation.__dragStartY =
+  relation.__dragStartY =
     world.y;
 
-  draggingRelation.__originalOffsetX =
-    draggingRelation.offsetX || 0;
 
-  draggingRelation.__originalOffsetY =
-    draggingRelation.offsetY || 0;
+  relation.__originalOffsetX =
+    relation.offsetX || 0;
+
+  relation.__originalOffsetY =
+    relation.offsetY || 0;
+
 
   document.addEventListener(
     "pointermove",
@@ -1551,14 +1787,18 @@ function startRelationLabelDrag(
 }
 
 
-function handleRelationLabelMove(event) {
+function handleRelationLabelMove(
+  event
+) {
 
   if (
     !draggingRelation ||
-    event.pointerId !== relationDragPointerId
+    event.pointerId !==
+      relationDragPointerId
   ) {
     return;
   }
+
 
   const world =
     screenToWorld(
@@ -1566,38 +1806,75 @@ function handleRelationLabelMove(event) {
       event.clientY
     );
 
-  draggingRelation.offsetX =
-    draggingRelation.__originalOffsetX +
+
+  const dx =
     world.x -
     draggingRelation.__dragStartX;
 
-  draggingRelation.offsetY =
-    draggingRelation.__originalOffsetY +
+  const dy =
     world.y -
     draggingRelation.__dragStartY;
+
+
+  if (
+    Math.sqrt(
+      dx * dx +
+      dy * dy
+    ) > 8
+  ) {
+
+    relationWasDragged =
+      true;
+  }
+
+
+  draggingRelation.offsetX =
+    draggingRelation.__originalOffsetX +
+    dx;
+
+  draggingRelation.offsetY =
+    draggingRelation.__originalOffsetY +
+    dy;
+
 
   updateRelations();
 }
 
 
-function handleRelationLabelUp(event) {
+function handleRelationLabelUp(
+  event
+) {
 
   if (
-    event.pointerId !== relationDragPointerId
+    event.pointerId !==
+      relationDragPointerId
   ) {
     return;
   }
 
-  if (draggingRelation) {
 
-    delete draggingRelation.__dragStartX;
-    delete draggingRelation.__dragStartY;
-    delete draggingRelation.__originalOffsetX;
-    delete draggingRelation.__originalOffsetY;
+  if (
+    draggingRelation
+  ) {
+
+    delete
+      draggingRelation.__dragStartX;
+
+    delete
+      draggingRelation.__dragStartY;
+
+    delete
+      draggingRelation.__originalOffsetX;
+
+    delete
+      draggingRelation.__originalOffsetY;
   }
 
+
   draggingRelation = null;
+
   relationDragPointerId = null;
+
 
   document.removeEventListener(
     "pointermove",
@@ -1614,21 +1891,30 @@ function handleRelationLabelUp(event) {
     handleRelationLabelUp
   );
 
+
   scheduleAutoSave();
 }
 
 
-/* =========================================================
-   キャラクタードラッグ
-========================================================= */
+/* =====================================================
+   キャラ PointerDown
+===================================================== */
 
-function handleCharacterPointerDown(event) {
+function handleCharacterPointerDown(
+  event
+) {
 
   if (
     event.pointerType === "touch"
   ) {
+
     registerTouchPointer(event);
   }
+
+
+  /*
+    関係追加モード
+  */
 
   if (
     relationModeSourceId
@@ -1641,12 +1927,16 @@ function handleCharacterPointerDown(event) {
       return;
     }
 
+
     const target =
       getCharacter(
         event.currentTarget.dataset.id
       );
 
-    if (target) {
+
+    if (
+      target
+    ) {
 
       event.preventDefault();
       event.stopPropagation();
@@ -1660,35 +1950,53 @@ function handleCharacterPointerDown(event) {
     }
   }
 
+
   /*
-    PC右クリックはドラッグしない
+    PC右クリック
   */
 
   if (
     event.pointerType === "mouse" &&
     event.button !== 0
   ) {
+
     return;
   }
 
+
   /*
-    スマホ2本指ならノードドラッグしない
+    スマホ2本指
   */
 
   if (
     event.pointerType === "touch" &&
     touchPointers.size >= 2
   ) {
+
     return;
   }
+
 
   draggingCharacter =
     getCharacter(
       event.currentTarget.dataset.id
     );
 
+
+  if (
+    !draggingCharacter
+  ) {
+    return;
+  }
+
+
   dragPointerId =
     event.pointerId;
+
+
+  characterWasDragged =
+    false;
+
 
   const world =
     screenToWorld(
@@ -1696,11 +2004,13 @@ function handleCharacterPointerDown(event) {
       event.clientY
     );
 
+
   dragStartWorldX =
     world.x;
 
   dragStartWorldY =
     world.y;
+
 
   dragStartCharacterX =
     draggingCharacter.x;
@@ -1708,8 +2018,9 @@ function handleCharacterPointerDown(event) {
   dragStartCharacterY =
     draggingCharacter.y;
 
+
   /*
-    タッチでは長押し判定
+    スマホ長押し
   */
 
   if (
@@ -1722,6 +2033,7 @@ function handleCharacterPointerDown(event) {
     );
   }
 
+
   document.addEventListener(
     "pointermove",
     handleCharacterDrag
@@ -1737,19 +2049,29 @@ function handleCharacterPointerDown(event) {
     handleCharacterDragEnd
   );
 
+
   event.preventDefault();
   event.stopPropagation();
 }
 
 
-function handleCharacterDrag(event) {
+/* =====================================================
+   キャラドラッグ
+===================================================== */
+
+function handleCharacterDrag(
+  event
+) {
 
   if (
     !draggingCharacter ||
-    event.pointerId !== dragPointerId
+    event.pointerId !==
+      dragPointerId
   ) {
+
     return;
   }
+
 
   if (
     event.pointerType === "touch" &&
@@ -1761,11 +2083,13 @@ function handleCharacterDrag(event) {
     return;
   }
 
+
   const world =
     screenToWorld(
       event.clientX,
       event.clientY
     );
+
 
   const dx =
     world.x -
@@ -1775,59 +2099,113 @@ function handleCharacterDrag(event) {
     world.y -
     dragStartWorldY;
 
+
   /*
-    タッチで少し動いたら長押しキャンセル
+    ★一定距離動いたら
+    「これはクリックではなくドラッグ」
+    と確定する。
   */
 
   if (
-    event.pointerType === "touch" &&
     Math.sqrt(
       dx * dx +
       dy * dy
     ) > 12
   ) {
 
+    characterWasDragged =
+      true;
+
     cancelLongPress();
   }
+
 
   draggingCharacter.x =
     clamp(
       dragStartCharacterX + dx,
       NODE_RADIUS + 20,
-      MAP_WIDTH - NODE_RADIUS - 20
+      MAP_WIDTH -
+        NODE_RADIUS -
+        20
     );
+
 
   draggingCharacter.y =
     clamp(
       dragStartCharacterY + dy,
       NODE_RADIUS + 20,
-      MAP_HEIGHT - NODE_RADIUS - 20
+      MAP_HEIGHT -
+        NODE_RADIUS -
+        20
     );
 
+
   updateNodes();
+
   updateRelations();
 }
 
 
-function handleCharacterDragEnd(event) {
+/* =====================================================
+   キャラドラッグ終了
+===================================================== */
+
+function handleCharacterDragEnd(
+  event
+) {
 
   if (
     !draggingCharacter ||
-    event.pointerId !== dragPointerId
+    event.pointerId !==
+      dragPointerId
   ) {
+
     return;
   }
 
-  const wasLongPress =
-    longPressTriggered;
-
-  cancelLongPress();
 
   const character =
     draggingCharacter;
 
+
+  const wasDragged =
+    characterWasDragged;
+
+
+  const wasLongPress =
+    longPressTriggered;
+
+
+  const world =
+    screenToWorld(
+      event.clientX,
+      event.clientY
+    );
+
+
+  const dx =
+    world.x -
+    dragStartWorldX;
+
+  const dy =
+    world.y -
+    dragStartWorldY;
+
+
+  /*
+    ★まずドラッグ状態を解除
+  */
+
   draggingCharacter = null;
+
   dragPointerId = null;
+
+  characterWasDragged =
+    false;
+
+
+  cancelLongPress();
+
 
   document.removeEventListener(
     "pointermove",
@@ -1844,26 +2222,40 @@ function handleCharacterDragEnd(event) {
     handleCharacterDragEnd
   );
 
+
   /*
-    長押しでメニューを開いた場合は
-    OPEN/CLOSE切替をしない
+    ★ドラッグした場合は
+    絶対にOPEN/CLOSEを切り替えない
   */
 
   if (
-    event.pointerType === "touch" &&
-    wasLongPress
+    wasDragged
   ) {
-
-    longPressTriggered = false;
 
     scheduleAutoSave();
 
     return;
   }
 
+
   /*
-    PC左クリック / スマホ短タップ
-    短い操作ならOPEN/CLOSE
+    ★長押しした場合も
+    OPEN/CLOSEを切り替えない
+  */
+
+  if (
+    wasLongPress
+  ) {
+
+    longPressTriggered =
+      false;
+
+    return;
+  }
+
+
+  /*
+    PC左クリック
   */
 
   if (
@@ -1875,29 +2267,17 @@ function handleCharacterDragEnd(event) {
       character.id
     );
 
-  } else if (
+    return;
+  }
+
+
+  /*
+    スマホ短タップ
+  */
+
+  if (
     event.pointerType === "touch"
   ) {
-
-    /*
-      実際にはドラッグ距離を
-      見ているので、長押し以外なら
-      タップとして扱う
-    */
-
-    const world =
-      screenToWorld(
-        event.clientX,
-        event.clientY
-      );
-
-    const dx =
-      world.x -
-      dragStartWorldX;
-
-    const dy =
-      world.y -
-      dragStartWorldY;
 
     if (
       Math.sqrt(
@@ -1911,58 +2291,44 @@ function handleCharacterDragEnd(event) {
       );
     }
   }
-
-  scheduleAutoSave();
 }
 
 
-function handleCharacterPointerUp(event) {
-
-  /*
-    実際の処理は
-    document側のpointerupで処理
-  */
-}
-
-
-function handleCharacterPointerCancel(event) {
-
-  cancelLongPress();
-
-  draggingCharacter = null;
-
-  dragPointerId = null;
-}
-
-
-/* =========================================================
+/* =====================================================
    OPEN / CLOSE
-========================================================= */
+===================================================== */
 
-function toggleCharacterStatus(id) {
+function toggleCharacterStatus(
+  id
+) {
 
   const character =
     getCharacter(id);
 
-  if (!character) {
+  if (
+    !character
+  ) {
     return;
   }
+
 
   character.status =
     character.status === "OPEN"
       ? "CLOSE"
       : "OPEN";
 
+
   updateNodes();
+
   updateRelations();
 
   scheduleAutoSave();
 }
 
 
-/* =========================================================
+/* =====================================================
    長押し
-========================================================= */
+===================================================== */
 
 function startLongPress(
   event,
@@ -1970,6 +2336,7 @@ function startLongPress(
 ) {
 
   cancelLongPress();
+
 
   longPressStartX =
     event.clientX;
@@ -1983,49 +2350,69 @@ function startLongPress(
   longPressTriggered =
     false;
 
+
   longPressTimer =
-    setTimeout(() => {
+    setTimeout(
+      () => {
 
-      if (
-        !longPressTarget
-      ) {
-        return;
-      }
+        if (
+          !longPressTarget
+        ) {
+          return;
+        }
 
-      longPressTriggered =
-        true;
-
-      const character =
-        getCharacter(
-          longPressTarget.dataset.id
-        );
-
-      if (character) {
 
         /*
-          長押し時はドラッグを止める
+          ドラッグ中なら
+          長押しにはしない
         */
 
-        draggingCharacter =
-          null;
+        if (
+          characterWasDragged
+        ) {
+          return;
+        }
 
-        dragPointerId =
-          null;
 
-        showCharacterContextMenu(
-          longPressStartX,
-          longPressStartY,
+        longPressTriggered =
+          true;
+
+
+        const character =
+          getCharacter(
+            longPressTarget.dataset.id
+          );
+
+
+        if (
           character
-        );
-      }
+        ) {
 
-    }, 600);
+          draggingCharacter =
+            null;
+
+          dragPointerId =
+            null;
+
+
+          showCharacterContextMenu(
+            longPressStartX,
+            longPressStartY,
+            character
+          );
+        }
+
+      },
+      600
+    );
 }
 
 
 function cancelLongPress() {
 
-  if (longPressTimer) {
+  if (
+    longPressTimer
+  ) {
 
     clearTimeout(
       longPressTimer
@@ -2038,11 +2425,13 @@ function cancelLongPress() {
 }
 
 
-/* =========================================================
-   タッチポインター管理
-========================================================= */
+/* =====================================================
+   Touch登録
+===================================================== */
 
-function registerTouchPointer(event) {
+function registerTouchPointer(
+  event
+) {
 
   touchPointers.set(
     event.pointerId,
@@ -2051,6 +2440,11 @@ function registerTouchPointer(event) {
       y: event.clientY
     }
   );
+
+
+  /*
+    2本指になった瞬間
+  */
 
   if (
     touchPointers.size === 2
@@ -2062,14 +2456,18 @@ function registerTouchPointer(event) {
 
     dragPointerId = null;
 
+
     const points =
       [...touchPointers.values()];
+
 
     pinchStartDistance =
       getTouchDistance();
 
+
     pinchStartZoom =
       zoom;
+
 
     pinchCenterX =
       (
@@ -2077,17 +2475,20 @@ function registerTouchPointer(event) {
         points[1].x
       ) / 2;
 
+
     pinchCenterY =
       (
         points[0].y +
         points[1].y
       ) / 2;
 
+
     const world =
       screenToWorld(
         pinchCenterX,
         pinchCenterY
       );
+
 
     pinchWorldX =
       world.x;
@@ -2103,11 +2504,14 @@ function getTouchDistance() {
   const points =
     [...touchPointers.values()];
 
+
   if (
     points.length < 2
   ) {
+
     return 0;
   }
+
 
   const dx =
     points[1].x -
@@ -2117,6 +2521,7 @@ function getTouchDistance() {
     points[1].y -
     points[0].y;
 
+
   return Math.sqrt(
     dx * dx +
     dy * dy
@@ -2124,9 +2529,9 @@ function getTouchDistance() {
 }
 
 
-/* =========================================================
-   背景ポインター
-========================================================= */
+/* =====================================================
+   VIEWPORT POINTER DOWN
+===================================================== */
 
 viewport.addEventListener(
   "pointerdown",
@@ -2142,18 +2547,22 @@ viewport.addEventListener(
 
       registerTouchPointer(event);
 
+
       /*
-        2本指ならパン開始しない
+        2本指
       */
 
       if (
         touchPointers.size >= 2
       ) {
+
         return;
       }
 
+
       /*
-        キャラ上ならキャラ側で処理
+        キャラ上なら
+        キャラ側で処理
       */
 
       if (
@@ -2161,14 +2570,58 @@ viewport.addEventListener(
           ".character-node"
         )
       ) {
+
         return;
       }
+
+
+      /*
+        関係名上なら
+        関係名側で処理
+      */
+
+      if (
+        event.target.closest(
+          ".relation-label-bg"
+        )
+      ) {
+
+        return;
+      }
+
+
+      /*
+        背景長押し開始
+      */
 
       startLongPress(
         event,
         null
       );
 
+
+      /*
+        背景パン開始
+      */
+
+      isPanning = true;
+
+      panPointerId =
+        event.pointerId;
+
+      panStartX =
+        event.clientX;
+
+      panStartY =
+        event.clientY;
+
+      panStartPanX =
+        panX;
+
+      panStartPanY =
+        panY;
+
+      return;
     }
 
 
@@ -2183,21 +2636,30 @@ viewport.addEventListener(
       if (
         event.button !== 0
       ) {
+
         return;
       }
 
-      /*
-        キャラ上なら
-        キャラ側に任せる
-      */
 
       if (
         event.target.closest(
           ".character-node"
         )
       ) {
+
         return;
       }
+
+
+      if (
+        event.target.closest(
+          ".relation-label-bg"
+        )
+      ) {
+
+        return;
+      }
+
 
       isPanning = true;
 
@@ -2224,16 +2686,16 @@ viewport.addEventListener(
 );
 
 
-/* =========================================================
-   背景 pointermove
-========================================================= */
+/* =====================================================
+   VIEWPORT POINTER MOVE
+===================================================== */
 
 viewport.addEventListener(
   "pointermove",
   event => {
 
     /*
-      タッチの位置更新
+      タッチ位置更新
     */
 
     if (
@@ -2251,6 +2713,7 @@ viewport.addEventListener(
         }
       );
 
+
       /*
         ピンチ
       */
@@ -2263,8 +2726,12 @@ viewport.addEventListener(
 
         cancelLongPress();
 
+        isPanning = false;
+
+
         const distance =
           getTouchDistance();
+
 
         if (
           pinchStartDistance > 0 &&
@@ -2282,32 +2749,35 @@ viewport.addEventListener(
               MAX_ZOOM
             );
 
-          /*
-            ピンチ中心を固定して
-            ズームする
-          */
 
           panX =
             pinchCenterX -
-            pinchWorldX * newZoom;
+            pinchWorldX *
+            newZoom;
+
 
           panY =
             pinchCenterY -
-            pinchWorldY * newZoom;
+            pinchWorldY *
+            newZoom;
+
 
           zoom =
             newZoom;
+
 
           constrainPan();
 
           applyTransform();
         }
 
+
         return;
       }
 
+
       /*
-        1本指の移動
+        1本指
       */
 
       const dx =
@@ -2317,6 +2787,7 @@ viewport.addEventListener(
       const dy =
         event.clientY -
         longPressStartY;
+
 
       if (
         Math.sqrt(
@@ -2328,38 +2799,16 @@ viewport.addEventListener(
         cancelLongPress();
       }
 
+
       /*
         背景パン
       */
 
       if (
-        !event.target.closest(
-          ".character-node"
-        ) &&
-        !draggingCharacter
+        isPanning &&
+        event.pointerId ===
+          panPointerId
       ) {
-
-        if (
-          !isPanning
-        ) {
-
-          isPanning = true;
-
-          panPointerId =
-            event.pointerId;
-
-          panStartX =
-            event.clientX;
-
-          panStartY =
-            event.clientY;
-
-          panStartPanX =
-            panX;
-
-          panStartPanY =
-            panY;
-        }
 
         const moveX =
           event.clientX -
@@ -2369,16 +2818,21 @@ viewport.addEventListener(
           event.clientY -
           panStartY;
 
+
         panX =
-          panStartPanX + moveX;
+          panStartPanX +
+          moveX;
 
         panY =
-          panStartPanY + moveY;
+          panStartPanY +
+          moveY;
+
 
         constrainPan();
 
         applyTransform();
       }
+
 
       return;
     }
@@ -2391,7 +2845,8 @@ viewport.addEventListener(
     if (
       event.pointerType === "mouse" &&
       isPanning &&
-      event.pointerId === panPointerId
+      event.pointerId ===
+        panPointerId
     ) {
 
       const moveX =
@@ -2402,11 +2857,15 @@ viewport.addEventListener(
         event.clientY -
         panStartY;
 
+
       panX =
-        panStartPanX + moveX;
+        panStartPanX +
+        moveX;
 
       panY =
-        panStartPanY + moveY;
+        panStartPanY +
+        moveY;
+
 
       constrainPan();
 
@@ -2420,9 +2879,9 @@ viewport.addEventListener(
 );
 
 
-/* =========================================================
-   pointerup
-========================================================= */
+/* =====================================================
+   Pointer UP
+===================================================== */
 
 document.addEventListener(
   "pointerup",
@@ -2436,6 +2895,7 @@ document.addEventListener(
         event.pointerId
       );
 
+
       if (
         touchPointers.size < 2
       ) {
@@ -2444,8 +2904,10 @@ document.addEventListener(
       }
     }
 
+
     if (
-      event.pointerId === panPointerId
+      event.pointerId ===
+      panPointerId
     ) {
 
       isPanning = false;
@@ -2457,9 +2919,9 @@ document.addEventListener(
 );
 
 
-/* =========================================================
+/* =====================================================
    PC右クリック
-========================================================= */
+===================================================== */
 
 viewport.addEventListener(
   "contextmenu",
@@ -2467,19 +2929,26 @@ viewport.addEventListener(
 
     event.preventDefault();
 
-    const node =
+
+    const characterNode =
       event.target.closest(
         ".character-node"
       );
 
-    if (node) {
+
+    if (
+      characterNode
+    ) {
 
       const character =
         getCharacter(
-          node.dataset.id
+          characterNode.dataset.id
         );
 
-      if (character) {
+
+      if (
+        character
+      ) {
 
         showCharacterContextMenu(
           event.clientX,
@@ -2491,11 +2960,57 @@ viewport.addEventListener(
       return;
     }
 
+
+    const relationLabel =
+      event.target.closest(
+        ".relation-label-bg"
+      );
+
+
+    if (
+      relationLabel
+    ) {
+
+      const group =
+        relationLabel.closest(
+          ".relation-group"
+        );
+
+
+      if (
+        group
+      ) {
+
+        const relation =
+          relationData.find(
+            item =>
+              item.id ===
+              group.dataset.id
+          );
+
+
+        if (
+          relation
+        ) {
+
+          showRelationContextMenu(
+            event.clientX,
+            event.clientY,
+            relation
+          );
+        }
+      }
+
+      return;
+    }
+
+
     const world =
       screenToWorld(
         event.clientX,
         event.clientY
       );
+
 
     showBackgroundContextMenu(
       event.clientX,
@@ -2507,9 +3022,9 @@ viewport.addEventListener(
 );
 
 
-/* =========================================================
+/* =====================================================
    ホイールズーム
-========================================================= */
+===================================================== */
 
 viewport.addEventListener(
   "wheel",
@@ -2517,13 +3032,16 @@ viewport.addEventListener(
 
     event.preventDefault();
 
+
     const oldZoom =
       zoom;
+
 
     const factor =
       event.deltaY < 0
         ? 1.12
         : 0.89;
+
 
     const newZoom =
       clamp(
@@ -2532,22 +3050,27 @@ viewport.addEventListener(
         MAX_ZOOM
       );
 
+
     const world =
       screenToWorld(
         event.clientX,
         event.clientY
       );
 
+
     zoom =
       newZoom;
+
 
     panX =
       event.clientX -
       world.x * zoom;
 
+
     panY =
       event.clientY -
       world.y * zoom;
+
 
     constrainPan();
 
@@ -2560,9 +3083,9 @@ viewport.addEventListener(
 );
 
 
-/* =========================================================
+/* =====================================================
    キャラメニュー
-========================================================= */
+===================================================== */
 
 function showCharacterContextMenu(
   screenX,
@@ -2572,7 +3095,8 @@ function showCharacterContextMenu(
 
   cancelRelationMode();
 
-  contextMenu.innerHTML = "";
+  hideContextMenu();
+
 
   const renameButton =
     createContextButton(
@@ -2584,30 +3108,41 @@ function showCharacterContextMenu(
         showTextDialog(
           "キャラクター名を変更",
           character.name
-        ).then(value => {
+        ).then(
+          value => {
 
-          if (
-            value === null
-          ) {
-            return;
+            if (
+              value === null
+            ) {
+              return;
+            }
+
+
+            const name =
+              value.trim();
+
+
+            if (
+              !name
+            ) {
+              return;
+            }
+
+
+            character.name =
+              name;
+
+
+            updateNodes();
+
+            updateRelations();
+
+            scheduleAutoSave();
           }
-
-          const name =
-            value.trim();
-
-          if (!name) {
-            return;
-          }
-
-          character.name =
-            name;
-
-          updateNodes();
-
-          scheduleAutoSave();
-        });
+        );
       }
     );
+
 
   const relationButton =
     createContextButton(
@@ -2622,6 +3157,7 @@ function showCharacterContextMenu(
       }
     );
 
+
   const deleteButton =
     createContextButton(
       "キャラ削除",
@@ -2635,6 +3171,7 @@ function showCharacterContextMenu(
       }
     );
 
+
   contextMenu.appendChild(
     renameButton
   );
@@ -2647,6 +3184,7 @@ function showCharacterContextMenu(
     deleteButton
   );
 
+
   showContextMenuAt(
     screenX,
     screenY
@@ -2654,9 +3192,169 @@ function showCharacterContextMenu(
 }
 
 
-/* =========================================================
+/* =====================================================
+   ★ 関係名メニュー
+===================================================== */
+
+function showRelationContextMenu(
+  screenX,
+  screenY,
+  relation
+) {
+
+  cancelRelationMode();
+
+  hideContextMenu();
+
+
+  const renameButton =
+    createContextButton(
+      "関係名を変更",
+      () => {
+
+        hideContextMenu();
+
+        renameRelation(
+          relation
+        );
+      }
+    );
+
+
+  const deleteButton =
+    createContextButton(
+      "関係を削除",
+      () => {
+
+        hideContextMenu();
+
+        deleteRelation(
+          relation
+        );
+      }
+    );
+
+
+  contextMenu.appendChild(
+    renameButton
+  );
+
+  contextMenu.appendChild(
+    deleteButton
+  );
+
+
+  showContextMenuAt(
+    screenX,
+    screenY
+  );
+}
+
+
+/* =====================================================
+   関係名変更
+===================================================== */
+
+function renameRelation(
+  relation
+) {
+
+  showTextDialog(
+    "関係名を変更",
+    relation.name
+  ).then(
+    value => {
+
+      if (
+        value === null
+      ) {
+        return;
+      }
+
+
+      const name =
+        value.trim();
+
+
+      if (
+        !name
+      ) {
+        return;
+      }
+
+
+      relation.name =
+        name;
+
+
+      updateRelations();
+
+      scheduleAutoSave();
+    }
+  );
+}
+
+
+/* =====================================================
+   関係削除
+===================================================== */
+
+function deleteRelation(
+  relation
+) {
+
+  const from =
+    getCharacter(
+      relation.from
+    );
+
+  const to =
+    getCharacter(
+      relation.to
+    );
+
+
+  const fromName =
+    from
+      ? from.name
+      : "";
+
+  const toName =
+    to
+      ? to.name
+      : "";
+
+
+  const ok =
+    confirm(
+      `${fromName} → ${toName}\n「${relation.name}」を削除しますか？`
+    );
+
+
+  if (
+    !ok
+  ) {
+    return;
+  }
+
+
+  relationData =
+    relationData.filter(
+      item =>
+        item.id !==
+        relation.id
+    );
+
+
+  updateRelations();
+
+  scheduleAutoSave();
+}
+
+
+/* =====================================================
    背景メニュー
-========================================================= */
+===================================================== */
 
 function showBackgroundContextMenu(
   screenX,
@@ -2667,7 +3365,8 @@ function showBackgroundContextMenu(
 
   cancelRelationMode();
 
-  contextMenu.innerHTML = "";
+  hideContextMenu();
+
 
   const addButton =
     createContextButton(
@@ -2683,6 +3382,7 @@ function showBackgroundContextMenu(
       }
     );
 
+
   const exportButton =
     createContextButton(
       "マップを書き出す",
@@ -2694,6 +3394,7 @@ function showBackgroundContextMenu(
       }
     );
 
+
   const importButton =
     createContextButton(
       "マップを読み込む",
@@ -2704,6 +3405,7 @@ function showBackgroundContextMenu(
         importMap();
       }
     );
+
 
   contextMenu.appendChild(
     addButton
@@ -2717,6 +3419,7 @@ function showBackgroundContextMenu(
     importButton
   );
 
+
   showContextMenuAt(
     screenX,
     screenY
@@ -2724,9 +3427,9 @@ function showBackgroundContextMenu(
 }
 
 
-/* =========================================================
-   コンテキストメニュー表示
-========================================================= */
+/* =====================================================
+   メニュー共通
+===================================================== */
 
 function createContextButton(
   label,
@@ -2736,22 +3439,27 @@ function createContextButton(
   const button =
     document.createElement("button");
 
+
   button.className =
     "context-item";
 
+
   button.textContent =
     label;
+
 
   button.addEventListener(
     "click",
     event => {
 
       event.preventDefault();
+
       event.stopPropagation();
 
       callback();
     }
   );
+
 
   return button;
 }
@@ -2765,13 +3473,16 @@ function showContextMenuAt(
   contextMenu.style.display =
     "block";
 
+
   const width =
     contextMenu.offsetWidth;
 
   const height =
     contextMenu.offsetHeight;
 
+
   const margin = 8;
+
 
   x =
     clamp(
@@ -2782,6 +3493,7 @@ function showContextMenuAt(
         margin
     );
 
+
   y =
     clamp(
       y,
@@ -2790,6 +3502,7 @@ function showContextMenuAt(
         height -
         margin
     );
+
 
   contextMenu.style.left =
     x + "px";
@@ -2806,9 +3519,9 @@ function hideContextMenu() {
 }
 
 
-/* =========================================================
+/* =====================================================
    メニュー外クリック
-========================================================= */
+===================================================== */
 
 document.addEventListener(
   "pointerdown",
@@ -2826,9 +3539,9 @@ document.addEventListener(
 );
 
 
-/* =========================================================
+/* =====================================================
    キャラ追加
-========================================================= */
+===================================================== */
 
 async function addCharacterAt(
   x,
@@ -2841,17 +3554,22 @@ async function addCharacterAt(
       ""
     );
 
+
   if (
     name === null ||
     !name.trim()
   ) {
+
     return;
   }
+
 
   characters.push({
 
     id:
-      generateId("character"),
+      generateId(
+        "character"
+      ),
 
     name:
       name.trim(),
@@ -2878,6 +3596,7 @@ async function addCharacterAt(
       "OPEN"
   });
 
+
   updateNodes();
 
   updateRelations();
@@ -2886,33 +3605,44 @@ async function addCharacterAt(
 }
 
 
-/* =========================================================
+/* =====================================================
    キャラ削除
-========================================================= */
+===================================================== */
 
-function deleteCharacter(id) {
+function deleteCharacter(
+  id
+) {
 
   const character =
     getCharacter(id);
 
-  if (!character) {
+
+  if (
+    !character
+  ) {
     return;
   }
+
 
   const ok =
     confirm(
       `「${character.name}」を削除しますか？`
     );
 
-  if (!ok) {
+
+  if (
+    !ok
+  ) {
     return;
   }
+
 
   characters =
     characters.filter(
       item =>
         item.id !== id
     );
+
 
   relationData =
     relationData.filter(
@@ -2921,6 +3651,7 @@ function deleteCharacter(id) {
         relation.to !== id
     );
 
+
   updateNodes();
 
   updateRelations();
@@ -2929,9 +3660,9 @@ function deleteCharacter(id) {
 }
 
 
-/* =========================================================
+/* =====================================================
    関係追加モード
-========================================================= */
+===================================================== */
 
 function startRelationMode(
   sourceId
@@ -2955,9 +3686,9 @@ function cancelRelationMode() {
 }
 
 
-/* =========================================================
+/* =====================================================
    関係追加
-========================================================= */
+===================================================== */
 
 async function addRelation(
   sourceId,
@@ -2973,11 +3704,17 @@ async function addRelation(
     return;
   }
 
+
   const source =
-    getCharacter(sourceId);
+    getCharacter(
+      sourceId
+    );
 
   const target =
-    getCharacter(targetId);
+    getCharacter(
+      targetId
+    );
+
 
   if (
     !source ||
@@ -2989,49 +3726,52 @@ async function addRelation(
     return;
   }
 
+
   const name =
     await showTextDialog(
       `${source.name} → ${target.name}`,
       "このキャラをどう思っている？"
     );
 
+
   cancelRelationMode();
+
 
   if (
     name === null ||
     !name.trim()
   ) {
+
     return;
   }
 
-  const relation =
-    {
 
-      id:
-        generateId("relation"),
+  relationData.push({
 
-      from:
-        sourceId,
+    id:
+      generateId(
+        "relation"
+      ),
 
-      to:
-        targetId,
+    from:
+      sourceId,
 
-      name:
-        name.trim(),
+    to:
+      targetId,
 
-      color:
-        randomRelationColor(),
+    name:
+      name.trim(),
 
-      offsetX:
-        0,
+    color:
+      randomRelationColor(),
 
-      offsetY:
-        0
-    };
+    offsetX:
+      0,
 
-  relationData.push(
-    relation
-  );
+    offsetY:
+      0
+  });
+
 
   updateRelations();
 
@@ -3039,9 +3779,9 @@ async function addRelation(
 }
 
 
-/* =========================================================
+/* =====================================================
    関係色
-========================================================= */
+===================================================== */
 
 function randomRelationColor() {
 
@@ -3058,6 +3798,7 @@ function randomRelationColor() {
 
   ];
 
+
   return colors[
     Math.floor(
       Math.random() *
@@ -3067,9 +3808,9 @@ function randomRelationColor() {
 }
 
 
-/* =========================================================
+/* =====================================================
    ダイアログ
-========================================================= */
+===================================================== */
 
 function showTextDialog(
   title,
@@ -3082,14 +3823,18 @@ function showTextDialog(
       dialogResolver =
         resolve;
 
+
       dialogTitle.textContent =
         title;
+
 
       dialogInput.value =
         defaultValue || "";
 
+
       dialogOverlay.style.display =
         "flex";
+
 
       setTimeout(
         () => {
@@ -3113,13 +3858,19 @@ function closeDialog(
   dialogOverlay.style.display =
     "none";
 
+
   const resolver =
     dialogResolver;
+
 
   dialogResolver =
     null;
 
-  if (resolver) {
+
+  if (
+    resolver
+  ) {
+
     resolver(result);
   }
 }
@@ -3175,6 +3926,7 @@ dialogInput.addEventListener(
       );
     }
 
+
     if (
       event.key === "Escape"
     ) {
@@ -3187,21 +3939,27 @@ dialogInput.addEventListener(
 );
 
 
-/* =========================================================
+/* =====================================================
    全部OPEN
-========================================================= */
+===================================================== */
 
 document
-  .getElementById("allOpenButton")
+  .getElementById(
+    "allOpenButton"
+  )
   .addEventListener(
     "click",
     event => {
 
       event.preventDefault();
+
       event.stopPropagation();
 
+
       hideContextMenu();
+
       cancelRelationMode();
+
 
       for (
         const character
@@ -3212,7 +3970,9 @@ document
           "OPEN";
       }
 
+
       updateNodes();
+
       updateRelations();
 
       scheduleAutoSave();
@@ -3220,21 +3980,27 @@ document
   );
 
 
-/* =========================================================
+/* =====================================================
    全部CLOSE
-========================================================= */
+===================================================== */
 
 document
-  .getElementById("allCloseButton")
+  .getElementById(
+    "allCloseButton"
+  )
   .addEventListener(
     "click",
     event => {
 
       event.preventDefault();
+
       event.stopPropagation();
 
+
       hideContextMenu();
+
       cancelRelationMode();
+
 
       for (
         const character
@@ -3245,7 +4011,9 @@ document
           "CLOSE";
       }
 
+
       updateNodes();
+
       updateRelations();
 
       scheduleAutoSave();
@@ -3253,15 +4021,15 @@ document
   );
 
 
-/* =========================================================
-   整地
-   コンパクト配置版
-========================================================= */
+/* =====================================================
+   ★ 整列
+===================================================== */
 
 function arrangeCharacters() {
 
   const count =
     characters.length;
+
 
   if (
     count === 0
@@ -3278,11 +4046,12 @@ function arrangeCharacters() {
 
 
   /*
-    接続数を数える
+    接続数を計算
   */
 
   const connectionCount =
     new Map();
+
 
   for (
     const character
@@ -3315,6 +4084,7 @@ function arrangeCharacters() {
       );
     }
 
+
     if (
       connectionCount.has(
         relation.to
@@ -3322,8 +4092,7 @@ function arrangeCharacters() {
     ) {
 
       connectionCount.set(
-        relation.to
-      ,
+        relation.to,
         connectionCount.get(
           relation.to
         ) + 1
@@ -3332,7 +4101,11 @@ function arrangeCharacters() {
   }
 
 
-  const sortedCharacters =
+  /*
+    接続数が多い順
+  */
+
+  const sorted =
     [...characters].sort(
       (a, b) =>
         connectionCount.get(b.id) -
@@ -3341,51 +4114,58 @@ function arrangeCharacters() {
 
 
   /*
-    1キャラ
+    ★整列の基本配置
+
+    1人 → 中央
+
+    2～7人 →
+    中央＋円形
+
+    8人以上 →
+    2重リング
   */
 
   if (
-    sortedCharacters.length === 1
+    sorted.length === 1
   ) {
 
-    sortedCharacters[0].x =
+    sorted[0].x =
       centerX;
 
-    sortedCharacters[0].y =
+    sorted[0].y =
       centerY;
 
   } else {
 
     /*
-      最重要キャラを中央
+      中心キャラ
     */
 
-    const main =
-      sortedCharacters[0];
-
-    main.x =
+    sorted[0].x =
       centerX;
 
-    main.y =
+    sorted[0].y =
       centerY;
 
 
-    /*
-      周囲にコンパクト配置
+    const rest =
+      sorted.slice(1);
 
+
+    /*
       5ノード程度なら
-      半径約520px
+      半径500前後。
+
+      画面内に関係名まで
+      まとめて入りやすい。
     */
 
-    const rest =
-      sortedCharacters.slice(1);
-
     const radius =
-      Math.min(
-        560,
-        420 +
-        rest.length * 20
-      );
+      rest.length <= 4
+        ? 500
+        : rest.length <= 7
+          ? 600
+          : 720;
 
 
     rest.forEach(
@@ -3406,6 +4186,7 @@ function arrangeCharacters() {
           Math.cos(angle) *
           radius;
 
+
         character.y =
           centerY +
           Math.sin(angle) *
@@ -3416,14 +4197,15 @@ function arrangeCharacters() {
 
 
   /*
-    軽い重なり防止
+    ★重なり防止
 
-    広げすぎないことを優先する。
+    ただし「離れすぎない」
+    ことを優先する。
   */
 
   for (
     let iteration = 0;
-    iteration < 40;
+    iteration < 30;
     iteration++
   ) {
 
@@ -3445,17 +4227,20 @@ function arrangeCharacters() {
         const b =
           characters[j];
 
+
         let dx =
           b.x - a.x;
 
         let dy =
           b.y - a.y;
 
+
         let distance =
           Math.sqrt(
             dx * dx +
             dy * dy
           );
+
 
         if (
           distance < 1
@@ -3467,8 +4252,10 @@ function arrangeCharacters() {
           dy = 0;
         }
 
+
         const minimumDistance =
-          230;
+          210;
+
 
         if (
           distance <
@@ -3481,22 +4268,20 @@ function arrangeCharacters() {
               distance
             ) * .035;
 
+
           const ux =
             dx / distance;
 
           const uy =
             dy / distance;
 
-          /*
-            中央から大きく離れないよう
-            弱い反発だけにする
-          */
 
           a.x -=
             ux * push;
 
           a.y -=
             uy * push;
+
 
           b.x +=
             ux * push;
@@ -3506,139 +4291,12 @@ function arrangeCharacters() {
         }
       }
     }
-
-
-    /*
-      中央への弱い引力
-    */
-
-    for (
-      const character
-      of characters
-    ) {
-
-      character.x +=
-        (
-          centerX -
-          character.x
-        ) * .002;
-
-      character.y +=
-        (
-          centerY -
-          character.y
-        ) * .002;
-    }
   }
-
-
-  separateCharacters();
-
-
-  updateNodes();
-
-  updateRelations();
 
 
   /*
-    整地後はキャラクター全体を
-    コンパクトに表示
+    マップ範囲内へ
   */
-
-  centerOnCharacters();
-
-
-  scheduleAutoSave();
-}
-
-
-/* =========================================================
-   キャラ同士の最終重なり防止
-========================================================= */
-
-function separateCharacters() {
-
-  const minimumDistance =
-    190;
-
-  for (
-    let iteration = 0;
-    iteration < 25;
-    iteration++
-  ) {
-
-    for (
-      let i = 0;
-      i < characters.length;
-      i++
-    ) {
-
-      for (
-        let j = i + 1;
-        j < characters.length;
-        j++
-      ) {
-
-        const a =
-          characters[i];
-
-        const b =
-          characters[j];
-
-        let dx =
-          b.x - a.x;
-
-        let dy =
-          b.y - a.y;
-
-        let distance =
-          Math.sqrt(
-            dx * dx +
-            dy * dy
-          );
-
-        if (
-          distance < 1
-        ) {
-
-          distance = 1;
-
-          dx = 1;
-          dy = 0;
-        }
-
-        if (
-          distance <
-          minimumDistance
-        ) {
-
-          const push =
-            (
-              minimumDistance -
-              distance
-            ) * .08;
-
-          const ux =
-            dx / distance;
-
-          const uy =
-            dy / distance;
-
-          a.x -=
-            ux * push;
-
-          a.y -=
-            uy * push;
-
-          b.x +=
-            ux * push;
-
-          b.y +=
-            uy * push;
-        }
-      }
-    }
-  }
 
   for (
     const character
@@ -3654,6 +4312,7 @@ function separateCharacters() {
           50
       );
 
+
     character.y =
       clamp(
         character.y,
@@ -3663,13 +4322,55 @@ function separateCharacters() {
           50
       );
   }
+
+
+  updateNodes();
+
+  updateRelations();
+
+
+  /*
+    ★整列後に必ず
+    キャラクター全体を表示
+  */
+
+  centerOnCharacters();
+
+
+  scheduleAutoSave();
 }
 
 
-/* =========================================================
-   キャラクター全体を画面中央に表示
-   5ノード＋関係名が見える程度
-========================================================= */
+/* =====================================================
+   整列ボタン
+===================================================== */
+
+document
+  .getElementById(
+    "arrangeButton"
+  )
+  .addEventListener(
+    "click",
+    event => {
+
+      event.preventDefault();
+
+      event.stopPropagation();
+
+
+      hideContextMenu();
+
+      cancelRelationMode();
+
+
+      arrangeCharacters();
+    }
+  );
+
+
+/* =====================================================
+   中央表示
+===================================================== */
 
 function centerOnCharacters() {
 
@@ -3690,6 +4391,7 @@ function centerOnCharacters() {
         viewport.clientHeight -
         MAP_HEIGHT
       ) / 2;
+
 
     applyTransform();
 
@@ -3722,6 +4424,7 @@ function centerOnCharacters() {
         NODE_RADIUS
       );
 
+
     maxX =
       Math.max(
         maxX,
@@ -3729,12 +4432,14 @@ function centerOnCharacters() {
         NODE_RADIUS
       );
 
+
     minY =
       Math.min(
         minY,
         character.y -
         NODE_RADIUS
       );
+
 
     maxY =
       Math.max(
@@ -3746,24 +4451,26 @@ function centerOnCharacters() {
 
 
   /*
-    関係名を考慮した余白
+    関係名が線の外へ出ても
+    見えるよう余白を確保
   */
 
   const padding =
-    180;
+    260;
 
 
   const worldWidth =
     Math.max(
-      600,
+      800,
       maxX -
       minX +
       padding * 2
     );
 
+
   const worldHeight =
     Math.max(
-      600,
+      800,
       maxY -
       minY +
       padding * 2
@@ -3771,10 +4478,7 @@ function centerOnCharacters() {
 
 
   /*
-    画面の75%程度に収める。
-
-    小さすぎる表示にならないよう
-    下限も設定。
+    画面の約75%に収める
   */
 
   const targetZoom =
@@ -3803,6 +4507,7 @@ function centerOnCharacters() {
       maxX
     ) / 2;
 
+
   const centerWorldY =
     (
       minY +
@@ -3813,6 +4518,7 @@ function centerOnCharacters() {
   panX =
     viewport.clientWidth / 2 -
     centerWorldX * zoom;
+
 
   panY =
     viewport.clientHeight / 2 -
@@ -3825,9 +4531,9 @@ function centerOnCharacters() {
 }
 
 
-/* =========================================================
+/* =====================================================
    自動保存
-========================================================= */
+===================================================== */
 
 let autoSaveTimer = null;
 
@@ -3868,10 +4574,12 @@ function saveAutoMap() {
     const data =
       getSaveData();
 
+
     localStorage.setItem(
       AUTO_SAVE_KEY,
       JSON.stringify(data)
     );
+
 
     showSaveStatus(
       "自動保存：保存済み",
@@ -3884,6 +4592,7 @@ function saveAutoMap() {
       "自動保存に失敗しました",
       error
     );
+
 
     showSaveStatus(
       "自動保存：失敗",
@@ -3899,10 +4608,12 @@ function scheduleAutoSave() {
     autoSaveTimer
   );
 
+
   showSaveStatus(
     "自動保存：変更あり",
     false
   );
+
 
   autoSaveTimer =
     setTimeout(
@@ -3920,6 +4631,7 @@ function showSaveStatus(
   saveStatus.textContent =
     text;
 
+
   saveStatus.style.color =
     success
       ? "#5dffc7"
@@ -3927,9 +4639,9 @@ function showSaveStatus(
 }
 
 
-/* =========================================================
+/* =====================================================
    自動読み込み
-========================================================= */
+===================================================== */
 
 function loadAutoMap() {
 
@@ -3940,12 +4652,18 @@ function loadAutoMap() {
         AUTO_SAVE_KEY
       );
 
-    if (!raw) {
+
+    if (
+      !raw
+    ) {
+
       return false;
     }
 
+
     const data =
       JSON.parse(raw);
+
 
     if (
       !data ||
@@ -4056,6 +4774,7 @@ function loadAutoMap() {
       true
     );
 
+
     return true;
 
   } catch (error) {
@@ -4065,19 +4784,21 @@ function loadAutoMap() {
       error
     );
 
+
     return false;
   }
 }
 
 
-/* =========================================================
-   JSON書き出し
-========================================================= */
+/* =====================================================
+   JSON EXPORT
+===================================================== */
 
 function exportMap() {
 
   const data =
     getSaveData();
+
 
   const json =
     JSON.stringify(
@@ -4085,6 +4806,7 @@ function exportMap() {
       null,
       2
     );
+
 
   const blob =
     new Blob(
@@ -4095,17 +4817,26 @@ function exportMap() {
       }
     );
 
+
   const url =
-    URL.createObjectURL(blob);
+    URL.createObjectURL(
+      blob
+    );
+
 
   const a =
-    document.createElement("a");
+    document.createElement(
+      "a"
+    );
+
 
   a.href =
     url;
 
+
   a.download =
     "character_relationship_map.json";
+
 
   document.body.appendChild(a);
 
@@ -4113,21 +4844,28 @@ function exportMap() {
 
   a.remove();
 
-  URL.revokeObjectURL(url);
+
+  URL.revokeObjectURL(
+    url
+  );
 }
 
 
-/* =========================================================
-   JSON読み込み
-========================================================= */
+/* =====================================================
+   JSON IMPORT
+===================================================== */
 
 function importMap() {
 
   const input =
-    document.createElement("input");
+    document.createElement(
+      "input"
+    );
+
 
   input.type =
     "file";
+
 
   input.accept =
     ".json,application/json";
@@ -4140,17 +4878,25 @@ function importMap() {
       const file =
         input.files[0];
 
-      if (!file) {
+
+      if (
+        !file
+      ) {
+
         return;
       }
+
 
       try {
 
         const text =
           await file.text();
 
+
         const data =
-          JSON.parse(text);
+          JSON.parse(
+            text
+          );
 
 
         if (
@@ -4267,13 +5013,17 @@ function importMap() {
 
         saveAutoMap();
 
+
         alert(
           "マップを読み込みました。"
         );
 
       } catch (error) {
 
-        console.error(error);
+        console.error(
+          error
+        );
+
 
         alert(
           "マップの読み込みに失敗しました。\n" +
@@ -4283,13 +5033,14 @@ function importMap() {
     }
   );
 
+
   input.click();
 }
 
 
-/* =========================================================
+/* =====================================================
    ESC
-========================================================= */
+===================================================== */
 
 document.addEventListener(
   "keydown",
@@ -4305,6 +5056,7 @@ document.addEventListener(
 
       cancelLongPress();
 
+
       if (
         dialogOverlay.style.display ===
         "flex"
@@ -4317,9 +5069,9 @@ document.addEventListener(
 );
 
 
-/* =========================================================
-   画面サイズ変更
-========================================================= */
+/* =====================================================
+   Resize
+===================================================== */
 
 window.addEventListener(
   "resize",
@@ -4332,26 +5084,31 @@ window.addEventListener(
 );
 
 
-/* =========================================================
+/* =====================================================
    初期化
-========================================================= */
+===================================================== */
 
 function initialize() {
 
   const restored =
     loadAutoMap();
 
+
   updateNodes();
 
   updateRelations();
 
-  if (!restored) {
+
+  if (
+    !restored
+  ) {
 
     /*
-      初期状態もコンパクトに表示
+      初期状態は整列
     */
 
     arrangeCharacters();
+
 
     showSaveStatus(
       "自動保存：初期状態",
@@ -4362,6 +5119,7 @@ function initialize() {
 
     centerOnCharacters();
   }
+
 
   applyTransform();
 }

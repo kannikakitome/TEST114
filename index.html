@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -119,7 +118,10 @@ body {
   font-size: 11px;
 
   pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s ease;
 }
+#saveStatus.visible { opacity: 1; }
 
 
 /* =====================================================
@@ -187,6 +189,8 @@ body {
 #relationLayer {
   position: absolute;
 
+  z-index: 10;
+
   left: 0;
   top: 0;
 
@@ -210,6 +214,12 @@ body {
   opacity: .88;
 
   pointer-events: none;
+}
+
+.relation-line.organization-relation {
+  stroke-width: 9;
+  stroke-dasharray: 18 8;
+  opacity: .96;
 }
 
 .relation-label-bg {
@@ -591,6 +601,176 @@ body {
   }
 }
 
+
+/* =====================================================
+   EXTENDED FEATURES
+===================================================== */
+
+#eventButton {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1800;
+  padding: 12px 18px;
+  border: 1px solid rgba(255,110,160,.55);
+  border-radius: 12px;
+  background: rgba(48,18,36,.96);
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(0,0,0,.45);
+}
+#eventButton:hover { background: rgba(78,25,52,.98); }
+
+.group-box {
+  position: absolute;
+  border: 2px solid rgba(120,170,255,.45);
+  border-radius: 18px;
+  background: rgba(40,65,105,.12);
+  z-index: 5;
+  pointer-events: all;
+  box-sizing: border-box;
+}
+.relation-label-bg, .relation-label { position:relative; z-index:40; }
+.group-header {
+  position: absolute;
+  left: 10px;
+  top: 8px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: rgba(12,17,28,.88);
+  border: 1px solid rgba(255,255,255,.12);
+  color: #dbe7ff;
+  font-size: 14px;
+  font-weight: 800;
+  pointer-events: all;
+  cursor: grab;
+  user-select: none;
+}
+.group-header:active { cursor: grabbing; }
+.group-box.selected { box-shadow: 0 0 0 3px rgba(120,170,255,.35); }
+.group-resize-handle { position:absolute; width:16px; height:16px; border:2px solid #fff; background:rgba(20,30,48,.95); border-radius:4px; z-index:30; display:none; box-sizing:border-box; }
+.group-box.selected .group-resize-handle { display:block; }
+.group-resize-nw { left:-8px; top:-8px; cursor:nwse-resize; }
+.group-resize-ne { right:-8px; top:-8px; cursor:nesw-resize; }
+.group-resize-sw { left:-8px; bottom:-8px; cursor:nesw-resize; }
+.group-resize-se { right:-8px; bottom:-8px; cursor:nwse-resize; }
+.organization-create-preview {
+  position:absolute; display:none; z-index:4; box-sizing:border-box;
+  border:2px dashed rgba(120,210,255,.95); background:rgba(80,150,220,.16);
+  border-radius:18px; pointer-events:none;
+}
+#organizationCreateMode {
+  position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
+  z-index: 1500; display: none; padding: 10px 16px; border-radius: 999px;
+  background: rgba(18,27,45,.96); border: 1px solid rgba(120,170,255,.55);
+  color: #fff; font-size: 13px; box-shadow: 0 5px 25px rgba(0,0,0,.4);
+}
+.group-box.collapsed { width: 190px !important; height: 48px !important; background: rgba(40,65,105,.22); }
+.group-box.collapsed .group-header { right: 10px; }
+
+#detailOverlay, #libraryOverlay, #eventOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.62);
+}
+.feature-panel {
+  width: min(720px, calc(100vw - 24px));
+  max-height: min(820px, calc(100vh - 24px));
+  overflow: auto;
+  padding: 20px;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 14px;
+  background: #111827;
+  box-shadow: 0 20px 80px rgba(0,0,0,.65);
+}
+.feature-title {
+  font-size: 19px;
+  font-weight: 800;
+  margin-bottom: 14px;
+}
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 10px;
+}
+.feature-field label {
+  display:block;
+  margin-bottom:4px;
+  color:#9fb0c8;
+  font-size:11px;
+}
+.feature-field input, .feature-field textarea, .feature-field select {
+  width:100%;
+  padding:9px 10px;
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:7px;
+  background:#080d16;
+  color:#fff;
+  outline:none;
+}
+.feature-field textarea { min-height:90px; resize:vertical; }
+.feature-section {
+  margin-top:16px;
+  padding-top:14px;
+  border-top:1px solid rgba(255,255,255,.10);
+}
+.param-row {
+  display:grid;
+  grid-template-columns: 1fr 90px;
+  gap:8px;
+  align-items:center;
+  margin:6px 0;
+}
+.param-row input { width:100%; }
+.feature-actions {
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:16px;
+  flex-wrap:wrap;
+}
+.mini-button {
+  padding:7px 10px;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:7px;
+  background:#172235;
+  color:#fff;
+  cursor:pointer;
+}
+.emotion-meter {
+  display:grid;
+  grid-template-columns: 1fr 100px;
+  gap:8px;
+  align-items:center;
+  margin:7px 0;
+}
+.emotion-meter input[type=range] { width:100%; }
+.event-history {
+  max-height:360px;
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.event-card {
+  padding:10px 12px;
+  border:1px solid rgba(255,255,255,.11);
+  border-radius:9px;
+  background:rgba(255,255,255,.035);
+}
+.event-card strong { color:#ffd36a; }
+.small-note { color:#8fa0b8; font-size:11px; line-height:1.5; }
+
+@media (max-width:700px) {
+  #eventButton { right:10px; bottom:78px; }
+  .feature-grid { grid-template-columns:1fr; }
+}
+
 </style>
 </head>
 
@@ -622,7 +802,21 @@ body {
     整列
   </button>
 
+  <button class="ui-button" id="dataLoadButton">
+    外部データ読込
+  </button>
+
+  <button class="ui-button" id="eventDataLoadButton">
+    イベント読込
+  </button>
+
+  <button class="ui-button" id="eventHistoryButton">
+    出来事
+  </button>
+
 </div>
+
+<button id="eventButton">イベント発動</button>
 
 
 <div id="saveStatus">
@@ -636,7 +830,7 @@ body {
 
 <div id="viewport">
 
-  <div id="map">
+  <div id="map"><div id="organizationCreatePreview" class="organization-create-preview"></div>
 
     <svg
       id="relationLayer"
@@ -661,6 +855,17 @@ body {
 
         </marker>
 
+        <marker
+          id="organizationArrow"
+          markerWidth="15"
+          markerHeight="15"
+          refX="13"
+          refY="7.5"
+          orient="auto"
+          markerUnits="strokeWidth">
+          <path d="M 0 0 L 15 7.5 L 0 15 z" fill="context-stroke"></path>
+        </marker>
+
       </defs>
 
     </svg>
@@ -681,6 +886,8 @@ body {
      RELATION MODE
 ===================================================== -->
 
+<div id="organizationCreateMode"><strong>組織枠作成モード</strong>　始点を押して、離したところを終点にしてください　<span>ESCでキャンセル</span></div>
+
 <div id="relationMode">
 
   <strong>
@@ -699,6 +906,23 @@ body {
 <!-- =====================================================
      DIALOG
 ===================================================== -->
+
+
+<!-- =====================================================
+     EXTENDED DETAIL / EVENT UI
+===================================================== -->
+
+<div id="detailOverlay">
+  <div class="feature-panel" id="detailPanel"></div>
+</div>
+
+<div id="libraryOverlay">
+  <div class="feature-panel" id="libraryPanel"></div>
+</div>
+
+<div id="eventOverlay">
+  <div class="feature-panel" id="eventPanel"></div>
+</div>
 
 <div id="dialogOverlay">
 
@@ -742,6 +966,8 @@ const MAP_WIDTH = 6000;
 const MAP_HEIGHT = 6000;
 
 const NODE_RADIUS = 75;
+// 見た目の円（150px）＋境界線4pxを含めた衝突半径
+const CHARACTER_COLLISION_RADIUS = NODE_RADIUS + 4;
 
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 2.5;
@@ -862,6 +1088,87 @@ let relationData = [
 ];
 
 
+
+/* =====================================================
+   EXTENDED DATA
+===================================================== */
+
+let organizationData = [];
+
+let eventHistory = [];
+
+let eventLibrary = [
+  {
+    id: "worst-meeting",
+    name: "最悪な出会い",
+    description: "まだ関係のない2人が最悪の第一印象を残す。",
+    conditions: { relationship: "none" },
+    effects: {
+      relationName: "険悪",
+      emotions: { "敵意": 35, "信頼": -20, "好意": -30, "警戒": 20 }
+    }
+  }
+];
+
+let generatorLists = {
+  surnames: ["天羽","火々里","藍堂","白鐘","玻璃","黒鉄","水城","神代"],
+  names: ["ルリ","ミカ","ミオ","アリア","ノクス","ユウ","シオン","レイ"],
+  relations: ["信頼","友情","憧れ","好意","警戒","敵意","対抗心","尊敬","嫌悪","依存","険悪"],
+  organizations: ["天羽家","SDA","禁書庫","七宝","無所属"]
+};
+
+const DEFAULT_EMOTIONS = [
+  "好意","信頼","尊敬","親近感","依存","嫉妬","警戒","恐怖","敵意","嫌悪"
+];
+
+function normalizeCharacter(character) {
+  return {
+    id: character.id || generateId("character"),
+    name: character.name || "名称未設定",
+    x: Number.isFinite(character.x) ? character.x : MAP_WIDTH/2,
+    y: Number.isFinite(character.y) ? character.y : MAP_HEIGHT/2,
+    status: character.status === "CLOSE" ? "CLOSE" : "OPEN",
+    organizationId: character.organizationId || null,
+    details: character.details && typeof character.details === "object" ? character.details : {},
+    stats: character.stats && typeof character.stats === "object" ? character.stats : {},
+    memories: Array.isArray(character.memories) ? character.memories : []
+  };
+}
+
+function normalizeRelation(relation) {
+  return {
+    id: relation.id || generateId("relation"),
+    from: relation.from,
+    to: relation.to,
+    name: relation.name || "",
+    color: relation.color || "#00eaff",
+    offsetX: Number.isFinite(relation.offsetX) ? relation.offsetX : 0,
+    offsetY: Number.isFinite(relation.offsetY) ? relation.offsetY : 0,
+    emotions: relation.emotions && typeof relation.emotions === "object"
+      ? relation.emotions
+      : Object.fromEntries(DEFAULT_EMOTIONS.map(name => [name, 0]))
+  };
+}
+
+function normalizeOrganization(group) {
+  return {
+    id: group.id || generateId("org"),
+    name: group.name || "組織",
+    x: Number.isFinite(group.x) ? group.x : 2200,
+    y: Number.isFinite(group.y) ? group.y : 2200,
+    width: Number.isFinite(group.width) ? group.width : 700,
+    height: Number.isFinite(group.height) ? group.height : 500,
+    color: group.color || "#78aaff",
+    collapsed: !!group.collapsed
+  };
+}
+
+function normalizeAllExtendedData() {
+  characters = characters.map(normalizeCharacter);
+  relationData = relationData.map(normalizeRelation);
+  organizationData = organizationData.map(normalizeOrganization);
+}
+
 /* =====================================================
    DOM
 ===================================================== */
@@ -880,6 +1187,10 @@ const contextMenu =
 
 const relationMode =
   document.getElementById("relationMode");
+
+const organizationCreateMode =
+  document.getElementById("organizationCreateMode");
+organizationCreatePreview = document.getElementById("organizationCreatePreview");
 
 const saveStatus =
   document.getElementById("saveStatus");
@@ -938,6 +1249,7 @@ let dragStartWorldY = 0;
 
 let dragStartCharacterX = 0;
 let dragStartCharacterY = 0;
+let dragStartCharacterOrganizationId = null;
 
 /*
   ★重要
@@ -988,6 +1300,333 @@ let pinchWorldY = 0;
 
 let relationModeSourceId = null;
 
+
+
+/* =====================================================
+   EVENT SYSTEM
+===================================================== */
+
+function getRelation(fromId,toId) {
+  return relationData.find(r => r.from===fromId && r.to===toId);
+}
+
+function applyRelationEmotionDelta(relation, deltas) {
+  relation.emotions = relation.emotions || {};
+  for (const [name,delta] of Object.entries(deltas || {})) {
+    relation.emotions[name] = clamp((Number(relation.emotions[name])||0) + Number(delta||0), -100, 100);
+  }
+}
+
+function createRelationForEvent(fromId,toId,name,emotions) {
+  let relation = getRelation(fromId,toId);
+  if (!relation) {
+    relation = normalizeRelation({
+      id: generateId("relation"), from:fromId, to:toId, name,
+      color: randomRelationColor(), offsetX:0, offsetY:0,
+      emotions: Object.fromEntries(DEFAULT_EMOTIONS.map(k=>[k,0]))
+    });
+    relationData.push(relation);
+  } else {
+    relation.name = name || relation.name;
+  }
+  applyRelationEmotionDelta(relation, emotions);
+  return relation;
+}
+
+function compareCondition(value, expression) {
+  if (expression === undefined || expression === null || expression === "") return true;
+  if (typeof expression === "number") return Number(value) === expression;
+  const text = String(expression).trim();
+  const m = text.match(/^(>=|<=|>|<|==|=)\s*(-?\d+(?:\.\d+)?)$/);
+  if (!m) return String(value) === text;
+  const n = Number(value);
+  const target = Number(m[2]);
+  switch (m[1]) {
+    case ">=": return n >= target;
+    case "<=": return n <= target;
+    case ">": return n > target;
+    case "<": return n < target;
+    case "==":
+    case "=": return n === target;
+  }
+  return false;
+}
+
+function matchesCharacterConditions(character, conditions, prefix) {
+  if (!character || !conditions) return true;
+  const statsKey = prefix + "Stats";
+  const emotionsKey = prefix + "Emotions";
+
+  for (const [name,expr] of Object.entries(conditions[statsKey] || {})) {
+    if (!compareCondition(character.stats?.[name] ?? 0, expr)) return false;
+  }
+
+  for (const [name,expr] of Object.entries(conditions[emotionsKey] || {})) {
+    // Character-level emotion conditions use the strongest outgoing relation.
+    const values = relationData
+      .filter(r => r.from === character.id)
+      .map(r => Number(r.emotions?.[name] ?? 0));
+    const value = values.length ? Math.max(...values) : 0;
+    if (!compareCondition(value, expr)) return false;
+  }
+
+  return true;
+}
+
+function eventEligible(event) {
+  const chars = characters.filter(c => c.status !== "CLOSE");
+  if (chars.length < 2) return [];
+
+  const conditions = event.conditions || {};
+  const pairs = [];
+
+  for (const a of chars) {
+    for (const b of chars) {
+      if (a.id === b.id) continue;
+
+      const relation = getRelation(a.id,b.id);
+
+      if (conditions.relationship === "none" && relation) continue;
+      if (conditions.relationship && !["none","any"].includes(conditions.relationship)) {
+        if (!relation || relation.name !== conditions.relationship) continue;
+      }
+      if (conditions.relationship !== "none" && !conditions.relationship && conditions.requireRelation && !relation) {
+        continue;
+      }
+
+      if (!matchesCharacterConditions(a, conditions, "source")) continue;
+      if (!matchesCharacterConditions(b, conditions, "target")) continue;
+
+      if (conditions.sourceStatus && a.status !== conditions.sourceStatus) continue;
+      if (conditions.targetStatus && b.status !== conditions.targetStatus) continue;
+
+      pairs.push([a,b]);
+    }
+  }
+
+  return pairs;
+}
+
+function weightedPick(items) {
+  if (!items.length) return null;
+  const total = items.reduce((sum,item) => sum + Math.max(0, Number(item.weight) || 1), 0);
+  let roll = Math.random() * total;
+  for (const item of items) {
+    roll -= Math.max(0, Number(item.weight) || 1);
+    if (roll <= 0) return item;
+  }
+  return items[items.length-1];
+}
+
+function applyStatDelta(character, deltas) {
+  if (!character || !deltas) return;
+  character.stats = character.stats || {};
+  for (const [name,delta] of Object.entries(deltas)) {
+    character.stats[name] = clamp((Number(character.stats[name])||0) + Number(delta||0), 0, 100);
+  }
+}
+
+function applyEventEffects(source, target, effects) {
+  const relationName = effects.relationName || pick(generatorLists.relations,"関係");
+  const relation = createRelationForEvent(
+    source.id,
+    target.id,
+    relationName,
+    effects.emotions || {}
+  );
+
+  applyStatDelta(source, effects.sourceStats);
+  applyStatDelta(target, effects.targetStats);
+
+  return relation;
+}
+
+function triggerEvent() {
+  const available = [];
+
+  for (const event of eventLibrary) {
+    const pairs = eventEligible(event);
+    for (const pair of pairs) available.push({event,pair});
+  }
+
+  if (!available.length) {
+    alert("現在の状態で発生条件を満たすイベントがありません。");
+    return;
+  }
+
+  const selected = pick(available, available[0]);
+  const {event,pair} = selected;
+  const [a,b] = pair;
+
+  let effects = event.effects || {};
+  let outcome = null;
+
+  if (Array.isArray(event.outcomes) && event.outcomes.length) {
+    outcome = weightedPick(event.outcomes);
+    effects = {
+      ...effects,
+      ...(outcome.effects || {})
+    };
+  }
+
+  const relation = applyEventEffects(a,b,effects);
+  const resultText =
+    outcome?.text ||
+    effects.result ||
+    `${a.name} → ${b.name} に「${relation.name}」が発生。`;
+
+  const record = {
+    id: generateId("event"),
+    time: new Date().toISOString(),
+    eventId: event.id,
+    eventName: event.name,
+    description: event.description || "",
+    characters: [a.id,b.id],
+    result: resultText,
+    changes: {
+      relation: relation.name,
+      emotions: effects.emotions || {},
+      sourceStats: effects.sourceStats || {},
+      targetStats: effects.targetStats || {}
+    }
+  };
+
+  eventHistory.unshift(record);
+
+  a.memories = Array.isArray(a.memories) ? a.memories : [];
+  b.memories = Array.isArray(b.memories) ? b.memories : [];
+  a.memories.unshift(record.id);
+  b.memories.unshift(record.id);
+
+  updateNodes();
+  updateRelations();
+  scheduleAutoSave();
+  showEventResult(record);
+}
+
+function showEventResult(record) {
+  const panel = document.getElementById("eventPanel");
+  const emotionChanges = Object.entries(record.changes?.emotions || {})
+    .map(([k,v]) => `${escapeHtml(k)} ${Number(v)>=0?"+":""}${v}`)
+    .join(" / ");
+  const sourceStatChanges = Object.entries(record.changes?.sourceStats || {})
+    .map(([k,v]) => `発動側 ${escapeHtml(k)} ${Number(v)>=0?"+":""}${v}`)
+    .join(" / ");
+  const targetStatChanges = Object.entries(record.changes?.targetStats || {})
+    .map(([k,v]) => `対象側 ${escapeHtml(k)} ${Number(v)>=0?"+":""}${v}`)
+    .join(" / ");
+  const changes = [emotionChanges,sourceStatChanges,targetStatChanges].filter(Boolean).join(" / ");
+
+  panel.innerHTML = `
+    <div class="feature-title">イベント発生</div>
+    <div class="event-card">
+      <strong>${escapeHtml(record.eventName)}</strong>
+      <p>${escapeHtml(record.description)}</p>
+      <p>${escapeHtml(record.result)}</p>
+      <div class="small-note">変化：${changes || "なし"}</div>
+    </div>
+    <div class="feature-actions">
+      <button class="mini-button" id="eventClose">閉じる</button>
+      <button class="mini-button" id="eventHistoryFromResult">出来事を見る</button>
+    </div>`;
+  document.getElementById("eventOverlay").style.display = "flex";
+  document.getElementById("eventClose").onclick = () => closeFeatureOverlay("eventOverlay");
+  document.getElementById("eventHistoryFromResult").onclick = () => {
+    closeFeatureOverlay("eventOverlay");
+    showEventHistory();
+  };
+}
+
+function showEventHistory() {
+  const panel = document.getElementById("libraryPanel");
+  panel.innerHTML = `
+    <div class="feature-title">出来事</div>
+    <div class="event-history">
+      ${eventHistory.length ? eventHistory.map(r => `
+        <div class="event-card">
+          <strong>${escapeHtml(r.eventName)}</strong>
+          <div>${new Date(r.time).toLocaleString("ja-JP")}</div>
+          <div>${escapeHtml(r.result)}</div>
+        </div>`).join("") : `<div class="small-note">まだ出来事はありません。</div>`}
+    </div>
+    <div class="feature-actions"><button class="mini-button" id="historyClose">閉じる</button></div>`;
+  document.getElementById("libraryOverlay").style.display = "flex";
+  document.getElementById("historyClose").onclick = () => closeFeatureOverlay("libraryOverlay");
+}
+
+document.getElementById("eventOverlay").addEventListener("pointerdown", e => {
+  if (e.target.id === "eventOverlay") closeFeatureOverlay("eventOverlay");
+});
+document.getElementById("libraryOverlay").addEventListener("pointerdown", e => {
+  if (e.target.id === "libraryOverlay") closeFeatureOverlay("libraryOverlay");
+});
+
+async function loadExternalDataFiles() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.multiple = true;
+  input.accept = ".txt,.csv,.json,application/json,text/plain,text/csv";
+  input.onchange = async () => {
+    for (const file of [...input.files]) {
+      const text = await file.text();
+      const lower = file.name.toLowerCase();
+      let data;
+      try { data = JSON.parse(text); } catch { data = null; }
+
+      if (data && typeof data === "object") {
+        if (Array.isArray(data.surnames)) generatorLists.surnames.push(...data.surnames);
+        if (Array.isArray(data.names)) generatorLists.names.push(...data.names);
+        if (Array.isArray(data.relations)) generatorLists.relations.push(...data.relations);
+        if (Array.isArray(data.organizations)) generatorLists.organizations.push(...data.organizations);
+      } else {
+        const values = text.split(/[\r\n,]+/).map(v=>v.trim()).filter(Boolean);
+        if (lower.includes("苗字") || lower.includes("surname")) generatorLists.surnames.push(...values);
+        else if (lower.includes("名前") || lower.includes("name")) generatorLists.names.push(...values);
+        else if (lower.includes("関係") || lower.includes("relation")) generatorLists.relations.push(...values);
+        else if (lower.includes("組織") || lower.includes("organization")) generatorLists.organizations.push(...values);
+      }
+    }
+    alert("外部生成データを読み込みました。");
+  };
+  input.click();
+}
+
+async function loadEventFiles() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.multiple = true;
+  input.accept = ".json,.txt,application/json,text/plain";
+  input.onchange = async () => {
+    let loaded = 0;
+    for (const file of [...input.files]) {
+      const text = await file.text();
+      try {
+        const data = JSON.parse(text);
+        const events = Array.isArray(data) ? data : (Array.isArray(data.events) ? data.events : [data]);
+        for (const event of events) {
+          if (!event || !event.name) continue;
+          eventLibrary.push({
+            id: event.id || generateId("eventdef"),
+            name: event.name,
+            description: event.description || "",
+            conditions: event.conditions || {relationship:"none"},
+            effects: event.effects || {relationName:"関係",emotions:{}}
+          });
+          loaded++;
+        }
+      } catch (e) {
+        console.warn("イベントファイルを読み込めませんでした", file.name, e);
+      }
+    }
+    alert(`${loaded}件のイベントを読み込みました。`);
+  };
+  input.click();
+}
+
+document.getElementById("dataLoadButton").addEventListener("click", loadExternalDataFiles);
+document.getElementById("eventDataLoadButton").addEventListener("click", loadEventFiles);
+document.getElementById("eventButton").addEventListener("click", triggerEvent);
+document.getElementById("eventHistoryButton").addEventListener("click", showEventHistory);
 
 /* =====================================================
    ダイアログ
@@ -1158,6 +1797,8 @@ function constrainPan() {
 
 function updateNodes() {
 
+  updateOrganizationBoxes();
+
   document
     .querySelectorAll(
       ".character-node"
@@ -1172,6 +1813,8 @@ function updateNodes() {
     const character
     of characters
   ) {
+
+    if (isCharacterHiddenByOrganization(character)) continue;
 
     const node =
       document.createElement("div");
@@ -1234,6 +1877,643 @@ function updateNodes() {
 }
 
 
+
+/* =====================================================
+   ORGANIZATION BOX
+===================================================== */
+
+let draggingOrganization = null;
+let organizationDragPointerId = null;
+let organizationDragStartWorldX = 0;
+let organizationDragStartWorldY = 0;
+let organizationOriginalPositions = null;
+let organizationOriginalX = 0;
+let organizationOriginalY = 0;
+let organizationWasDragged = false;
+let selectedOrganizationId = null;
+let resizingOrganization = null;
+let organizationResizePointerId = null;
+let organizationResizeStartWorldX = 0;
+let organizationResizeStartWorldY = 0;
+let organizationResizeOriginal = null;
+let organizationResizeCorner = null;
+let organizationResizeWasMoved = false;
+let organizationCreateActive = false;
+let organizationCreateStart = null;
+let organizationCreatePointerId = null;
+let organizationCreatePreview = null;
+
+function rectsOverlap(a, b, padding = 0) {
+  return a.x < b.x + b.width - padding &&
+         a.x + a.width > b.x + padding &&
+         a.y < b.y + b.height - padding &&
+         a.y + a.height > b.y + padding;
+}
+
+function charactersOverlapAt(character, x, y) {
+  return characters.some(other => {
+    if (other.id === character.id) return false;
+    // キャラの丸い枠全体が重ならないように判定する。
+    return Math.hypot(other.x - x, other.y - y) < CHARACTER_COLLISION_RADIUS * 2;
+  });
+}
+
+function organizationMembersOverlap(group, projectedPositions = null) {
+  const positions = projectedPositions || getOrganizationCharacters(group.id).map(c => ({id:c.id, x:c.x, y:c.y}));
+  for (let i = 0; i < positions.length; i++) {
+    for (let j = i + 1; j < positions.length; j++) {
+      if (Math.hypot(positions[i].x - positions[j].x, positions[i].y - positions[j].y) < CHARACTER_COLLISION_RADIUS * 2) return true;
+    }
+  }
+  return false;
+}
+
+function getProjectedMemberPositions(group, x, y, width, height) {
+  const pad = NODE_RADIUS + 12;
+  return getOrganizationCharacters(group.id).map(c => ({
+    id:c.id,
+    x:clamp(c.x, x + pad, x + width - pad),
+    y:clamp(c.y, y + pad, y + height - pad)
+  }));
+}
+
+function pointInsideOrganization(x, y, group, margin = 0) {
+  return x >= group.x + margin &&
+         x <= group.x + group.width - margin &&
+         y >= group.y + margin &&
+         y <= group.y + group.height - margin;
+}
+
+function getCharacterOrganizationAt(x, y, excludeId=null) {
+  // ドラッグ終了時はキャラの中心が組織枠の内側なら所属対象。
+  // 枠線ぎりぎりでも判定できるよう、判定対象を少しだけ外側へ広げる。
+  return organizationData.find(g =>
+    !g.collapsed &&
+    g.id !== excludeId &&
+    x >= g.x && x <= g.x + g.width &&
+    y >= g.y && y <= g.y + g.height
+  ) || null;
+}
+
+function getVisibleOrganization(group) {
+  return !group.collapsed;
+}
+
+function isCharacterHiddenByOrganization(character) {
+  if (!character.organizationId) return false;
+  const group = organizationData.find(g => g.id === character.organizationId);
+  return !!(group && group.collapsed);
+}
+
+function getRelationEntity(id) {
+  return getCharacter(id) || organizationData.find(g => g.id === id) || null;
+}
+
+function isRelationHiddenByOrganization(relation) {
+  const from = getRelationEntity(relation.from);
+  const to = getRelationEntity(relation.to);
+  if (!from || !to) return true;
+  if (from.id && organizationData.some(g => g.id === from.id) && from.collapsed) return true;
+  if (to.id && organizationData.some(g => g.id === to.id) && to.collapsed) return true;
+  return !!((from.id && getCharacter(from.id) && isCharacterHiddenByOrganization(from)) ||
+            (to.id && getCharacter(to.id) && isCharacterHiddenByOrganization(to)));
+}
+
+function assignCharactersToOrganization(group) {
+  for (const character of characters) {
+    // 中心点が枠の内側にあるキャラだけ所属させる。
+    if (pointInsideOrganization(character.x, character.y, group, NODE_RADIUS + 8)) {
+      character.organizationId = group.id;
+    }
+  }
+}
+
+function keepOrganizationMembersInside(group) {
+  const pad = NODE_RADIUS + 12;
+  for (const character of getOrganizationCharacters(group.id)) {
+    character.x = clamp(character.x, group.x + pad, group.x + group.width - pad);
+    character.y = clamp(character.y, group.y + pad, group.y + group.height - pad);
+  }
+}
+
+function removeCharacterFromOrganizationIfOutside(character) {
+  if (!character.organizationId) return;
+  const group = organizationData.find(g => g.id === character.organizationId);
+  if (!group || !pointInsideOrganization(character.x, character.y, group, NODE_RADIUS + 8)) {
+    character.organizationId = null;
+  }
+}
+
+function updateOrganizationBoxes() {
+  document.querySelectorAll('.group-box').forEach(el => el.remove());
+
+  for (const group of organizationData) {
+    const box = document.createElement('div');
+    box.className = 'group-box' + (group.collapsed ? ' collapsed' : '') + (selectedOrganizationId === group.id ? ' selected' : '');
+    box.dataset.id = group.id;
+    box.style.left = group.x + 'px';
+    box.style.top = group.y + 'px';
+    box.style.width = group.width + 'px';
+    box.style.height = group.height + 'px';
+    box.style.borderColor = group.color;
+
+    const header = document.createElement('div');
+    header.className = 'group-header';
+    header.textContent = `${group.name} ${group.collapsed ? 'CLOSE' : 'OPEN'}`;
+    header.style.borderColor = group.color;
+
+    header.addEventListener('pointerdown', event => {
+      if (organizationCreateActive) {
+        handleOrganizationCreationStart(event);
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      if (relationModeSourceId) {
+        startRelationModeTarget(group.id);
+        return;
+      }
+      startOrganizationDrag(event, group);
+    });
+
+    header.addEventListener('contextmenu', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      showOrganizationContextMenu(event.clientX, event.clientY, group);
+    });
+
+    box.addEventListener('pointerdown', event => {
+      if (organizationCreateActive) {
+        handleOrganizationCreationStart(event);
+        return;
+      }
+      // 関係名・リサイズハンドル・キャラは、それぞれ自身の操作を優先する。
+      if (event.target.closest && (event.target.closest('.relation-label-bg') || event.target.closest('.group-resize-handle') || event.target.closest('.character-node'))) return;
+      event.preventDefault();
+      event.stopPropagation();
+      selectedOrganizationId = group.id;
+      startOrganizationDrag(event, group);
+    });
+
+    box.addEventListener('contextmenu', event => {
+      if (event.target !== box) return;
+      event.preventDefault();
+      event.stopPropagation();
+      showOrganizationContextMenu(event.clientX, event.clientY, group);
+    });
+
+    box.appendChild(header);
+
+    if (!group.collapsed) {
+      for (const corner of ['nw','ne','sw','se']) {
+        const handle = document.createElement('div');
+        handle.className = `group-resize-handle group-resize-${corner}`;
+        handle.dataset.corner = corner;
+        handle.addEventListener('pointerdown', event => startOrganizationResize(event, group, corner));
+        box.appendChild(handle);
+      }
+    }
+
+    // 組織枠は関係線より前、キャラより後ろに配置。
+    map.appendChild(box);
+  }
+}
+
+function startOrganizationResize(event, group, corner) {
+  if (event.pointerType === 'mouse' && event.button !== 0) return;
+  event.preventDefault();
+  event.stopPropagation();
+  selectedOrganizationId = group.id;
+  resizingOrganization = group;
+  organizationResizePointerId = event.pointerId;
+  organizationResizeCorner = corner;
+  organizationResizeWasMoved = false;
+  const world = screenToWorld(event.clientX, event.clientY);
+  organizationResizeStartWorldX = world.x;
+  organizationResizeStartWorldY = world.y;
+  organizationResizeOriginal = { x:group.x, y:group.y, width:group.width, height:group.height };
+  document.addEventListener('pointermove', handleOrganizationResize);
+  document.addEventListener('pointerup', endOrganizationResize);
+  document.addEventListener('pointercancel', endOrganizationResize);
+}
+
+function moveCharacterOutsideRect(character, rect) {
+  const r = CHARACTER_COLLISION_RADIUS;
+  const left = rect.x - r;
+  const right = rect.x + rect.width + r;
+  const top = rect.y - r;
+  const bottom = rect.y + rect.height + r;
+  if (character.x < left || character.x > right || character.y < top || character.y > bottom) return true;
+
+  const distances = [
+    {x:left, y:character.y, d:Math.abs(character.x-left)},
+    {x:right, y:character.y, d:Math.abs(right-character.x)},
+    {x:character.x, y:top, d:Math.abs(character.y-top)},
+    {x:character.x, y:bottom, d:Math.abs(bottom-character.y)}
+  ];
+  distances.sort((a,b)=>a.d-b.d);
+  const p = distances[0];
+  character.x = clamp(p.x, r + 20, MAP_WIDTH - r - 20);
+  character.y = clamp(p.y, r + 20, MAP_HEIGHT - r - 20);
+  return true;
+}
+
+function pushOrganizationOutOfRect(other, rect) {
+  if (other.collapsed || !rectsOverlap(rect, other)) return true;
+  const gap = 12;
+  const candidates = [
+    {dx: rect.x - (other.x + other.width) - gap, dy:0},
+    {dx: rect.x + rect.width - other.x + gap, dy:0},
+    {dx:0, dy: rect.y - (other.y + other.height) - gap},
+    {dx:0, dy: rect.y + rect.height - other.y + gap}
+  ];
+  candidates.sort((a,b)=>Math.hypot(a.dx,a.dy)-Math.hypot(b.dx,b.dy));
+  for (const c of candidates) {
+    const nx = clamp(other.x + c.dx, 0, MAP_WIDTH - other.width);
+    const ny = clamp(other.y + c.dy, 0, MAP_HEIGHT - other.height);
+    const test = {...other, x:nx, y:ny};
+    if (organizationData.some(g => g.id !== other.id && g.id !== resizingOrganization?.id && !g.collapsed && rectsOverlap(test,g))) continue;
+    if (rectsOverlap(test, rect)) continue;
+    other.x=nx; other.y=ny;
+    // 呼び出し側で移動前後の差分を使って所属キャラも追従させる。
+    return true;
+  }
+  return false;
+}
+
+function prepareResizeObstacles(test, originalGroup) {
+  // 先に別組織を押し出す。
+  for (const other of organizationData) {
+    if (other.id === originalGroup.id || other.collapsed) continue;
+    if (rectsOverlap(test, other)) {
+      const oldX=other.x, oldY=other.y;
+      const ok = pushOrganizationOutOfRect(other, test);
+      if (!ok) return false;
+      const shiftX=other.x-oldX, shiftY=other.y-oldY;
+      for (const c of getOrganizationCharacters(other.id)) {
+        c.x += shiftX; c.y += shiftY;
+      }
+    }
+  }
+  // 組織外のキャラが新しい枠に入り込む場合は、枠の外へ押し出す。
+  for (const c of characters) {
+    if (c.organizationId === originalGroup.id) continue;
+    if (pointInsideOrganization(c.x, c.y, test, 0)) {
+      moveCharacterOutsideRect(c, test);
+    }
+  }
+  return true;
+}
+
+function handleOrganizationResize(event) {
+  if (!resizingOrganization || event.pointerId !== organizationResizePointerId) return;
+  const world = screenToWorld(event.clientX, event.clientY);
+  const dx = world.x - organizationResizeStartWorldX;
+  const dy = world.y - organizationResizeStartWorldY;
+  if (Math.hypot(dx,dy) > 5) organizationResizeWasMoved = true;
+  const o = organizationResizeOriginal;
+  const minW = NODE_RADIUS*2 + 50;
+  const minH = NODE_RADIUS*2 + 80;
+  let x=o.x, y=o.y, w=o.width, h=o.height;
+  if (organizationResizeCorner.includes('w')) { x = clamp(o.x + dx, 0, o.x+o.width-minW); w = o.width - (x-o.x); }
+  if (organizationResizeCorner.includes('e')) { w = clamp(o.width + dx, minW, MAP_WIDTH-o.x); }
+  if (organizationResizeCorner.includes('n')) { y = clamp(o.y + dy, 0, o.y+o.height-minH); h = o.height - (y-o.y); }
+  if (organizationResizeCorner.includes('s')) { h = clamp(o.height + dy, minH, MAP_HEIGHT-o.y); }
+  const test = {...resizingOrganization, x,y,width:w,height:h};
+  const projectedMembers = getProjectedMemberPositions(resizingOrganization, x, y, w, h);
+  if (!organizationMembersOverlap(resizingOrganization, projectedMembers)) {
+    const snapshot = organizationData.map(g => ({id:g.id,x:g.x,y:g.y,chars:getOrganizationCharacters(g.id).map(c=>({id:c.id,x:c.x,y:c.y}))}));
+    if (prepareResizeObstacles(test, resizingOrganization)) {
+      resizingOrganization.x=x; resizingOrganization.y=y; resizingOrganization.width=w; resizingOrganization.height=h;
+      projectedMembers.forEach(pos => {
+        const c = getCharacter(pos.id);
+        if (c) { c.x=pos.x; c.y=pos.y; }
+      });
+      updateNodes(); updateRelations();
+      return;
+    }
+    // 押し出せない場合は、今回のリサイズだけ元に戻す。
+    organizationData.forEach(g=>{const old=snapshot.find(v=>v.id===g.id); if(old){g.x=old.x;g.y=old.y; old.chars.forEach(v=>{const c=getCharacter(v.id);if(c){c.x=v.x;c.y=v.y;}});}});
+  }
+}
+
+function endOrganizationResize(event) {
+  if (!resizingOrganization || event.pointerId !== organizationResizePointerId) return;
+  const moved=organizationResizeWasMoved;
+  resizingOrganization=null; organizationResizePointerId=null; organizationResizeOriginal=null; organizationResizeCorner=null; organizationResizeWasMoved=false;
+  document.removeEventListener('pointermove', handleOrganizationResize);
+  document.removeEventListener('pointerup', endOrganizationResize);
+  document.removeEventListener('pointercancel', endOrganizationResize);
+  updateNodes(); updateRelations();
+  if (moved) scheduleAutoSave();
+}
+
+function getOrganizationCharacters(groupId) {
+  return characters.filter(c => c.organizationId === groupId);
+}
+
+function organizationCanOccupy(group, x, y, width = group.width, height = group.height) {
+  const test = { ...group, x, y, width, height };
+  const pad = NODE_RADIUS + 8;
+
+  if (organizationData.some(other => other.id !== group.id && !other.collapsed && rectsOverlap(test, other))) return false;
+
+  if (characters.some(c => {
+    if (c.organizationId === group.id) return false;
+    return pointInsideOrganization(c.x, c.y, test, pad);
+  })) return false;
+
+  const projected = getProjectedMemberPositions(group, x, y, width, height);
+  if (organizationMembersOverlap(group, projected)) return false;
+
+  return true;
+}
+
+function startOrganizationDrag(event, group) {
+  draggingOrganization = group;
+  organizationDragPointerId = event.pointerId;
+  organizationWasDragged = false;
+  const world = screenToWorld(event.clientX, event.clientY);
+  organizationDragStartWorldX = world.x;
+  organizationDragStartWorldY = world.y;
+  organizationOriginalX = group.x;
+  organizationOriginalY = group.y;
+  organizationOriginalPositions = getOrganizationCharacters(group.id).map(c => ({ id:c.id, x:c.x, y:c.y }));
+  document.addEventListener('pointermove', handleOrganizationDrag);
+  document.addEventListener('pointerup', endOrganizationDrag);
+  document.addEventListener('pointercancel', endOrganizationDrag);
+}
+
+function handleOrganizationDrag(event) {
+  if (!draggingOrganization || event.pointerId !== organizationDragPointerId) return;
+  const world = screenToWorld(event.clientX, event.clientY);
+  const dx = world.x - organizationDragStartWorldX;
+  const dy = world.y - organizationDragStartWorldY;
+  if (Math.hypot(dx, dy) > 8) organizationWasDragged = true;
+
+  const nextX = clamp(organizationOriginalX + dx, 0, MAP_WIDTH - draggingOrganization.width);
+  const nextY = clamp(organizationOriginalY + dy, 0, MAP_HEIGHT - draggingOrganization.height);
+
+  // 組織外のキャラクターを枠の中へ巻き込まない。
+  if (!organizationCanOccupy(draggingOrganization, nextX, nextY)) return;
+
+  const actualDx = nextX - organizationOriginalX;
+  const actualDy = nextY - organizationOriginalY;
+  draggingOrganization.x = nextX;
+  draggingOrganization.y = nextY;
+
+  for (const original of organizationOriginalPositions || []) {
+    const c = getCharacter(original.id);
+    if (!c) continue;
+    c.x = original.x + actualDx;
+    c.y = original.y + actualDy;
+  }
+  updateNodes();
+  updateRelations();
+}
+
+function endOrganizationDrag(event) {
+  if (!draggingOrganization || event.pointerId !== organizationDragPointerId) return;
+  const group = draggingOrganization;
+  const wasDragged = organizationWasDragged;
+  draggingOrganization = null;
+  organizationDragPointerId = null;
+  organizationOriginalPositions = null;
+  organizationOriginalX = 0;
+  organizationOriginalY = 0;
+  organizationWasDragged = false;
+  document.removeEventListener('pointermove', handleOrganizationDrag);
+  document.removeEventListener('pointerup', endOrganizationDrag);
+  document.removeEventListener('pointercancel', endOrganizationDrag);
+
+  if (!wasDragged) {
+    group.collapsed = !group.collapsed;
+  } else {
+    keepOrganizationMembersInside(group);
+  }
+  updateNodes();
+  updateRelations();
+  scheduleAutoSave();
+}
+
+function startOrganizationCreation() {
+  hideContextMenu();
+  cancelRelationMode();
+  organizationCreateActive = true;
+  organizationCreateStart = null;
+  organizationCreatePointerId = null;
+  organizationCreateMode.style.display = 'block';
+  organizationCreateMode.innerHTML = '<strong>組織枠作成モード</strong>　始点を押して、離したところを終点にしてください　<span>ESCでキャンセル</span>';
+}
+
+function cancelOrganizationCreation() {
+  organizationCreateActive = false;
+  organizationCreateStart = null;
+  organizationCreatePointerId = null;
+  organizationCreateMode.style.display = 'none';
+  if (organizationCreatePreview) organizationCreatePreview.style.display = 'none';
+}
+
+function handleOrganizationCreationStart(event) {
+  if (!organizationCreateActive) return false;
+  if (event.pointerType === 'mouse' && event.button !== 0) return false;
+  event.preventDefault();
+  event.stopPropagation();
+  organizationCreatePointerId = event.pointerId;
+  organizationCreateStart = screenToWorld(event.clientX, event.clientY);
+  organizationCreateMode.innerHTML = '<strong>組織枠作成モード</strong>　そのままドラッグして終点で離してください　<span>ESCでキャンセル</span>';
+  document.addEventListener('pointermove', handleOrganizationCreationMove);
+  document.addEventListener('pointerup', handleOrganizationCreationEnd);
+  document.addEventListener('pointercancel', handleOrganizationCreationEnd);
+  return true;
+}
+
+function handleOrganizationCreationMove(event) {
+  if (!organizationCreateActive || organizationCreatePointerId !== event.pointerId || !organizationCreateStart) return;
+  event.preventDefault();
+  const world = screenToWorld(event.clientX, event.clientY);
+  const x = Math.min(organizationCreateStart.x, world.x);
+  const y = Math.min(organizationCreateStart.y, world.y);
+  const width = Math.abs(world.x - organizationCreateStart.x);
+  const height = Math.abs(world.y - organizationCreateStart.y);
+  if (organizationCreatePreview) {
+    organizationCreatePreview.style.display = 'block';
+    organizationCreatePreview.style.left = x + 'px';
+    organizationCreatePreview.style.top = y + 'px';
+    organizationCreatePreview.style.width = width + 'px';
+    organizationCreatePreview.style.height = height + 'px';
+    organizationCreatePreview.style.borderColor = (width >= NODE_RADIUS*2+30 && height >= NODE_RADIUS*2+30) ? 'rgba(120,210,255,.95)' : 'rgba(255,120,120,.95)';
+  }
+}
+
+function handleOrganizationCreationEnd(event) {
+  if (!organizationCreateActive || organizationCreatePointerId !== event.pointerId || !organizationCreateStart) return;
+  event.preventDefault();
+  event.stopPropagation();
+  const world = screenToWorld(event.clientX, event.clientY);
+  const startPoint = organizationCreateStart;
+  document.removeEventListener('pointermove', handleOrganizationCreationMove);
+  document.removeEventListener('pointerup', handleOrganizationCreationEnd);
+  document.removeEventListener('pointercancel', handleOrganizationCreationEnd);
+  cancelOrganizationCreation();
+
+  const x = Math.min(startPoint.x, world.x);
+  const y = Math.min(startPoint.y, world.y);
+  const width = Math.abs(world.x - startPoint.x);
+  const height = Math.abs(world.y - startPoint.y);
+  if (width < NODE_RADIUS * 2 + 30 || height < NODE_RADIUS * 2 + 30) {
+    alert('組織枠が小さすぎます。キャラクターが入る大きさで指定してください。');
+    return true;
+  }
+  const test = {x,y,width,height};
+  if (organizationData.some(g => !g.collapsed && rectsOverlap(test, g))) {
+    alert('別の組織枠と重なるため、組織枠を作成できません。');
+    return true;
+  }
+  const group = normalizeOrganization({
+    id: generateId('org'), name: pick(generatorLists.organizations, '組織'),
+    x, y, width, height, collapsed:false
+  });
+  organizationData.push(group);
+  assignCharactersToOrganization(group);
+  keepOrganizationMembersInside(group);
+  updateNodes();
+  updateRelations();
+  scheduleAutoSave();
+  return true;
+}
+
+// 既存の「クリック→クリック」API名を残しつつ、実体は押下→離上方式にする。
+function handleOrganizationCreationPoint(event) {
+  return handleOrganizationCreationStart(event);
+}
+
+function showOrganizationContextMenu(x, y, group) {
+  cancelRelationMode();
+  hideContextMenu();
+
+  contextMenu.appendChild(createContextButton(group.collapsed ? '組織をOPEN' : '組織をCLOSE', () => {
+    hideContextMenu(); group.collapsed=!group.collapsed; selectedOrganizationId=group.id; updateNodes(); updateRelations(); scheduleAutoSave();
+  }));
+  contextMenu.appendChild(createContextButton('組織名を変更', () => {
+    hideContextMenu(); showTextDialog('組織名を変更', group.name).then(value=>{ if(value && value.trim()){group.name=value.trim();updateNodes();scheduleAutoSave();} });
+  }));
+  contextMenu.appendChild(createContextButton('組織内に新規キャラ', () => { hideContextMenu(); addCharacterAtInOrganization(group); }));
+  contextMenu.appendChild(createContextButton('組織内にランダムキャラ生成', () => { hideContextMenu(); createRandomCharacterInOrganization(group); }));
+  contextMenu.appendChild(createContextButton('＋ 関係追加', () => { hideContextMenu(); startRelationMode(group.id); }));
+  contextMenu.appendChild(createContextButton('所属キャラを詳細表示', () => { hideContextMenu(); showOrganizationMembers(group); }));
+  contextMenu.appendChild(createContextButton('組織内を整列', () => { hideContextMenu(); arrangeOrganization(group); }));
+  contextMenu.appendChild(createContextButton('組織を削除', () => { deleteOrganization(group); }));
+  showContextMenuAt(x, y);
+}
+
+function deleteOrganization(group) {
+  hideContextMenu();
+  const target = organizationData.find(g => g.id === group.id);
+  if (!target) return;
+
+  // 「組織を削除」を選択した時点で、組織枠そのものは必ず削除する。
+  // 所属キャラを残すか削除するかだけをここで選択する。
+  const members = getOrganizationCharacters(target.id);
+  let deleteMembers = false;
+
+  if (members.length) {
+    deleteMembers = confirm(
+      `「${target.name}」を完全に削除します。\n\n` +
+      `所属キャラ ${members.length} 人も削除しますか？\n\n` +
+      `【OK】組織＋所属キャラを削除\n` +
+      `【キャンセル】組織だけ削除し、キャラは無所属で残す`
+    );
+  }
+
+  // 組織への関係を先に削除する。
+  relationData = relationData.filter(r => r.from !== target.id && r.to !== target.id);
+
+  if (deleteMembers) {
+    const memberIds = new Set(members.map(c => c.id));
+    characters = characters.filter(c => !memberIds.has(c.id));
+    relationData = relationData.filter(r => !memberIds.has(r.from) && !memberIds.has(r.to));
+  } else {
+    // 組織だけ完全に消し、キャラは無所属として残す。
+    characters.forEach(c => {
+      if (c.organizationId === target.id) c.organizationId = null;
+    });
+  }
+
+  organizationData = organizationData.filter(g => g.id !== target.id);
+  if (selectedOrganizationId === target.id) selectedOrganizationId = null;
+
+  updateNodes();
+  updateRelations();
+  scheduleAutoSave();
+}
+
+function addCharacterAtInOrganization(group) {
+  const pad = NODE_RADIUS + 25;
+  const x = group.x + group.width/2;
+  const y = group.y + group.height/2;
+  showTextDialog('組織内にキャラクター追加', '').then(name => {
+    if (!name || !name.trim()) return;
+    const pos = findOpenOrganizationPosition(group, x, y);
+    if (!pos) { alert('組織内にキャラクターを配置できる空きがありません。'); return; }
+    characters.push(normalizeCharacter({id:generateId('character'),name:name.trim(),x:pos.x,y:pos.y,status:'OPEN',organizationId:group.id}));
+    updateNodes(); updateRelations(); scheduleAutoSave();
+  });
+}
+
+function createRandomCharacterInOrganization(group) {
+  const pos = findOpenOrganizationPosition(group, group.x+group.width/2, group.y+group.height/2);
+  if (!pos) { alert('組織内にキャラクターを配置できる空きがありません。'); return; }
+  const name = pick(generatorLists.surnames,'名無し') + pick(generatorLists.names,'太郎');
+  characters.push(normalizeCharacter({id:generateId('character'),name,x:pos.x,y:pos.y,status:'OPEN',organizationId:group.id,details:{notes:'ランダム生成（組織内）'},stats:{'体力':Math.floor(Math.random()*101),'知力':Math.floor(Math.random()*101),'精神力':Math.floor(Math.random()*101),'戦闘力':Math.floor(Math.random()*101),'運':Math.floor(Math.random()*101)}}));
+  updateNodes(); updateRelations(); scheduleAutoSave();
+}
+
+function findOpenOrganizationPosition(group, preferredX, preferredY) {
+  const pad=NODE_RADIUS+30;
+  const minX=group.x+pad, maxX=group.x+group.width-pad;
+  const minY=group.y+pad, maxY=group.y+group.height-pad;
+  if (minX>maxX || minY>maxY) return null;
+  const candidates=[];
+  for(let r=0;r<8;r++) for(let a=0;a<24;a++) {
+    const radius=r*70;
+    const angle=(a/24)*Math.PI*2;
+    candidates.push({x:clamp(preferredX+Math.cos(angle)*radius,minX,maxX),y:clamp(preferredY+Math.sin(angle)*radius,minY,maxY)});
+  }
+  candidates.push({x:(minX+maxX)/2,y:(minY+maxY)/2});
+  for(const pos of candidates) {
+    const occupied=characters.some(c=>c.organizationId===group.id && Math.hypot(c.x-pos.x,c.y-pos.y)<NODE_RADIUS*2+20);
+    if(!occupied) return pos;
+  }
+  return null;
+}
+
+function createOrganization() {
+  startOrganizationCreation();
+}
+
+function showOrganizationMembers(group) {
+  const members = getOrganizationCharacters(group.id);
+  const names = members.length ? members.map(c => c.name).join('、') : '所属キャラクターなし';
+  alert(`【${group.name}】\n${names}`);
+}
+
+function arrangeOrganization(group) {
+  const members = getOrganizationCharacters(group.id);
+  if (!members.length) return;
+  const pad = NODE_RADIUS + 30;
+  const cols = Math.max(1, Math.floor((group.width - pad*2) / (NODE_RADIUS*2 + 25)));
+  const rows = Math.ceil(members.length / cols);
+  const stepX = cols > 1 ? (group.width - pad*2) / (cols-1) : 0;
+  const stepY = rows > 1 ? (group.height - pad*2) / (rows-1) : 0;
+  members.forEach((c,i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    c.x = group.x + (cols > 1 ? pad + col*stepX : group.width/2);
+    c.y = group.y + (rows > 1 ? pad + row*stepY : group.height/2);
+  });
+  updateNodes(); updateRelations(); scheduleAutoSave();
+}
+
 /* =====================================================
    関係更新
 ===================================================== */
@@ -1285,15 +2565,10 @@ function updateRelations() {
     of relationData
   ) {
 
-    const from =
-      getCharacter(
-        relation.from
-      );
+    const from = getRelationEntity(relation.from);
+    const to = getRelationEntity(relation.to);
 
-    const to =
-      getCharacter(
-        relation.to
-      );
+    if (isRelationHiddenByOrganization(relation)) continue;
 
     if (
       !from ||
@@ -1362,6 +2637,18 @@ function updateRelations() {
    関係描画
 ===================================================== */
 
+function getRelationBoundaryPoint(entity, dx, dy, direction) {
+  if (organizationData.some(g => g.id === entity.id)) {
+    const g = entity;
+    const ux = dx * direction, uy = dy * direction;
+    const halfW = g.width/2, halfH = g.height/2;
+    const scale = 1 / Math.max(Math.abs(ux)/Math.max(halfW,1), Math.abs(uy)/Math.max(halfH,1), 0.0001);
+    return { x:g.x+halfW+ux*scale, y:g.y+halfH+uy*scale };
+  }
+  const radius = NODE_RADIUS;
+  return { x:entity.x + dx*radius*direction, y:entity.y + dy*radius*direction };
+}
+
 function drawRelation(
   relation,
   from,
@@ -1398,26 +2685,12 @@ function drawRelation(
   const py = dx;
 
 
-  const startX =
-    from.x +
-    dx * NODE_RADIUS +
-    px * perpendicularOffset;
-
-  const startY =
-    from.y +
-    dy * NODE_RADIUS +
-    py * perpendicularOffset;
-
-
-  const endX =
-    to.x -
-    dx * NODE_RADIUS +
-    px * perpendicularOffset;
-
-  const endY =
-    to.y -
-    dy * NODE_RADIUS +
-    py * perpendicularOffset;
+  const startPoint = getRelationBoundaryPoint(from, dx, dy, 1);
+  const endPoint = getRelationBoundaryPoint(to, dx, dy, -1);
+  const startX = startPoint.x + px * perpendicularOffset;
+  const startY = startPoint.y + py * perpendicularOffset;
+  const endX = endPoint.x + px * perpendicularOffset;
+  const endY = endPoint.y + py * perpendicularOffset;
 
 
   const centerX =
@@ -1539,6 +2812,15 @@ function drawRelation(
     "marker-end",
     "url(#arrow)"
   );
+
+  const fromIsOrganization = organizationData.some(g => g.id === from.id);
+  const toIsOrganization = organizationData.some(g => g.id === to.id);
+  const organizationToOrganization = fromIsOrganization && toIsOrganization;
+  if (organizationToOrganization) {
+    line1.classList.add("organization-relation");
+    line2.classList.add("organization-relation");
+    line2.setAttribute("marker-end", "url(#organizationArrow)");
+  }
 
 
   const relationColor =
@@ -1915,6 +3197,11 @@ function handleCharacterPointerDown(
   event
 ) {
 
+  if (organizationCreateActive) {
+    handleOrganizationCreationPoint(event);
+    return;
+  }
+
   if (
     event.pointerType === "touch"
   ) {
@@ -2029,6 +3316,8 @@ function handleCharacterPointerDown(
   dragStartCharacterY =
     draggingCharacter.y;
 
+  dragStartCharacterOrganizationId = draggingCharacter.organizationId || null;
+
 
   /*
     スマホ長押し
@@ -2131,25 +3420,12 @@ function handleCharacterDrag(
   }
 
 
-  draggingCharacter.x =
-    clamp(
-      dragStartCharacterX + dx,
-      NODE_RADIUS + 20,
-      MAP_WIDTH -
-        NODE_RADIUS -
-        20
-    );
-
-
-  draggingCharacter.y =
-    clamp(
-      dragStartCharacterY + dy,
-      NODE_RADIUS + 20,
-      MAP_HEIGHT -
-        NODE_RADIUS -
-        20
-    );
-
+  // 移動中は他ノードとの重なりを許可する。
+  // 重なり判定はドラッグ終了時だけ行う。
+  const candidateX = clamp(dragStartCharacterX + dx, NODE_RADIUS + 20, MAP_WIDTH - NODE_RADIUS - 20);
+  const candidateY = clamp(dragStartCharacterY + dy, NODE_RADIUS + 20, MAP_HEIGHT - NODE_RADIUS - 20);
+  draggingCharacter.x = candidateX;
+  draggingCharacter.y = candidateY;
 
   updateNodes();
 
@@ -2239,12 +3515,50 @@ function handleCharacterDragEnd(
     絶対にOPEN/CLOSEを切り替えない
   */
 
-  if (
-    wasDragged
-  ) {
+  if (wasDragged) {
+    const originalX = dragStartCharacterX;
+    const originalY = dragStartCharacterY;
+    const originalOrganizationId = dragStartCharacterOrganizationId;
+    const originalGroup = originalOrganizationId
+      ? organizationData.find(g => g.id === originalOrganizationId) || null
+      : null;
 
+    // pointerup位置を最終位置として必ず反映する（最後のpointermoveが届かなかった場合にも対応）。
+    const finalX = clamp(dragStartCharacterX + dx, NODE_RADIUS + 20, MAP_WIDTH - NODE_RADIUS - 20);
+    const finalY = clamp(dragStartCharacterY + dy, NODE_RADIUS + 20, MAP_HEIGHT - NODE_RADIUS - 20);
+    character.x = finalX;
+    character.y = finalY;
+
+    const destinationGroup = getCharacterOrganizationAt(finalX, finalY, null);
+    const destinationOrganizationId = destinationGroup ? destinationGroup.id : null;
+    const leavingOriginal = !!originalGroup && destinationOrganizationId !== originalOrganizationId;
+    const joiningDestination = !!destinationGroup && destinationOrganizationId !== originalOrganizationId;
+
+    let accepted = true;
+    if (leavingOriginal) {
+      accepted = confirm(`「${originalGroup.name}」から離脱させますか？\n\n【OK】離脱する\n【キャンセル】移動をキャンセル`);
+    }
+    if (accepted && joiningDestination) {
+      accepted = confirm(`「${destinationGroup.name}」に所属しますか？\n\n【OK】所属する\n【キャンセル】移動をキャンセル`);
+    }
+
+    if (!accepted) {
+      character.x = originalX;
+      character.y = originalY;
+      character.organizationId = originalOrganizationId;
+    } else {
+      character.organizationId = destinationOrganizationId;
+      // 最終位置だけは丸全体の重なりを禁止する。
+      if (charactersOverlapAt(character, character.x, character.y)) {
+        character.x = originalX;
+        character.y = originalY;
+        character.organizationId = originalOrganizationId;
+      }
+    }
+
+    updateNodes();
+    updateRelations();
     scheduleAutoSave();
-
     return;
   }
 
@@ -2551,6 +3865,11 @@ function getTouchDistance() {
 viewport.addEventListener(
   "pointerdown",
   event => {
+
+    if (organizationCreateActive) {
+      handleOrganizationCreationPoint(event);
+      return;
+    }
 
     /*
       タッチ
@@ -3164,6 +4483,15 @@ function showCharacterContextMenu(
     );
 
 
+  const detailButton =
+    createContextButton(
+      "詳細設定",
+      () => {
+        hideContextMenu();
+        showCharacterDetail(character);
+      }
+    );
+
   const relationButton =
     createContextButton(
       "＋ 関係追加",
@@ -3194,6 +4522,10 @@ function showCharacterContextMenu(
 
   contextMenu.appendChild(
     renameButton
+  );
+
+  contextMenu.appendChild(
+    detailButton
   );
 
   contextMenu.appendChild(
@@ -3241,6 +4573,15 @@ function showRelationContextMenu(
     );
 
 
+  const detailButton =
+    createContextButton(
+      "関係・感情を詳細設定",
+      () => {
+        hideContextMenu();
+        showRelationDetail(relation);
+      }
+    );
+
   const deleteButton =
     createContextButton(
       "関係を削除",
@@ -3257,6 +4598,10 @@ function showRelationContextMenu(
 
   contextMenu.appendChild(
     renameButton
+  );
+
+  contextMenu.appendChild(
+    detailButton
   );
 
   contextMenu.appendChild(
@@ -3323,15 +4668,8 @@ function deleteRelation(
   relation
 ) {
 
-  const from =
-    getCharacter(
-      relation.from
-    );
-
-  const to =
-    getCharacter(
-      relation.to
-    );
+  const from = getRelationEntity(relation.from);
+  const to = getRelationEntity(relation.to);
 
 
   const fromName =
@@ -3403,6 +4741,24 @@ function showBackgroundContextMenu(
     );
 
 
+  const orgButton =
+    createContextButton(
+      "＋ 組織枠を追加",
+      () => {
+        hideContextMenu();
+        startOrganizationCreation();
+      }
+    );
+
+  const randomButton =
+    createContextButton(
+      "ランダムキャラクター生成",
+      () => {
+        hideContextMenu();
+        createRandomCharacterAt(worldX, worldY);
+      }
+    );
+
   const exportButton =
     createContextButton(
       "マップを書き出す",
@@ -3429,6 +4785,14 @@ function showBackgroundContextMenu(
 
   contextMenu.appendChild(
     addButton
+  );
+
+  contextMenu.appendChild(
+    randomButton
+  );
+
+  contextMenu.appendChild(
+    orgButton
   );
 
   contextMenu.appendChild(
@@ -3561,6 +4925,147 @@ document.addEventListener(
 );
 
 
+
+/* =====================================================
+   CHARACTER / RELATION DETAIL EDITORS
+===================================================== */
+
+function showCharacterDetail(character) {
+  const panel = document.getElementById("detailPanel");
+  const details = character.details || {};
+  const stats = character.stats || {};
+  character.details = details;
+  character.stats = stats;
+
+  const statRows = Object.entries(stats).map(([key,value]) => `
+    <div class="param-row">
+      <input data-stat-name="${escapeHtml(key)}" value="${escapeHtml(key)}">
+      <input type="number" min="0" max="100" data-stat-value="${escapeHtml(key)}" value="${Number(value)||0}">
+    </div>`).join("");
+
+  panel.innerHTML = `
+    <div class="feature-title">キャラクター詳細設定：${escapeHtml(character.name)}</div>
+    <div class="feature-grid">
+      <div class="feature-field"><label>名前</label><input id="detailName" value="${escapeHtml(character.name)}"></div>
+      <div class="feature-field"><label>読み</label><input id="detailReading" value="${escapeHtml(details.reading||"")}"></div>
+      <div class="feature-field"><label>年齢</label><input id="detailAge" value="${escapeHtml(details.age||"")}"></div>
+      <div class="feature-field"><label>性別</label><input id="detailGender" value="${escapeHtml(details.gender||"")}"></div>
+      <div class="feature-field"><label>役職</label><input id="detailRole" value="${escapeHtml(details.role||"")}"></div>
+      <div class="feature-field"><label>所属組織</label>
+        <select id="detailOrganization">
+          <option value="">所属なし</option>
+          ${organizationData.map(g => `<option value="${escapeHtml(g.id)}" ${character.organizationId===g.id?"selected":""}>${escapeHtml(g.name)}</option>`).join("")}
+        </select>
+      </div>
+      <div class="feature-field"><label>一人称</label><input id="detailFirstPerson" value="${escapeHtml(details.firstPerson||"")}"></div>
+    </div>
+    <div class="feature-section">
+      <div class="feature-title" style="font-size:15px">能力・性格パラメータ（0～100）</div>
+      <div id="statRows">${statRows}</div>
+      <button class="mini-button" id="addStatButton">＋ パラメータ追加</button>
+    </div>
+    <div class="feature-section feature-field">
+      <label>自由設定</label>
+      <textarea id="detailNotes">${escapeHtml(details.notes||"")}</textarea>
+    </div>
+    <div class="feature-actions">
+      <button class="mini-button" id="detailCancel">キャンセル</button>
+      <button class="mini-button" id="detailSave">保存</button>
+    </div>`;
+
+  document.getElementById("detailOverlay").style.display = "flex";
+
+  document.getElementById("addStatButton").onclick = () => {
+    const row = document.createElement("div");
+    row.className = "param-row";
+    row.innerHTML = `<input placeholder="項目名"><input type="number" min="0" max="100" value="50">`;
+    document.getElementById("statRows").appendChild(row);
+  };
+
+  document.getElementById("detailCancel").onclick = () => closeFeatureOverlay("detailOverlay");
+
+  document.getElementById("detailSave").onclick = () => {
+    character.name = document.getElementById("detailName").value.trim() || character.name;
+    character.organizationId = document.getElementById("detailOrganization").value || null;
+    character.details = {
+      ...details,
+      reading: document.getElementById("detailReading").value,
+      age: document.getElementById("detailAge").value,
+      gender: document.getElementById("detailGender").value,
+      role: document.getElementById("detailRole").value,
+      firstPerson: document.getElementById("detailFirstPerson").value,
+      notes: document.getElementById("detailNotes").value
+    };
+    character.stats = {};
+    document.querySelectorAll("#statRows .param-row").forEach(row => {
+      const inputs = row.querySelectorAll("input");
+      const key = inputs[0].value.trim();
+      if (key) character.stats[key] = clamp(Number(inputs[1].value)||0, 0, 100);
+    });
+    closeFeatureOverlay("detailOverlay");
+    updateNodes();
+    updateRelations();
+    scheduleAutoSave();
+  };
+}
+
+function showRelationDetail(relation) {
+  relation.emotions = relation.emotions || {};
+  const merged = {};
+  DEFAULT_EMOTIONS.forEach(k => merged[k] = Number(relation.emotions[k]) || 0);
+  Object.entries(relation.emotions).forEach(([k,v]) => merged[k] = Number(v)||0);
+
+  const panel = document.getElementById("detailPanel");
+  const rows = Object.entries(merged).map(([name,value]) => `
+    <div class="emotion-meter">
+      <label>${escapeHtml(name)}</label>
+      <input type="range" min="-100" max="100" value="${value}" data-emotion="${escapeHtml(name)}">
+    </div>`).join("");
+
+  panel.innerHTML = `
+    <div class="feature-title">関係詳細：${escapeHtml(relation.name)}</div>
+    <div class="feature-field"><label>関係名</label><input id="relationDetailName" value="${escapeHtml(relation.name)}"></div>
+    <div class="feature-section">
+      <div class="feature-title" style="font-size:15px">感情パラメータ（-100～100）</div>
+      <div id="emotionRows">${rows}</div>
+      <button class="mini-button" id="addEmotionButton">＋ 感情を追加</button>
+    </div>
+    <div class="feature-actions">
+      <button class="mini-button" id="relationDetailCancel">キャンセル</button>
+      <button class="mini-button" id="relationDetailSave">保存</button>
+    </div>`;
+
+  document.getElementById("detailOverlay").style.display = "flex";
+  document.getElementById("relationDetailCancel").onclick = () => closeFeatureOverlay("detailOverlay");
+  document.getElementById("addEmotionButton").onclick = () => {
+    const name = prompt("追加する感情名");
+    if (!name || !name.trim()) return;
+    if (document.querySelector(`[data-emotion="${CSS.escape(name.trim())}"]`)) return;
+    const row = document.createElement("div");
+    row.className = "emotion-meter";
+    row.innerHTML = `<label>${escapeHtml(name.trim())}</label><input type="range" min="-100" max="100" value="0" data-emotion="${escapeHtml(name.trim())}">`;
+    document.getElementById("emotionRows").appendChild(row);
+  };
+  document.getElementById("relationDetailSave").onclick = () => {
+    relation.name = document.getElementById("relationDetailName").value.trim() || relation.name;
+    relation.emotions = {};
+    document.querySelectorAll("#emotionRows input[data-emotion]").forEach(input => {
+      relation.emotions[input.dataset.emotion] = Number(input.value) || 0;
+    });
+    closeFeatureOverlay("detailOverlay");
+    updateRelations();
+    scheduleAutoSave();
+  };
+}
+
+function closeFeatureOverlay(id) {
+  document.getElementById(id).style.display = "none";
+}
+
+document.getElementById("detailOverlay").addEventListener("pointerdown", e => {
+  if (e.target.id === "detailOverlay") closeFeatureOverlay("detailOverlay");
+});
+
 /* =====================================================
    キャラ追加
 ===================================================== */
@@ -3626,6 +5131,73 @@ async function addCharacterAt(
   scheduleAutoSave();
 }
 
+
+
+/* =====================================================
+   RANDOM GENERATION
+===================================================== */
+
+function pick(list, fallback) {
+  const arr = Array.isArray(list) && list.length ? list : [fallback];
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+
+function createRandomCharacterAt(x,y) {
+  const name = pick(generatorLists.surnames,"名無し") + pick(generatorLists.names,"太郎");
+  const character = normalizeCharacter({
+    id: generateId("character"),
+    name,
+    x: clamp(x, NODE_RADIUS+20, MAP_WIDTH-NODE_RADIUS-20),
+    y: clamp(y, NODE_RADIUS+20, MAP_HEIGHT-NODE_RADIUS-20),
+    status: "OPEN",
+    organizationId: null,
+    details: { notes: "ランダム生成" },
+    stats: {
+      "体力": Math.floor(Math.random()*101),
+      "知力": Math.floor(Math.random()*101),
+      "精神力": Math.floor(Math.random()*101),
+      "戦闘力": Math.floor(Math.random()*101),
+      "運": Math.floor(Math.random()*101)
+    }
+  });
+  characters.push(character);
+  updateNodes();
+  updateRelations();
+  scheduleAutoSave();
+}
+
+function randomGenerate() {
+  const mode = prompt("生成対象を入力してください：\\n1 = キャラクター\\n2 = 関係\\n3 = 組織");
+  if (mode === "1") {
+    createRandomCharacterAt(MAP_WIDTH/2 + (Math.random()-.5)*500, MAP_HEIGHT/2 + (Math.random()-.5)*500);
+  } else if (mode === "2") {
+    const candidates = characters.filter(c => c.id);
+    if (candidates.length < 2) return alert("キャラクターが2人以上必要です。");
+    const from = pick(candidates, candidates[0]);
+    let to = pick(candidates, candidates[1]);
+    let guard=0;
+    while (to.id===from.id && guard++<20) to=pick(candidates,candidates[1]);
+    if (from.id===to.id) return;
+    addRandomRelation(from.id,to.id);
+  } else if (mode === "3") {
+    createOrganization();
+  }
+}
+
+function addRandomRelation(sourceId,targetId) {
+  if (relationData.some(r=>r.from===sourceId && r.to===targetId)) return;
+  relationData.push(normalizeRelation({
+    id: generateId("relation"),
+    from: sourceId,
+    to: targetId,
+    name: pick(generatorLists.relations,"関係"),
+    color: randomRelationColor(),
+    offsetX:0, offsetY:0,
+    emotions: Object.fromEntries(DEFAULT_EMOTIONS.map(k=>[k,Math.floor(Math.random()*101)-50]))
+  }));
+  updateRelations();
+  scheduleAutoSave();
+}
 
 /* =====================================================
    キャラ削除
@@ -3699,12 +5271,13 @@ function startRelationMode(
 
 
 function cancelRelationMode() {
+  relationModeSourceId = null;
+  relationMode.style.display = "none";
+}
 
-  relationModeSourceId =
-    null;
-
-  relationMode.style.display =
-    "none";
+function startRelationModeTarget(targetId) {
+  if (!relationModeSourceId || relationModeSourceId === targetId) { cancelRelationMode(); return; }
+  addRelation(relationModeSourceId, targetId);
 }
 
 
@@ -3727,21 +5300,10 @@ async function addRelation(
   }
 
 
-  const source =
-    getCharacter(
-      sourceId
-    );
+  const source = getRelationEntity(sourceId);
+  const target = getRelationEntity(targetId);
 
-  const target =
-    getCharacter(
-      targetId
-    );
-
-
-  if (
-    !source ||
-    !target
-  ) {
+  if (!source || !target) {
 
     cancelRelationMode();
 
@@ -4397,9 +5959,15 @@ document
       hideContextMenu();
 
       cancelRelationMode();
-
+      cancelOrganizationCreation();
 
       arrangeCharacters();
+      for (const group of organizationData) {
+        if (!group.collapsed) arrangeOrganization(group);
+      }
+      updateNodes();
+      updateRelations();
+      scheduleAutoSave();
     }
   );
 
@@ -4578,7 +6146,7 @@ function getSaveData() {
 
   return {
 
-    version: 4,
+    version: 5,
 
     mapWidth:
       MAP_WIDTH,
@@ -4597,6 +6165,27 @@ function getSaveData() {
       JSON.parse(
         JSON.stringify(
           relationData
+        )
+      ),
+
+    organizations:
+      JSON.parse(
+        JSON.stringify(
+          organizationData
+        )
+      ),
+
+    eventHistory:
+      JSON.parse(
+        JSON.stringify(
+          eventHistory
+        )
+      ),
+
+    eventLibrary:
+      JSON.parse(
+        JSON.stringify(
+          eventLibrary
         )
       )
   };
@@ -4659,19 +6248,16 @@ function scheduleAutoSave() {
 }
 
 
+let saveStatusTimer = null;
 function showSaveStatus(
   text,
   success
 ) {
-
-  saveStatus.textContent =
-    text;
-
-
-  saveStatus.style.color =
-    success
-      ? "#5dffc7"
-      : "#aebbd0";
+  saveStatus.textContent = text;
+  saveStatus.style.color = success ? "#5dffc7" : "#aebbd0";
+  saveStatus.classList.add("visible");
+  clearTimeout(saveStatusTimer);
+  saveStatusTimer = setTimeout(() => saveStatus.classList.remove("visible"), 1800);
 }
 
 
@@ -4683,148 +6269,38 @@ function loadAutoMap() {
 
   try {
 
-    const raw =
-      localStorage.getItem(
-        AUTO_SAVE_KEY
-      );
+    const raw = localStorage.getItem(AUTO_SAVE_KEY);
 
+    if (!raw) return false;
 
-    if (
-      !raw
-    ) {
+    const data = JSON.parse(raw);
 
+    if (!data || !Array.isArray(data.characters) || !Array.isArray(data.relations)) {
       return false;
     }
 
-
-    const data =
-      JSON.parse(raw);
-
-
-    if (
-      !data ||
-      !Array.isArray(
-        data.characters
-      ) ||
-      !Array.isArray(
-        data.relations
-      )
-    ) {
-
-      return false;
+    characters = data.characters.map(normalizeCharacter);
+    relationData = data.relations.map(normalizeRelation);
+    organizationData = Array.isArray(data.organizations)
+      ? data.organizations.map(normalizeOrganization)
+      : [];
+    eventHistory = Array.isArray(data.eventHistory) ? data.eventHistory : [];
+    if (Array.isArray(data.eventLibrary) && data.eventLibrary.length) {
+      eventLibrary = data.eventLibrary;
     }
 
+    normalizeAllExtendedData();
 
-    characters =
-      data.characters.map(
-        character => ({
-
-          id:
-            character.id ||
-            generateId(
-              "character"
-            ),
-
-          name:
-            character.name ||
-            "名称未設定",
-
-          x:
-            Number.isFinite(
-              character.x
-            )
-              ? character.x
-              : MAP_WIDTH / 2,
-
-          y:
-            Number.isFinite(
-              character.y
-            )
-              ? character.y
-              : MAP_HEIGHT / 2,
-
-          status:
-            character.status ===
-            "CLOSE"
-              ? "CLOSE"
-              : "OPEN"
-        })
-      );
-
-
-    relationData =
-      data.relations.map(
-        relation => ({
-
-          id:
-            relation.id ||
-            generateId(
-              "relation"
-            ),
-
-          from:
-            relation.from,
-
-          to:
-            relation.to,
-
-          name:
-            relation.name ||
-            "",
-
-          color:
-            relation.color ||
-            "#00eaff",
-
-          offsetX:
-            Number.isFinite(
-              relation.offsetX
-            )
-              ? relation.offsetX
-              : (
-                  Number.isFinite(
-                    relation.labelOffsetX
-                  )
-                    ? relation.labelOffsetX
-                    : 0
-                ),
-
-          offsetY:
-            Number.isFinite(
-              relation.offsetY
-            )
-              ? relation.offsetY
-              : (
-                  Number.isFinite(
-                    relation.labelOffsetY
-                  )
-                    ? relation.labelOffsetY
-                    : 0
-                )
-        })
-      );
-
-
-    showSaveStatus(
-      "自動保存：前回のマップを復元",
-      true
-    );
-
-
+    showSaveStatus("自動保存：前回のマップを復元", true);
     return true;
 
   } catch (error) {
 
-    console.error(
-      "自動読み込みに失敗しました",
-      error
-    );
-
-
+    console.error("自動読み込みに失敗しました", error);
     return false;
+
   }
 }
-
 
 /* =====================================================
    JSON EXPORT
@@ -4893,186 +6369,54 @@ function exportMap() {
 
 function importMap() {
 
-  const input =
-    document.createElement(
-      "input"
-    );
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".json,application/json";
 
+  input.addEventListener("change", async () => {
 
-  input.type =
-    "file";
+    const file = input.files[0];
+    if (!file) return;
 
+    try {
 
-  input.accept =
-    ".json,application/json";
+      const text = await file.text();
+      const data = JSON.parse(text);
 
-
-  input.addEventListener(
-    "change",
-    async () => {
-
-      const file =
-        input.files[0];
-
-
-      if (
-        !file
-      ) {
-
-        return;
+      if (!data || !Array.isArray(data.characters) || !Array.isArray(data.relations)) {
+        throw new Error("JSON形式が正しくありません");
       }
 
-
-      try {
-
-        const text =
-          await file.text();
-
-
-        const data =
-          JSON.parse(
-            text
-          );
-
-
-        if (
-          !data ||
-          !Array.isArray(
-            data.characters
-          ) ||
-          !Array.isArray(
-            data.relations
-          )
-        ) {
-
-          throw new Error(
-            "JSON形式が正しくありません"
-          );
-        }
-
-
-        characters =
-          data.characters.map(
-            character => ({
-
-              id:
-                character.id ||
-                generateId(
-                  "character"
-                ),
-
-              name:
-                character.name ||
-                "名称未設定",
-
-              x:
-                Number.isFinite(
-                  character.x
-                )
-                  ? character.x
-                  : MAP_WIDTH / 2,
-
-              y:
-                Number.isFinite(
-                  character.y
-                )
-                  ? character.y
-                  : MAP_HEIGHT / 2,
-
-              status:
-                character.status ===
-                "CLOSE"
-                  ? "CLOSE"
-                  : "OPEN"
-            })
-          );
-
-
-        relationData =
-          data.relations.map(
-            relation => ({
-
-              id:
-                relation.id ||
-                generateId(
-                  "relation"
-                ),
-
-              from:
-                relation.from,
-
-              to:
-                relation.to,
-
-              name:
-                relation.name ||
-                "",
-
-              color:
-                relation.color ||
-                "#00eaff",
-
-              offsetX:
-                Number.isFinite(
-                  relation.offsetX
-                )
-                  ? relation.offsetX
-                  : (
-                      Number.isFinite(
-                        relation.labelOffsetX
-                      )
-                        ? relation.labelOffsetX
-                        : 0
-                    ),
-
-              offsetY:
-                Number.isFinite(
-                  relation.offsetY
-                )
-                  ? relation.offsetY
-                  : (
-                      Number.isFinite(
-                        relation.labelOffsetY
-                      )
-                        ? relation.labelOffsetY
-                        : 0
-                    )
-            })
-          );
-
-
-        updateNodes();
-
-        updateRelations();
-
-        centerOnCharacters();
-
-        saveAutoMap();
-
-
-        alert(
-          "マップを読み込みました。"
-        );
-
-      } catch (error) {
-
-        console.error(
-          error
-        );
-
-
-        alert(
-          "マップの読み込みに失敗しました。\n" +
-          error.message
-        );
+      characters = data.characters.map(normalizeCharacter);
+      relationData = data.relations.map(normalizeRelation);
+      organizationData = Array.isArray(data.organizations)
+        ? data.organizations.map(normalizeOrganization)
+        : [];
+      eventHistory = Array.isArray(data.eventHistory) ? data.eventHistory : [];
+      if (Array.isArray(data.eventLibrary) && data.eventLibrary.length) {
+        eventLibrary = data.eventLibrary;
       }
+
+      normalizeAllExtendedData();
+      updateOrganizationBoxes();
+      updateNodes();
+      updateRelations();
+      centerOnCharacters();
+      saveAutoMap();
+
+      alert("マップを読み込みました。");
+
+    } catch (error) {
+
+      console.error(error);
+      alert("マップの読み込みに失敗しました。\n" + error.message);
+
     }
-  );
 
+  });
 
   input.click();
 }
-
 
 /* =====================================================
    ESC
@@ -5089,6 +6433,7 @@ document.addEventListener(
       hideContextMenu();
 
       cancelRelationMode();
+      cancelOrganizationCreation();
 
       cancelLongPress();
 
@@ -5125,6 +6470,8 @@ window.addEventListener(
 ===================================================== */
 
 function initialize() {
+
+  normalizeAllExtendedData();
 
   const restored =
     loadAutoMap();
@@ -5167,4 +6514,3 @@ initialize();
 
 </body>
 </html>
-```

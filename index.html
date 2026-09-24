@@ -3511,20 +3511,15 @@ function showContextMenuAt(
     y + "px";
 }
 
+
 function hideContextMenu() {
-  // 表示を消す
   contextMenu.style.display = "none";
 
-  // 中身を完全に削除
-  while (contextMenu.firstChild) {
-    contextMenu.removeChild(contextMenu.firstChild);
-  }
-
-  // 念のためイベント関連の状態もリセット
-  contextMenu.onpointerdown = null;
-  contextMenu.onpointerup = null;
-  contextMenu.onclick = null;
+  // メニュー項目を毎回完全に破棄する
+  // 非表示にするだけだと、開くたびに古い項目が残って増殖する
+  contextMenu.replaceChildren();
 }
+
 
 /* =====================================================
    メニュー外クリック

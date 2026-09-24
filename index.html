@@ -2796,149 +2796,206 @@ document.getElementById(
 /* =========================================================
    ARRANGE
 ========================================================= */
-
 function arrangeCharacters() {
 
-  const count =
-    characters.length;
+  const count = characters.length;
 
-  if (count <= 1) {
+  if (count === 0) {
     return;
   }
 
-  /*
-    ノード数が多くても
-    6000×6000の中に収まりやすい
-    円形初期配置。
-  */
+  if (count === 1) {
 
-  const centerX =
-    MAP_WIDTH / 2;
+    characters[0].x = MAP_WIDTH / 2;
+    characters[0].y = MAP_HEIGHT / 2;
 
-  const centerY =
-    MAP_HEIGHT / 2;
+    updateNodes();
+    updateRelations();
+    centerOnCharacters();
 
-  const radius =
-    Math.min(
-      2350,
-      Math.max(
-        700,
-        400 +
-        Math.sqrt(count) *
-        430
-      )
-    );
+    scheduleAutoSave();
 
-  /*
-    接続数の多いキャラを
-    少し中心寄りにする。
-  */
-
-  const connectionCount =
-    new Map();
-
-  for (
-    const character of characters
-  ) {
-
-    connectionCount.set(
-      character.id,
-      0
-    );
+    return;
   }
 
-  for (
-    const relation of relationData
-  ) {
+  const centerX = MAP_WIDTH / 2;
+  const centerY = MAP_HEIGHT / 2;
 
-    if (
-      connectionCount.has(
-        relation.from
-      )
-    ) {
+  /*
+   * =====================================================
+   * まず接続数を計算
+   * =====================================================
+   */
 
+  const connectionCount = new Map();
+
+  for (const character of characters) {
+    connectionCount.set(character.id, 0);
+  }
+
+  for (const relation of relationData) {
+
+    if (connectionCount.has(relation.from)) {
       connectionCount.set(
         relation.from,
-        connectionCount.get(
-          relation.from
-        ) + 1
+        connectionCount.get(relation.from) + 1
       );
     }
 
-    if (
-      connectionCount.has(
-        relation.to
-      )
-    ) {
-
+    if (connectionCount.has(relation.to)) {
       connectionCount.set(
         relation.to,
-        connectionCount.get(
-          relation.to
-        ) + 1
+        connectionCount.get(relation.to) + 1
       );
     }
   }
 
-  const sorted =
-    [...characters].sort(
-      (a, b) =>
-        connectionCount.get(b.id) -
-        connectionCount.get(a.id)
+  /*
+   * 接続の多いキャラを中心寄りにする。
+   */
+
+  const sortedCharacters = [...characters].sort(
+    (a, b) =>
+      connectionCount.get(b.id) -
+      connectionCount.get(a.id)
+  );
+
+  /*
+   * =====================================================
+   * 初期配置
+   *
+   * キャラ数に応じて同心円状に配置
+   * =====================================================
+   */
+
+  const usableWidth = MAP_WIDTH - 700;
+  const usableHeight = MAP_HEIGHT - 700;
+
+  const maxRadius =
+    Math.min(
+      usableWidth,
+      usableHeight
+    ) / 2;
+
+  /*
+   * キャラ数が多いほど外側まで使う。
+   */
+
+  const baseRadius =
+    Math.min(
+      maxRadius,
+      Math.max(
+        650,
+        450 + Math.sqrt(count) * 500
+      )
     );
 
   /*
-    最初の配置。
-  */
+   * 中心キャラ
+   */
 
-  sorted.forEach(
+  if (sortedCharacters.length > 0) {
+
+    const main =
+      sortedCharacters[0];
+
+    main.x = centerX;
+    main.y = centerY;
+  }
+
+  /*
+   * 残りを円形配置
+   */
+
+  const rest =
+    sortedCharacters.slice(1);
+
+  const ringCount =
+    Math.max(
+      1,
+      Math.ceil(
+        Math.sqrt(rest.length / 6)
+      )
+    );
+
+  rest.forEach(
     (character, index) => {
+
+      const ring =
+        Math.floor(
+          index / Math.max(
+            1,
+            Math.ceil(
+              rest.length / ringCount
+            )
+          )
+        );
+
+      const indexInRing =
+        index -
+        ring *
+        Math.ceil(
+          rest.length / ringCount
+        );
+
+      const countInRing =
+        Math.ceil(
+          rest.length / ringCount
+        );
+
+      const radius =
+        Math.min(
+          maxRadius,
+          baseRadius *
+          (
+            0.45 +
+            (ring + 1) /
+            Math.max(
+              1,
+              ringCount
+            ) *
+            0.55
+          )
+        );
 
       const angle =
         (
-          Math.PI * 2 *
-          index
-        ) /
-        sorted.length;
-
-      const layer =
-        index % 3;
-
-      const layerRadius =
-        radius *
-        (
-          0.72 +
-          layer * 0.13
-        );
+          indexInRing /
+          Math.max(
+            1,
+            countInRing
+          )
+        ) *
+        Math.PI *
+        2;
 
       character.x =
         centerX +
         Math.cos(angle) *
-        layerRadius;
+        radius;
 
       character.y =
         centerY +
         Math.sin(angle) *
-        layerRadius;
+        radius;
     }
   );
 
   /*
-    簡易的な力学レイアウト。
-  */
+   * =====================================================
+   * 関係を意識したレイアウト調整
+   * =====================================================
+   */
 
   for (
     let iteration = 0;
-    iteration < 90;
+    iteration < 120;
     iteration++
   ) {
 
-    const forces =
-      new Map();
+    const forces = new Map();
 
-    for (
-      const character of characters
-    ) {
+    for (const character of characters) {
 
       forces.set(
         character.id,
@@ -2950,8 +3007,10 @@ function arrangeCharacters() {
     }
 
     /*
-      ノード同士の反発。
-    */
+     * -----------------------------------------------
+     * ノード同士を強く反発
+     * -----------------------------------------------
+     */
 
     for (
       let i = 0;
@@ -2965,133 +3024,131 @@ function arrangeCharacters() {
         j++
       ) {
 
-        const a =
-          characters[i];
+        const a = characters[i];
+        const b = characters[j];
 
-        const b =
-          characters[j];
+        let dx = b.x - a.x;
+        let dy = b.y - a.y;
 
-        let dx =
-          b.x - a.x;
-
-        let dy =
-          b.y - a.y;
-
-        let dist =
+        let distance =
           Math.sqrt(
             dx * dx +
             dy * dy
           );
 
-        if (dist < 1) {
-          dist = 1;
+        if (distance < 1) {
+          distance = 1;
+
+          /*
+           * 同じ位置に重なった場合の
+           * ランダムではない微調整
+           */
+          dx = 1;
+          dy = 0;
         }
 
-        const minDistance =
-          250;
+        const minimumDistance = 280;
 
         if (
-          dist <
-          minDistance
+          distance <
+          minimumDistance
         ) {
 
-          const force =
+          const strength =
             (
-              minDistance -
-              dist
-            ) *
-            0.025;
+              minimumDistance -
+              distance
+            ) * 0.09;
 
-          dx /= dist;
-          dy /= dist;
+          const ux =
+            dx / distance;
+
+          const uy =
+            dy / distance;
 
           forces.get(a.id).x -=
-            dx * force;
+            ux * strength;
 
           forces.get(a.id).y -=
-            dy * force;
+            uy * strength;
 
           forces.get(b.id).x +=
-            dx * force;
+            ux * strength;
 
           forces.get(b.id).y +=
-            dy * force;
+            uy * strength;
         }
       }
     }
 
     /*
-      関係のあるキャラ同士は
-      少し近づける。
-    */
+     * -----------------------------------------------
+     * 関係のあるキャラは適度に近づける
+     * -----------------------------------------------
+     */
 
-    for (
-      const relation of relationData
-    ) {
+    for (const relation of relationData) {
 
-      const a =
-        getCharacter(
-          relation.from
-        );
+      const from =
+        getCharacter(relation.from);
 
-      const b =
-        getCharacter(
-          relation.to
-        );
+      const to =
+        getCharacter(relation.to);
 
-      if (!a || !b) {
+      if (!from || !to) {
         continue;
       }
 
       let dx =
-        b.x - a.x;
+        to.x - from.x;
 
       let dy =
-        b.y - a.y;
+        to.y - from.y;
 
-      let dist =
+      let distance =
         Math.sqrt(
           dx * dx +
           dy * dy
         );
 
-      if (dist < 1) {
-        dist = 1;
+      if (distance < 1) {
+        distance = 1;
       }
 
-      const targetDistance =
-        850;
+      const targetDistance = 850;
 
-      const force =
+      const strength =
         (
-          dist -
+          distance -
           targetDistance
-        ) *
-        0.0012;
+        ) * 0.002;
 
-      dx /= dist;
-      dy /= dist;
+      const ux =
+        dx / distance;
 
-      forces.get(a.id).x +=
-        dx * force;
+      const uy =
+        dy / distance;
 
-      forces.get(a.id).y +=
-        dy * force;
+      forces.get(from.id).x +=
+        ux * strength;
 
-      forces.get(b.id).x -=
-        dx * force;
+      forces.get(from.id).y +=
+        uy * strength;
 
-      forces.get(b.id).y -=
-        dy * force;
+      forces.get(to.id).x -=
+        ux * strength;
+
+      forces.get(to.id).y -=
+        uy * strength;
     }
 
     /*
-      中央から離れすぎないようにする。
-    */
+     * -----------------------------------------------
+     * 中央への弱い引力
+     * -----------------------------------------------
+     */
 
-    for (
-      const character of characters
-    ) {
+    for (const character of characters) {
 
       const force =
         forces.get(
@@ -3102,66 +3159,101 @@ function arrangeCharacters() {
         (
           centerX -
           character.x
-        ) *
-        0.00025;
+        ) * 0.00045;
 
       force.y +=
         (
           centerY -
           character.y
-        ) *
-        0.00025;
+        ) * 0.00045;
     }
 
     /*
-      適用。
-    */
+     * -----------------------------------------------
+     * 力を適用
+     * -----------------------------------------------
+     */
 
-    for (
-      const character of characters
-    ) {
+    for (const character of characters) {
 
       const force =
         forces.get(
           character.id
         );
 
-      character.x +=
-        force.x;
+      /*
+       * 1回の移動量を制限。
+       * 大きく飛びすぎるのを防止。
+       */
 
-      character.y +=
-        force.y;
+      const maxMove = 35;
+
+      const moveX =
+        clamp(
+          force.x,
+          -maxMove,
+          maxMove
+        );
+
+      const moveY =
+        clamp(
+          force.y,
+          -maxMove,
+          maxMove
+        );
+
+      character.x += moveX;
+      character.y += moveY;
 
       character.x =
         clamp(
           character.x,
-          NODE_RADIUS + 50,
+          NODE_RADIUS + 80,
           MAP_WIDTH -
             NODE_RADIUS -
-            50
+            80
         );
 
       character.y =
         clamp(
           character.y,
-          NODE_RADIUS + 50,
+          NODE_RADIUS + 80,
           MAP_HEIGHT -
             NODE_RADIUS -
-            50
+            80
         );
     }
   }
 
+  /*
+   * =====================================================
+   * 最後に重なりを完全に解消
+   * =====================================================
+   */
+
   separateCharacters();
+
+  /*
+   * =====================================================
+   * 表示更新
+   * =====================================================
+   */
 
   updateNodes();
   updateRelations();
 
+  /*
+   * キャラクター群が画面中央に来るようにする
+   */
+
   centerOnCharacters();
+
+  /*
+   * 自動保存
+   */
 
   scheduleAutoSave();
 }
-
 /* =========================================================
    FINAL CHARACTER SEPARATION
 ========================================================= */

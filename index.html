@@ -957,6 +957,8 @@ let longPressTimer = null;
 
 let longPressTarget = null;
 
+let longPressKind = null;
+
 let longPressStartX = 0;
 let longPressStartY = 0;
 
@@ -1670,6 +1672,15 @@ function drawRelation(
       event.preventDefault();
       event.stopPropagation();
 
+      if (event.pointerType === "touch") {
+        startLongPress(
+          event,
+          rect,
+          "relation",
+          relation
+        );
+      }
+
       startRelationLabelDrag(
         event,
         relation
@@ -2332,81 +2343,84 @@ function toggleCharacterStatus(
 
 function startLongPress(
   event,
-  node
+  target,
+  kind = "character",
+  relation = null
 ) {
+
+  if (event.pointerType !== "touch") {
+    return;
+  }
 
   cancelLongPress();
 
+  longPressStartX = event.clientX;
+  longPressStartY = event.clientY;
+  longPressTarget = target;
+  longPressKind = kind;
+  longPressTriggered = false;
 
-  longPressStartX =
-    event.clientX;
+  longPressTimer = setTimeout(() => {
 
-  longPressStartY =
-    event.clientY;
+    if (longPressTriggered) {
+      return;
+    }
 
-  longPressTarget =
-    node;
+    if (characterWasDragged || relationWasDragged) {
+      return;
+    }
 
-  longPressTriggered =
-    false;
+    longPressTriggered = true;
 
+    // 長押しした瞬間はパン・関係名ドラッグを止める
+    isPanning = false;
+    panPointerId = null;
 
-  longPressTimer =
-    setTimeout(
-      () => {
+    if (longPressKind === "background") {
+      showBackgroundContextMenu(
+        longPressStartX,
+        longPressStartY,
+        screenToWorld(longPressStartX, longPressStartY).x,
+        screenToWorld(longPressStartX, longPressStartY).y
+      );
+      return;
+    }
 
-        if (
-          !longPressTarget
-        ) {
-          return;
-        }
+    if (longPressKind === "relation" && relation) {
+      // 関係名を長押しした場合はドラッグを解除してメニューを表示
+      if (draggingRelation === relation) {
+        handleRelationLabelUp({
+          pointerId: relationDragPointerId
+        });
+      }
 
+      showRelationContextMenu(
+        longPressStartX,
+        longPressStartY,
+        relation
+      );
+      return;
+    }
 
-        /*
-          ドラッグ中なら
-          長押しにはしない
-        */
+    if (longPressKind === "character" && longPressTarget) {
+      const character = getCharacter(
+        longPressTarget.dataset.id
+      );
 
-        if (
-          characterWasDragged
-        ) {
-          return;
-        }
+      if (character) {
+        draggingCharacter = null;
+        dragPointerId = null;
 
-
-        longPressTriggered =
-          true;
-
-
-        const character =
-          getCharacter(
-            longPressTarget.dataset.id
-          );
-
-
-        if (
+        showCharacterContextMenu(
+          longPressStartX,
+          longPressStartY,
           character
-        ) {
+        );
+      }
+    }
 
-          draggingCharacter =
-            null;
-
-          dragPointerId =
-            null;
-
-
-          showCharacterContextMenu(
-            longPressStartX,
-            longPressStartY,
-            character
-          );
-        }
-
-      },
-      600
-    );
+  }, 600);
 }
-
 
 function cancelLongPress() {
 
@@ -2422,6 +2436,7 @@ function cancelLongPress() {
   }
 
   longPressTarget = null;
+  longPressKind = null;
 }
 
 
@@ -2596,7 +2611,8 @@ viewport.addEventListener(
 
       startLongPress(
         event,
-        null
+        null,
+        "background"
       );
 
 
@@ -2890,6 +2906,10 @@ document.addEventListener(
     if (
       event.pointerType === "touch"
     ) {
+
+      // タップで終わった場合は長押しタイマーを必ず解除。
+      // 長押し発火後でも解除して問題ない。
+      cancelLongPress();
 
       touchPointers.delete(
         event.pointerId
@@ -3725,6 +3745,20 @@ async function addRelation(
 
     cancelRelationMode();
 
+    return;
+  }
+
+
+  // 同じ方向の関係は1本だけ。
+  // 逆方向（A→B と B→A）は相互関係として許可する。
+  const alreadyExists = relationData.some(
+    relation =>
+      relation.from === sourceId &&
+      relation.to === targetId
+  );
+
+  if (alreadyExists) {
+    cancelRelationMode();
     return;
   }
 

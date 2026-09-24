@@ -631,7 +631,6 @@ body {
   pointer-events: all;
   box-sizing: border-box;
 }
-.relation-label-bg, .relation-label { position:relative; z-index:40; }
 .group-header {
   position: absolute;
   left: 10px;
@@ -655,11 +654,6 @@ body {
 .group-resize-ne { right:-8px; top:-8px; cursor:nesw-resize; }
 .group-resize-sw { left:-8px; bottom:-8px; cursor:nesw-resize; }
 .group-resize-se { right:-8px; bottom:-8px; cursor:nwse-resize; }
-.organization-create-preview {
-  position:absolute; display:none; z-index:4; box-sizing:border-box;
-  border:2px dashed rgba(120,210,255,.95); background:rgba(80,150,220,.16);
-  border-radius:18px; pointer-events:none;
-}
 #organizationCreateMode {
   position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
   z-index: 1500; display: none; padding: 10px 16px; border-radius: 999px;
@@ -830,7 +824,7 @@ body {
 
 <div id="viewport">
 
-  <div id="map"><div id="organizationCreatePreview" class="organization-create-preview"></div>
+  <div id="map">
 
     <svg
       id="relationLayer"
@@ -1190,7 +1184,6 @@ const relationMode =
 
 const organizationCreateMode =
   document.getElementById("organizationCreateMode");
-organizationCreatePreview = document.getElementById("organizationCreatePreview");
 
 const saveStatus =
   document.getElementById("saveStatus");
@@ -1901,7 +1894,6 @@ let organizationResizeWasMoved = false;
 let organizationCreateActive = false;
 let organizationCreateStart = null;
 let organizationCreatePointerId = null;
-let organizationCreatePreview = null;
 
 function rectsOverlap(a, b, padding = 0) {
   return a.x < b.x + b.width - padding &&
@@ -1947,11 +1939,14 @@ function pointInsideOrganization(x, y, group, margin = 0) {
 function getCharacterOrganizationAt(x, y, excludeId=null) {
   // ドラッグ終了時はキャラの中心が組織枠の内側なら所属対象。
   // 枠線ぎりぎりでも判定できるよう、判定対象を少しだけ外側へ広げる。
+  const tolerance = Math.max(4, Math.min(NODE_RADIUS * 0.18, 12));
   return organizationData.find(g =>
     !g.collapsed &&
     g.id !== excludeId &&
-    x >= g.x && x <= g.x + g.width &&
-    y >= g.y && y <= g.y + g.height
+    x >= g.x - tolerance &&
+    x <= g.x + g.width + tolerance &&
+    y >= g.y - tolerance &&
+    y <= g.y + g.height + tolerance
   ) || null;
 }
 
@@ -2311,7 +2306,6 @@ function cancelOrganizationCreation() {
   organizationCreateStart = null;
   organizationCreatePointerId = null;
   organizationCreateMode.style.display = 'none';
-  if (organizationCreatePreview) organizationCreatePreview.style.display = 'none';
 }
 
 function handleOrganizationCreationStart(event) {
@@ -2331,19 +2325,6 @@ function handleOrganizationCreationStart(event) {
 function handleOrganizationCreationMove(event) {
   if (!organizationCreateActive || organizationCreatePointerId !== event.pointerId || !organizationCreateStart) return;
   event.preventDefault();
-  const world = screenToWorld(event.clientX, event.clientY);
-  const x = Math.min(organizationCreateStart.x, world.x);
-  const y = Math.min(organizationCreateStart.y, world.y);
-  const width = Math.abs(world.x - organizationCreateStart.x);
-  const height = Math.abs(world.y - organizationCreateStart.y);
-  if (organizationCreatePreview) {
-    organizationCreatePreview.style.display = 'block';
-    organizationCreatePreview.style.left = x + 'px';
-    organizationCreatePreview.style.top = y + 'px';
-    organizationCreatePreview.style.width = width + 'px';
-    organizationCreatePreview.style.height = height + 'px';
-    organizationCreatePreview.style.borderColor = (width >= NODE_RADIUS*2+30 && height >= NODE_RADIUS*2+30) ? 'rgba(120,210,255,.95)' : 'rgba(255,120,120,.95)';
-  }
 }
 
 function handleOrganizationCreationEnd(event) {

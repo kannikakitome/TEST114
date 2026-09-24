@@ -2791,6 +2791,20 @@ document.getElementById(
 
     scheduleAutoSave();
   }
+);document.getElementById(
+  "arrangeButton"
+).addEventListener(
+  "click",
+  event => {
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    hideContextMenu();
+    cancelRelationMode();
+
+    arrangeCharacters();
+  }
 );
 
 /* =========================================================

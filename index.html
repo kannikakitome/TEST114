@@ -2025,11 +2025,14 @@ function updateOrganizationBoxes() {
     header.textContent = `${group.name} ${group.collapsed ? 'CLOSE' : 'OPEN'}`;
     header.style.borderColor = group.color;
 
+    // 組織名部分だけが OPEN / CLOSE の切り替え対象。
+    // クリック（移動なし）なら切り替え、ドラッグした場合は組織を移動する。
     header.addEventListener('pointerdown', event => {
       if (organizationCreateActive) {
         handleOrganizationCreationStart(event);
         return;
       }
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
       event.preventDefault();
       event.stopPropagation();
       if (relationModeSourceId) {
@@ -2054,6 +2057,7 @@ function updateOrganizationBoxes() {
       if (event.target.closest && (event.target.closest('.relation-label-bg') || event.target.closest('.group-resize-handle') || event.target.closest('.character-node'))) return;
       event.preventDefault();
       event.stopPropagation();
+      // 組織枠内部（名前以外）のクリックでは OPEN / CLOSE を変更しない。
       selectedOrganizationId = group.id;
       startOrganizationDrag(event, group, false);
     });

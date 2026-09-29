@@ -669,7 +669,7 @@ body {
 .group-box.collapsed { width: 190px !important; height: 48px !important; background: rgba(40,65,105,.22); }
 .group-box.collapsed .group-header { right: 10px; }
 
-#detailOverlay, #libraryOverlay, #eventOverlay {
+#detailOverlay, #libraryOverlay, #eventOverlay, #eventBuilderOverlay {
   position: fixed;
   inset: 0;
   z-index: 5000;
@@ -764,6 +764,10 @@ body {
   background:rgba(255,255,255,.035);
 }
 .event-card strong { color:#ffd36a; }
+.event-builder-box { border:1px solid rgba(255,255,255,.10); border-radius:10px; padding:12px; margin-top:12px; background:rgba(255,255,255,.025); }
+.event-builder-lines { width:100%; min-height:72px; resize:vertical; font-family:monospace; }
+.memory-list { max-height:260px; overflow:auto; display:flex; flex-direction:column; gap:7px; }
+.memory-item { padding:8px 10px; border-left:3px solid rgba(255,211,106,.65); background:rgba(255,255,255,.035); border-radius:6px; font-size:12px; line-height:1.5; }
 .small-note { color:#8fa0b8; font-size:11px; line-height:1.5; }
 
 @media (max-width:700px) {
@@ -813,6 +817,8 @@ body {
   <button class="ui-button" id="eventHistoryButton">
     出来事
   </button>
+  <button class="ui-button" id="eventCreateButton">イベント作成</button>
+  <button class="ui-button" id="eventExportButton">イベント出力</button>
 
 </div>
 
@@ -922,6 +928,9 @@ body {
 
 <div id="eventOverlay">
   <div class="feature-panel" id="eventPanel"></div>
+</div>
+<div id="eventBuilderOverlay">
+  <div class="feature-panel" id="eventBuilderPanel"></div>
 </div>
 
 <div id="dialogOverlay">
@@ -1131,7 +1140,9 @@ function normalizeCharacter(character) {
     organizationId: character.organizationId || null,
     details: character.details && typeof character.details === "object" ? character.details : {},
     stats: character.stats && typeof character.stats === "object" ? character.stats : {},
-    memories: Array.isArray(character.memories) ? character.memories : []
+    memories: Array.isArray(character.memories) ? character.memories : [],
+    memoryLogs: Array.isArray(character.memoryLogs) ? character.memoryLogs : [],
+    traits: Array.isArray(character.traits) ? character.traits : []
   };
 }
 
@@ -1429,82 +1440,46 @@ function applyStatDelta(character, deltas) {
   }
 }
 
-function applyEventEffects(source, target, effects) {
-  const relationName = effects.relationName || pick(generatorLists.relations,"関係");
-  const relation = createRelationForEvent(
-    source.id,
-    target.id,
-    relationName,
-    effects.emotions || {}
-  );
-
-  applyStatDelta(source, effects.sourceStats);
-  applyStatDelta(target, effects.targetStats);
-
-  return relation;
+function applyTraitChanges(character, changes) {
+  if (!character || !changes) return {added:[],removed:[]};
+  character.traits = Array.isArray(character.traits) ? character.traits : [];
+  const added=[], removed=[];
+  for (const v of (changes.add||[])) { const t=String(v||'').trim(); if(t && !character.traits.includes(t)){character.traits.push(t);added.push(t);} }
+  for (const v of (changes.remove||[])) { const t=String(v||'').trim(); if(t && character.traits.includes(t)){character.traits=character.traits.filter(x=>x!==t);removed.push(t);} }
+  return {added,removed};
 }
-
+function applyDetailChanges(character, changes) {
+  if (!character || !changes) return {}; character.details=character.details||{};
+  const changed={}; for(const [k,v] of Object.entries(changes)){if(k){character.details[k]=v;changed[k]=v;}} return changed;
+}
+function addCharacterMemory(character, record, role, other) {
+  character.memories=Array.isArray(character.memories)?character.memories:[];
+  character.memoryLogs=Array.isArray(character.memoryLogs)?character.memoryLogs:[];
+  character.memories.unshift(record.id);
+  character.memoryLogs.unshift({id:generateId('memory'),eventId:record.id,time:record.time,eventName:record.eventName,role,otherCharacterId:other?.id||null,otherCharacterName:other?.name||'不明',result:record.result,description:record.description||''});
+  if(character.memoryLogs.length>100) character.memoryLogs.length=100;
+}
+function applyEventEffects(source, target, effects) {
+  const re=effects.relation||{}; let relation=getRelation(source.id,target.id);
+  const legacy=effects.relationName!==undefined || effects.emotions!==undefined;
+  const mode=re.mode || (legacy?'create_or_update':'none');
+  if(mode==='create' && !relation) relation=createRelationForEvent(source.id,target.id,re.name||effects.relationName||pick(generatorLists.relations,'関係'),re.emotionsDelta||effects.emotions||{});
+  else if(mode==='update' && relation){ if(re.name) relation.name=re.name; applyRelationEmotionDelta(relation,re.emotionsDelta||effects.emotions||{}); }
+  else if(mode==='create_or_update') relation=createRelationForEvent(source.id,target.id,re.name||effects.relationName||(relation?.name||pick(generatorLists.relations,'関係')),re.emotionsDelta||effects.emotions||{});
+  const sourceStats=applyStatDelta(source,effects.sourceStats); const targetStats=applyStatDelta(target,effects.targetStats);
+  return {relation,sourceStats,targetStats,sourceTraits:applyTraitChanges(source,effects.sourceTraits),targetTraits:applyTraitChanges(target,effects.targetTraits),sourceDetails:applyDetailChanges(source,effects.sourceDetails),targetDetails:applyDetailChanges(target,effects.targetDetails)};
+}
 function triggerEvent() {
-  const available = [];
-
-  for (const event of eventLibrary) {
-    const pairs = eventEligible(event);
-    for (const pair of pairs) available.push({event,pair});
-  }
-
-  if (!available.length) {
-    alert("現在の状態で発生条件を満たすイベントがありません。");
-    return;
-  }
-
-  const selected = pick(available, available[0]);
-  const {event,pair} = selected;
-  const [a,b] = pair;
-
-  let effects = event.effects || {};
-  let outcome = null;
-
-  if (Array.isArray(event.outcomes) && event.outcomes.length) {
-    outcome = weightedPick(event.outcomes);
-    effects = {
-      ...effects,
-      ...(outcome.effects || {})
-    };
-  }
-
-  const relation = applyEventEffects(a,b,effects);
-  const resultText =
-    outcome?.text ||
-    effects.result ||
-    `${a.name} → ${b.name} に「${relation.name}」が発生。`;
-
-  const record = {
-    id: generateId("event"),
-    time: new Date().toISOString(),
-    eventId: event.id,
-    eventName: event.name,
-    description: event.description || "",
-    characters: [a.id,b.id],
-    result: resultText,
-    changes: {
-      relation: relation.name,
-      emotions: effects.emotions || {},
-      sourceStats: effects.sourceStats || {},
-      targetStats: effects.targetStats || {}
-    }
-  };
-
-  eventHistory.unshift(record);
-
-  a.memories = Array.isArray(a.memories) ? a.memories : [];
-  b.memories = Array.isArray(b.memories) ? b.memories : [];
-  a.memories.unshift(record.id);
-  b.memories.unshift(record.id);
-
-  updateNodes();
-  updateRelations();
-  scheduleAutoSave();
-  showEventResult(record);
+  const available=[]; for(const event of eventLibrary) for(const pair of eventEligible(event)) available.push({event,pair});
+  if(!available.length){alert('現在の状態で発生条件を満たすイベントがありません。');return;}
+  const selected=pick(available,available[0]), event=selected.event, [a,b]=selected.pair;
+  let effects=event.effects||{}, outcome=null;
+  if(Array.isArray(event.outcomes)&&event.outcomes.length){outcome=weightedPick(event.outcomes);effects={...effects,...(outcome.effects||{})};}
+  const before=getRelation(a.id,b.id), applied=applyEventEffects(a,b,effects), relation=applied.relation;
+  const result=outcome?.text||effects.result||`${a.name} と ${b.name} に変化が起こった。`;
+  const record={id:generateId('event'),time:new Date().toISOString(),eventId:event.id,eventName:event.name,description:event.description||'',characters:[a.id,b.id],characterNames:[a.name,b.name],result,changes:{relation:relation?.name||null,relationCreated:!before&&!!relation,emotions:effects.relation?.emotionsDelta||effects.emotions||{},sourceStats:applied.sourceStats,targetStats:applied.targetStats,sourceTraits:applied.sourceTraits,targetTraits:applied.targetTraits,sourceDetails:applied.sourceDetails,targetDetails:applied.targetDetails}};
+  eventHistory.unshift(record); addCharacterMemory(a,record,'発動側',b); addCharacterMemory(b,record,'対象側',a);
+  updateNodes(); updateRelations(); scheduleAutoSave(); showEventResult(record);
 }
 
 function showEventResult(record) {
@@ -1564,6 +1539,25 @@ document.getElementById("libraryOverlay").addEventListener("pointerdown", e => {
   if (e.target.id === "libraryOverlay") closeFeatureOverlay("libraryOverlay");
 });
 
+function parseKeyValueLines(text, numeric=false) { const out={}; String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean).forEach(line=>{const a=line.split(/\s*[:=]\s*/),k=(a.shift()||'').trim();if(k)out[k]=numeric?Number(a.join('=')||0):a.join('=');});return out; }
+function parseTraitLines(text){return String(text||'').split(/[\r\n,、]+/).map(x=>x.trim()).filter(Boolean);}
+function downloadJsonFile(filename,data){const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);}
+function exportEvents(){downloadJsonFile('character_relationship_events.json',{format:'character-relationship-event-library',version:1,events:JSON.parse(JSON.stringify(eventLibrary))});}
+function showEventBuilder(){
+ const p=document.getElementById('eventBuilderPanel');
+ p.innerHTML=`<div class="feature-title">イベント作成</div><div class="small-note">条件に合う2人をランダムに選び、関係・感情・パラメータ・特性・自由データを変化させます。存在しないパラメータは自動追加されます。</div>
+ <div class="feature-grid"><div class="feature-field"><label>イベント名</label><input id="evName" placeholder="共闘を経験する"></div><div class="feature-field"><label>関係条件</label><select id="evRelCond"><option value="none">関係なし</option><option value="any">関係あり</option><option value="specific">指定した関係</option></select></div></div>
+ <div class="feature-field"><label>指定した関係名</label><input id="evCondName" placeholder="友情"></div><div class="feature-field"><label>説明</label><textarea id="evDesc"></textarea></div>
+ <div class="event-builder-box"><b>関係性の変化</b><div class="feature-grid"><div class="feature-field"><label>処理</label><select id="evRelMode"><option value="none">変更しない</option><option value="create">関係なしなら新規作成</option><option value="update">既存関係を変更</option><option value="create_or_update">新規作成または変更</option></select></div><div class="feature-field"><label>関係名</label><input id="evRelName" placeholder="友情"></div></div><div class="feature-field"><label>感情変化（1行1項目：信頼=20）</label><textarea class="event-builder-lines" id="evEmotion" placeholder="信頼=20\n好意=15\n警戒=-10"></textarea></div></div>
+ <div class="event-builder-box"><b>発動側</b><div class="feature-field"><label>パラメータ変化</label><textarea class="event-builder-lines" id="evSS" placeholder="戦闘力=10\n精神力=-5"></textarea></div><div class="feature-field"><label>特性追加</label><input id="evSTA" placeholder="共闘経験"></div><div class="feature-field"><label>特性削除</label><input id="evSTR" placeholder="疑念"></div><div class="feature-field"><label>自由データ変更（項目=値）</label><textarea class="event-builder-lines" id="evSD"></textarea></div></div>
+ <div class="event-builder-box"><b>対象側</b><div class="feature-field"><label>パラメータ変化</label><textarea class="event-builder-lines" id="evTS" placeholder="精神力=10"></textarea></div><div class="feature-field"><label>特性追加</label><input id="evTTA" placeholder="借りがある"></div><div class="feature-field"><label>特性削除</label><input id="evTTR" placeholder="警戒心"></div><div class="feature-field"><label>自由データ変更（項目=値）</label><textarea class="event-builder-lines" id="evTD"></textarea></div></div>
+ <div class="feature-field"><label>結果文</label><input id="evResult" placeholder="2人は互いを認めた。"></div><div class="feature-actions"><button class="mini-button" id="evBuilderClose">閉じる</button><button class="mini-button" id="evBuilderSave">イベントを登録</button></div>`;
+ document.getElementById('eventBuilderOverlay').style.display='flex';
+ document.getElementById('evBuilderClose').onclick=()=>closeFeatureOverlay('eventBuilderOverlay');
+ document.getElementById('evBuilderSave').onclick=()=>{const name=document.getElementById('evName').value.trim();if(!name){alert('イベント名を入力してください。');return;}const c=document.getElementById('evRelCond').value,conditions={relationship:c==='specific'?(document.getElementById('evCondName').value.trim()||'any'):c};const effects={relation:{mode:document.getElementById('evRelMode').value,name:document.getElementById('evRelName').value.trim(),emotionsDelta:parseKeyValueLines(document.getElementById('evEmotion').value,true)},sourceStats:parseKeyValueLines(document.getElementById('evSS').value,true),targetStats:parseKeyValueLines(document.getElementById('evTS').value,true),sourceTraits:{add:parseTraitLines(document.getElementById('evSTA').value),remove:parseTraitLines(document.getElementById('evSTR').value)},targetTraits:{add:parseTraitLines(document.getElementById('evTTA').value),remove:parseTraitLines(document.getElementById('evTTR').value)},sourceDetails:parseKeyValueLines(document.getElementById('evSD').value),targetDetails:parseKeyValueLines(document.getElementById('evTD').value),result:document.getElementById('evResult').value.trim()};eventLibrary.push({id:generateId('eventdef'),name,description:document.getElementById('evDesc').value.trim(),conditions,effects,outcomes:[]});scheduleAutoSave();closeFeatureOverlay('eventBuilderOverlay');alert(`イベント「${name}」を登録しました。`);};
+}
+document.getElementById('eventBuilderOverlay').addEventListener('pointerdown',e=>{if(e.target.id==='eventBuilderOverlay')closeFeatureOverlay('eventBuilderOverlay');});
+
 async function loadExternalDataFiles() {
   const input = document.createElement("input");
   input.type = "file";
@@ -1613,7 +1607,8 @@ async function loadEventFiles() {
             name: event.name,
             description: event.description || "",
             conditions: event.conditions || {relationship:"none"},
-            effects: event.effects || {relationName:"関係",emotions:{}}
+            effects: event.effects || {},
+            outcomes: Array.isArray(event.outcomes) ? event.outcomes : []
           });
           loaded++;
         }
@@ -1630,6 +1625,8 @@ document.getElementById("dataLoadButton").addEventListener("click", loadExternal
 document.getElementById("eventDataLoadButton").addEventListener("click", loadEventFiles);
 document.getElementById("eventButton").addEventListener("click", triggerEvent);
 document.getElementById("eventHistoryButton").addEventListener("click", showEventHistory);
+document.getElementById("eventCreateButton").addEventListener("click", showEventBuilder);
+document.getElementById("eventExportButton").addEventListener("click", exportEvents);
 
 /* =====================================================
    ダイアログ
@@ -4885,6 +4882,14 @@ function showCharacterDetail(character) {
       <div class="feature-title" style="font-size:15px">能力・性格パラメータ（0～100）</div>
       <div id="statRows">${statRows}</div>
       <button class="mini-button" id="addStatButton">＋ パラメータ追加</button>
+    </div>
+    <div class="feature-section">
+      <div class="feature-title" style="font-size:15px">特性</div>
+      <div class="small-note">${escapeHtml((character.traits || []).join('、') || 'まだ特性はありません。')}</div>
+    </div>
+    <div class="feature-section">
+      <div class="feature-title" style="font-size:15px">記憶・出来事ログ</div>
+      <div class="memory-list">${(character.memoryLogs || []).slice(0,30).map(m => `<div class="memory-item"><div>${escapeHtml(new Date(m.time).toLocaleString('ja-JP'))}　<strong>${escapeHtml(m.eventName)}</strong></div><div>${escapeHtml(m.otherCharacterName)}：${escapeHtml(m.result)}</div></div>`).join('') || '<div class="small-note">まだ記憶ログはありません。</div>'}</div>
     </div>
     <div class="feature-section feature-field">
       <label>自由設定</label>

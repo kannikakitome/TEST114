@@ -2032,6 +2032,7 @@ function updateOrganizationBoxes() {
         handleOrganizationCreationStart(event);
         return;
       }
+      // 右クリック・中クリックでは絶対に組織ドラッグを開始しない。
       if (event.pointerType === 'mouse' && event.button !== 0) return;
       event.preventDefault();
       event.stopPropagation();
@@ -2039,7 +2040,23 @@ function updateOrganizationBoxes() {
         startRelationModeTarget(group.id);
         return;
       }
-      startOrganizationDrag(event, group, true);
+      startOrganizationDrag(event, group, false);
+    });
+
+    // 組織名部分の「クリック」だけで OPEN / CLOSE を切り替える。
+    // ドラッグ後に発生する click は endOrganizationDrag 側のフラグで無視する。
+    header.addEventListener('pointerup', event => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      if (relationModeSourceId) return;
+      // pointerup がヘッダー上で発生した「クリック」の時だけ切り替える。
+      // ドラッグだった場合は document 側の endOrganizationDrag に任せる。
+      if (draggingOrganization === group && !organizationWasDragged) {
+        group.collapsed = !group.collapsed;
+        organizationToggleOnClick = false;
+        updateNodes();
+        updateRelations();
+        scheduleAutoSave();
+      }
     });
 
     header.addEventListener('contextmenu', event => {
@@ -2053,6 +2070,9 @@ function updateOrganizationBoxes() {
         handleOrganizationCreationStart(event);
         return;
       }
+      // 右クリック・中クリックでは組織ドラッグを開始しない。
+      // 右クリックは contextmenu だけを処理する。
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
       // 関係名・リサイズハンドル・キャラは、それぞれ自身の操作を優先する。
       if (event.target.closest && (event.target.closest('.relation-label-bg') || event.target.closest('.group-resize-handle') || event.target.closest('.character-node'))) return;
       event.preventDefault();
@@ -2289,15 +2309,15 @@ function endOrganizationDrag(event) {
   organizationOriginalPositions = null;
   organizationOriginalX = 0;
   organizationOriginalY = 0;
-  organizationWasDragged = false;
+  // organizationWasDragged は次の click でドラッグ後クリックを抑止した後に解除する。
   organizationToggleOnClick = false;
   document.removeEventListener('pointermove', handleOrganizationDrag);
   document.removeEventListener('pointerup', endOrganizationDrag);
   document.removeEventListener('pointercancel', endOrganizationDrag);
 
-  if (!wasDragged && organizationToggleOnClick) {
-    group.collapsed = !group.collapsed;
-  } else {
+  // OPEN / CLOSE はヘッダー上の pointerup（クリック相当）だけで行う。
+  // ドラッグ時はここでは切り替えず、位置だけ確定する。
+  if (wasDragged) {
     keepOrganizationMembersInside(group);
   }
   updateNodes();
@@ -3000,6 +3020,12 @@ function drawRelation(
   rect.addEventListener(
     "pointerdown",
     event => {
+
+      // 右クリック・中クリックでは関係名ドラッグを開始しない。
+      // 右クリックは contextmenu 側だけでメニューを表示する。
+      if (event.pointerType === "mouse" && event.button !== 0) {
+        return;
+      }
 
       event.preventDefault();
       event.stopPropagation();

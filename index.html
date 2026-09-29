@@ -1159,7 +1159,9 @@ function normalizeOrganization(group) {
     width: Number.isFinite(group.width) ? group.width : 700,
     height: Number.isFinite(group.height) ? group.height : 500,
     color: group.color || "#78aaff",
-    collapsed: !!group.collapsed
+    collapsed: !!group.collapsed,
+    purpose: group.purpose || "",
+    stats: group.stats && typeof group.stats === "object" ? group.stats : {"資金力": 50, "影響力": 50}
   };
 }
 
@@ -1891,6 +1893,7 @@ let organizationOriginalPositions = null;
 let organizationOriginalX = 0;
 let organizationOriginalY = 0;
 let organizationWasDragged = false;
+let organizationToggleOnClick = false;
 let selectedOrganizationId = null;
 let resizingOrganization = null;
 let organizationResizePointerId = null;
@@ -2033,7 +2036,7 @@ function updateOrganizationBoxes() {
         startRelationModeTarget(group.id);
         return;
       }
-      startOrganizationDrag(event, group);
+      startOrganizationDrag(event, group, true);
     });
 
     header.addEventListener('contextmenu', event => {
@@ -2052,7 +2055,7 @@ function updateOrganizationBoxes() {
       event.preventDefault();
       event.stopPropagation();
       selectedOrganizationId = group.id;
-      startOrganizationDrag(event, group);
+      startOrganizationDrag(event, group, false);
     });
 
     box.addEventListener('contextmenu', event => {
@@ -2229,8 +2232,9 @@ function organizationCanOccupy(group, x, y, width = group.width, height = group.
   return true;
 }
 
-function startOrganizationDrag(event, group) {
+function startOrganizationDrag(event, group, toggleOnClick = false) {
   draggingOrganization = group;
+  organizationToggleOnClick = toggleOnClick;
   organizationDragPointerId = event.pointerId;
   organizationWasDragged = false;
   const world = screenToWorld(event.clientX, event.clientY);
@@ -2282,11 +2286,12 @@ function endOrganizationDrag(event) {
   organizationOriginalX = 0;
   organizationOriginalY = 0;
   organizationWasDragged = false;
+  organizationToggleOnClick = false;
   document.removeEventListener('pointermove', handleOrganizationDrag);
   document.removeEventListener('pointerup', endOrganizationDrag);
   document.removeEventListener('pointercancel', endOrganizationDrag);
 
-  if (!wasDragged) {
+  if (!wasDragged && organizationToggleOnClick) {
     group.collapsed = !group.collapsed;
   } else {
     keepOrganizationMembersInside(group);
@@ -2392,19 +2397,50 @@ function showOrganizationContextMenu(x, y, group) {
   cancelRelationMode();
   hideContextMenu();
 
-  contextMenu.appendChild(createContextButton(group.collapsed ? '組織をOPEN' : '組織をCLOSE', () => {
-    hideContextMenu(); group.collapsed=!group.collapsed; selectedOrganizationId=group.id; updateNodes(); updateRelations(); scheduleAutoSave();
-  }));
-  contextMenu.appendChild(createContextButton('組織名を変更', () => {
-    hideContextMenu(); showTextDialog('組織名を変更', group.name).then(value=>{ if(value && value.trim()){group.name=value.trim();updateNodes();scheduleAutoSave();} });
+  contextMenu.appendChild(createContextButton('組織設定', () => {
+    hideContextMenu();
+    showOrganizationSettings(group);
   }));
   contextMenu.appendChild(createContextButton('組織内に新規キャラ', () => { hideContextMenu(); addCharacterAtInOrganization(group); }));
   contextMenu.appendChild(createContextButton('組織内にランダムキャラ生成', () => { hideContextMenu(); createRandomCharacterInOrganization(group); }));
   contextMenu.appendChild(createContextButton('＋ 関係追加', () => { hideContextMenu(); startRelationMode(group.id); }));
-  contextMenu.appendChild(createContextButton('所属キャラを詳細表示', () => { hideContextMenu(); showOrganizationMembers(group); }));
   contextMenu.appendChild(createContextButton('組織内を整列', () => { hideContextMenu(); arrangeOrganization(group); }));
   contextMenu.appendChild(createContextButton('組織を削除', () => { deleteOrganization(group); }));
   showContextMenuAt(x, y);
+}
+
+function showOrganizationSettings(group) {
+  const panel = document.getElementById('detailPanel');
+  const stats = group.stats && typeof group.stats === 'object' ? group.stats : {};
+  group.stats = stats;
+  const statRows = Object.entries(stats).map(([key,value]) => `
+    <div class="param-row"><input data-org-stat-name="${escapeHtml(key)}" value="${escapeHtml(key)}"><input type="number" min="0" max="100" data-org-stat-value="${escapeHtml(key)}" value="${Number(value)||0}"></div>`).join('');
+  panel.innerHTML = `
+    <div class="feature-title">組織設定：${escapeHtml(group.name)}</div>
+    <div class="feature-grid">
+      <div class="feature-field"><label>組織名</label><input id="orgSettingName" value="${escapeHtml(group.name)}"></div>
+      <div class="feature-field"><label>組織色</label><input id="orgSettingColor" type="color" value="${escapeHtml(group.color || '#78aaff')}"></div>
+    </div>
+    <div class="feature-section feature-field"><label>組織の目的</label><textarea id="orgSettingPurpose">${escapeHtml(group.purpose || '')}</textarea></div>
+    <div class="feature-section">
+      <div class="feature-title" style="font-size:15px">組織パラメータ（0～100）</div>
+      <div id="orgStatRows">${statRows}</div>
+      <button class="mini-button" id="addOrgStatButton">＋ パラメータ追加</button>
+    </div>
+    <div class="feature-actions"><button class="mini-button" id="orgSettingCancel">キャンセル</button><button class="mini-button" id="orgSettingSave">保存</button></div>`;
+  document.getElementById('detailOverlay').style.display = 'flex';
+  document.getElementById('addOrgStatButton').onclick = () => {
+    const row=document.createElement('div'); row.className='param-row'; row.innerHTML='<input placeholder="項目名"><input type="number" min="0" max="100" value="50">'; document.getElementById('orgStatRows').appendChild(row);
+  };
+  document.getElementById('orgSettingCancel').onclick=()=>closeFeatureOverlay('detailOverlay');
+  document.getElementById('orgSettingSave').onclick=()=>{
+    group.name=document.getElementById('orgSettingName').value.trim() || group.name;
+    group.color=document.getElementById('orgSettingColor').value || group.color;
+    group.purpose=document.getElementById('orgSettingPurpose').value;
+    group.stats={};
+    document.querySelectorAll('#orgStatRows .param-row').forEach(row=>{ const inputs=row.querySelectorAll('input'); const key=inputs[0].value.trim(); if(key) group.stats[key]=clamp(Number(inputs[1].value)||0,0,100); });
+    closeFeatureOverlay('detailOverlay'); updateOrganizationBoxes(); updateNodes(); updateRelations(); scheduleAutoSave();
+  };
 }
 
 function deleteOrganization(group) {
@@ -4431,116 +4467,15 @@ function showCharacterContextMenu(
   screenY,
   character
 ) {
-
   cancelRelationMode();
-
   hideContextMenu();
-
-
-  const renameButton =
-    createContextButton(
-      "名前を変更",
-      () => {
-
-        hideContextMenu();
-
-        showTextDialog(
-          "キャラクター名を変更",
-          character.name
-        ).then(
-          value => {
-
-            if (
-              value === null
-            ) {
-              return;
-            }
-
-
-            const name =
-              value.trim();
-
-
-            if (
-              !name
-            ) {
-              return;
-            }
-
-
-            character.name =
-              name;
-
-
-            updateNodes();
-
-            updateRelations();
-
-            scheduleAutoSave();
-          }
-        );
-      }
-    );
-
-
-  const detailButton =
-    createContextButton(
-      "詳細設定",
-      () => {
-        hideContextMenu();
-        showCharacterDetail(character);
-      }
-    );
-
-  const relationButton =
-    createContextButton(
-      "＋ 関係追加",
-      () => {
-
-        hideContextMenu();
-
-        startRelationMode(
-          character.id
-        );
-      }
-    );
-
-
-  const deleteButton =
-    createContextButton(
-      "キャラ削除",
-      () => {
-
-        hideContextMenu();
-
-        deleteCharacter(
-          character.id
-        );
-      }
-    );
-
-
-  contextMenu.appendChild(
-    renameButton
-  );
-
-  contextMenu.appendChild(
-    detailButton
-  );
-
-  contextMenu.appendChild(
-    relationButton
-  );
-
-  contextMenu.appendChild(
-    deleteButton
-  );
-
-
-  showContextMenuAt(
-    screenX,
-    screenY
-  );
+  const detailButton = createContextButton('キャラ設定', () => { hideContextMenu(); showCharacterDetail(character); });
+  const relationButton = createContextButton('＋ 関係追加', () => { hideContextMenu(); startRelationMode(character.id); });
+  const deleteButton = createContextButton('キャラ削除', () => { hideContextMenu(); deleteCharacter(character.id); });
+  contextMenu.appendChild(detailButton);
+  contextMenu.appendChild(relationButton);
+  contextMenu.appendChild(deleteButton);
+  showContextMenuAt(screenX, screenY);
 }
 
 
@@ -4553,66 +4488,13 @@ function showRelationContextMenu(
   screenY,
   relation
 ) {
-
   cancelRelationMode();
-
   hideContextMenu();
-
-
-  const renameButton =
-    createContextButton(
-      "関係名を変更",
-      () => {
-
-        hideContextMenu();
-
-        renameRelation(
-          relation
-        );
-      }
-    );
-
-
-  const detailButton =
-    createContextButton(
-      "関係・感情を詳細設定",
-      () => {
-        hideContextMenu();
-        showRelationDetail(relation);
-      }
-    );
-
-  const deleteButton =
-    createContextButton(
-      "関係を削除",
-      () => {
-
-        hideContextMenu();
-
-        deleteRelation(
-          relation
-        );
-      }
-    );
-
-
-  contextMenu.appendChild(
-    renameButton
-  );
-
-  contextMenu.appendChild(
-    detailButton
-  );
-
-  contextMenu.appendChild(
-    deleteButton
-  );
-
-
-  showContextMenuAt(
-    screenX,
-    screenY
-  );
+  const detailButton = createContextButton('関係設定', () => { hideContextMenu(); showRelationDetail(relation); });
+  const deleteButton = createContextButton('関係を削除', () => { hideContextMenu(); deleteRelation(relation); });
+  contextMenu.appendChild(detailButton);
+  contextMenu.appendChild(deleteButton);
+  showContextMenuAt(screenX, screenY);
 }
 
 
